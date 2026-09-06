@@ -79,17 +79,7 @@ function Dashboard({ onLogout }) {
       {ordered.length === 0 ? (
         <EmptyState
           title="Non sono ancora presenti recensioni."
-          description="Aggiungi il primo locale con il pulsante “Nuovo locale”."
-          action={
-            <button
-              type="button"
-              onClick={openCreate}
-              className="btn btn-primary"
-            >
-              <Icon name="plus" size={18} />
-              Nuovo locale
-            </button>
-          }
+          description="Aggiungi il primo locale con il pulsante “Nuovo locale” qui sopra."
         />
       ) : (
         <RestaurantListAdmin

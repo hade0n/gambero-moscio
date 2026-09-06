@@ -26,13 +26,17 @@ export default function Header({ variant = 'public', onLogout }) {
         scrolled ? 'shadow-sm' : 'shadow-none'
       }`}
     >
-      <div className="relative mx-auto flex h-32 max-w-content items-center px-4 md:h-44 md:px-6">
+      <div
+        className={`relative mx-auto flex max-w-content items-center px-4 md:px-6 ${
+          isAdmin ? 'h-16' : 'h-24 md:h-28'
+        }`}
+      >
         <Link
           to="/"
           className={`press flex min-h-[44px] items-center rounded-lg px-2 ${
             isAdmin
               ? '-ml-2'
-              : 'absolute left-1/2 -translate-x-1/2 md:static md:left-auto md:translate-x-0'
+              : 'absolute left-1/2 -translate-x-[calc(50%+18px)] md:static md:left-auto md:translate-x-0'
           }`}
           aria-label="PNDR — vai alla homepage"
         >
@@ -40,8 +44,8 @@ export default function Header({ variant = 'public', onLogout }) {
             src="/logo.svg"
             alt="PNDR — Recensioni per gente non da ristorante"
             width="694"
-            height="348"
-            className="h-24 w-auto sm:h-28 md:h-36"
+            height="156"
+            className={isAdmin ? 'h-10 w-auto sm:h-11' : 'h-16 w-auto sm:h-20 md:h-24'}
           />
         </Link>
 

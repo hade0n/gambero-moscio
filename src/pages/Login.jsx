@@ -30,7 +30,7 @@ export default function Login({ onSuccess }) {
   return (
     <div className="min-h-dvh bg-cream">
       <header className="bg-cream/95">
-        <div className="mx-auto flex h-32 max-w-content items-center justify-center px-4 md:h-44 md:justify-start md:px-6">
+        <div className="mx-auto flex h-24 max-w-content items-center justify-center px-4 md:h-28 md:justify-start md:px-6">
           <Link
             to="/"
             className="press flex min-h-[44px] items-center"
@@ -40,8 +40,8 @@ export default function Login({ onSuccess }) {
               src="/logo.svg"
               alt="PNDR — Recensioni per gente non da ristorante"
               width="694"
-              height="348"
-              className="h-24 w-auto sm:h-28 md:h-36"
+              height="156"
+              className="h-16 w-auto sm:h-20 md:h-24"
             />
           </Link>
         </div>

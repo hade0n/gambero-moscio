@@ -1,0 +1,238 @@
+# PNDR — Recensioni per gente non da ristorante
+
+Piattaforma web per consultare recensioni di locali e ristoranti: homepage pubblica con
+filtro per categoria e classifica automatica, area riservata con gestione completa delle
+recensioni (create, read, update, delete). Dati persistiti nel browser tramite
+`localStorage`. Pronta per il deployment su Vercel.
+
+## Stack
+
+- React 18 + Vite 5
+- React Router DOM 6
+- Tailwind CSS 3
+- `localStorage` per la persistenza dei contenuti (nessun database)
+- Vercel Functions (`api/`) per l'autenticazione server-side — solo `node:crypto`, nessuna dipendenza
+
+Nessuna dipendenza npm oltre a quelle già presenti.
+
+## Requisiti
+
+- Node.js 18+ (testato con Node 24)
+- npm 9+
+
+## Installazione
+
+```bash
+npm install
+```
+
+## Sviluppo
+
+```bash
+npm run dev
+```
+
+Server locale su `http://localhost:5173`.
+
+## Build
+
+```bash
+npm run build
+```
+
+Output statico in `dist/`.
+
+## Anteprima della build
+
+```bash
+npm run preview
+```
+
+## Deployment su Vercel
+
+1. Push del repository su GitHub.
+2. Su Vercel: **New Project** → importa il repository.
+3. Impostazioni rilevate automaticamente:
+   - Framework preset: **Vite**
+   - Build command: `npm run build`
+   - Output directory: `dist`
+   - Serverless functions: cartella `api/` (rilevata automaticamente)
+4. `vercel.json` è già incluso: reindirizza le route a `index.html` per il routing SPA,
+   **escludendo `/api/*`** (che resta servito dalle serverless function).
+5. Configura le Environment Variables (vedi sotto).
+
+## Configurazione Vercel — Environment Variables
+
+Su Vercel → **Project Settings → Environment Variables**, crea:
+
+```text
+ADMIN_USERNAME
+ADMIN_PASSWORD
+```
+
+(opzionale: `AUTH_SECRET`, chiave per firmare i cookie di sessione; se assente viene derivata
+dai due valori sopra).
+
+- I valori reali **non** sono presenti nel repository: vanno inseriti manualmente qui.
+- **Non** usare il prefisso `VITE_`: quelle variabili finirebbero nel bundle e non sarebbero segrete.
+- Per lo sviluppo locale crea un file `.env.local` (già in `.gitignore`) con le stesse chiavi:
+
+  ```text
+  ADMIN_USERNAME=...
+  ADMIN_PASSWORD=...
+  ```
+
+  `npm run dev` esegue le funzioni in `api/` e legge queste variabili lato server.
+- Nel repository è versionato solo `.env.example`, **senza valori**.
+
+## Struttura del progetto
+
+```
+src/
+├── components/        Componenti UI (Header, CategoryFilter, RestaurantCard, Modal, form, toast…)
+├── pages/             Home, Login, Backend
+├── context/           RestaurantsContext (fonte dati unica), ToastContext
+├── hooks/             useRestaurants (re-export del context)
+├── utils/             storage.js, ratings.js, auth.js (client HTTP), image.js
+├── config/            categories.js (fonte unica delle categorie)
+├── data/              restaurants.json (seed vuoto: [])
+├── App.jsx            Routing
+├── main.jsx           Bootstrap + Provider
+└── index.css          Token colore, base tipografica, utility
+
+api/                   Vercel Functions (auth server-side)
+├── auth/login.js      POST — verifica credenziali (process.env.ADMIN_*)
+├── auth/session.js    GET  — stato sessione
+├── auth/logout.js     POST — invalida la sessione
+└── restaurants.js     gate di autorizzazione per CREATE/UPDATE/DELETE
+
+lib/session.js         Firma/verifica token, helper cookie (server-only)
+```
+
+Documento di riferimento del design e delle regole di progetto: [`CLAUDE.md`](./CLAUDE.md).
+
+## Persistenza (localStorage)
+
+- Chiave dati: `pndr_restaurants`
+- La sessione dell'area riservata **non** è in `localStorage`: è un cookie HttpOnly
+  gestito dal server (vedi *Autenticazione*).
+
+Il seed `src/data/restaurants.json` è **vuoto** (`[]`): l'app parte senza locali di esempio,
+il contenuto lo inserisce l'amministratore. Da quel momento `localStorage` è la fonte
+persistente: ogni operazione di create / update / delete aggiorna lo stato React **e**
+`localStorage`. Il refresh non cancella i dati.
+
+- I record corrotti vengono scartati in lettura; i dati salvati nel vecchio formato
+  (`food`/`service`/`price`) vengono migrati alle 8 categorie.
+- Le modifiche fatte in un'altra scheda del browser vengono recepite tramite l'evento `storage`.
+- Se lo spazio di `localStorage` è esaurito (immagini troppo grandi), il salvataggio
+  viene annullato e viene mostrato un messaggio; i dati già presenti restano intatti.
+
+## Autenticazione
+
+L'area riservata (`/backend`) è protetta da un'autenticazione **verificata lato server**
+tramite Vercel Functions.
+
+- Il frontend **non conosce la password**: invia le credenziali inserite dall'utente a
+  `POST /api/auth/login`, che le confronta con `process.env.ADMIN_USERNAME` /
+  `process.env.ADMIN_PASSWORD` (Environment Variables di Vercel in produzione, `.env.local`
+  in sviluppo). Le credenziali non compaiono nel bundle né nei log.
+- In caso di successo il server imposta un **cookie di sessione `HttpOnly`** (firmato
+  HMAC-SHA256, `Secure` in produzione, `SameSite=Lax`, scadenza 8 h, valore imprevedibile).
+  Il cookie non è leggibile da JavaScript.
+- Il frontend interroga `GET /api/auth/session` per sapere se mostrare il Backend o il Login:
+  la fonte autorevole è il server, non `localStorage`.
+- `POST /api/auth/logout` invalida la sessione.
+- Le operazioni amministrative (CREATE / UPDATE / DELETE) passano prima da
+  `/api/restaurants`, che risponde `401` senza sessione valida: un utente non autenticato
+  non può modificare i dati nemmeno chiamando direttamente le API.
+- Messaggio di errore login (non rivela quale campo è errato): `Username o password non corretti.`
+
+I dati dei ristoranti restano in `localStorage` (nessun database): l'autenticazione e
+l'autorizzazione sono lato server, la persistenza dei contenuti è lato client.
+
+## CRUD
+
+Tutte le operazioni sono nell'area riservata, dopo il login:
+
+- **Create** — pulsante “Nuovo locale”, form completo, il locale entra subito in classifica.
+- **Read** — elenco di tutte le recensioni (tabella su desktop, card su mobile).
+- **Update** — “Modifica” apre il form precompilato; il salvataggio aggiorna il record
+  esistente (stesso `id`, nessun duplicato).
+- **Delete** — “Elimina” chiede conferma prima di rimuovere definitivamente la recensione.
+
+### Sistema di valutazione
+
+Ogni locale è valutato su **8 categorie indipendenti** (0.0–10.0, passo 0.1):
+Location, Menu, Materie prime, Cibo, Presentazione, Servizio, Qualità/Prezzo, Esperienza.
+
+Tutta la matematica è in [`src/utils/ratings.js`](src/utils/ratings.js):
+
+- **`rankingScore`** (valore tecnico, ≥ 4 decimali) = media ponderata delle 8 categorie
+  (`RATING_WEIGHTS`) + correttivo di coerenza + bonus di qualità gastronomica + bonus di
+  eccellenza − penalità per i punti deboli, limitato a 0–10.
+- **`overall`** (voto pubblico) = `rankingScore` arrotondato a una cifra decimale. È l'unico
+  numero mostrato in homepage (`★ 8.7`).
+- La **classifica** è ordinata sul `rankingScore` ad alta precisione (con catena di tie-break
+  deterministica), non sull'`overall` arrotondato: due locali con lo stesso `★ 8.7` possono
+  quindi avere posizioni diverse.
+- `overall` e `rankingScore` non si inseriscono a mano: sono ricalcolati in tempo reale nel
+  form a ogni modifica di uno degli 8 voti.
+- I dati salvati nel vecchio formato (`food`/`service`/`price`) vengono migrati alle 8
+  categorie in modo deterministico al caricamento e ri-salvati nel nuovo formato.
+
+## Foto dei piatti
+
+Ogni ristorante ha un campo `dishImages` (array di immagini Base64), gestito come **semplice
+galleria** — nessun nome, descrizione, prezzo o CRUD del singolo piatto.
+
+- Backend: nel form del ristorante, sezione "Foto dei piatti" → `[+ Aggiungi foto]` con
+  `<input type="file" accept="image/*" multiple>` (selezione multipla). Miniature con pulsante
+  di rimozione. Nessun campo URL per queste foto (solo caricamento da dispositivo).
+- Le immagini sono ridimensionate (max ~1200px) e salvate come data URL in `dishImages`,
+  persistite in `localStorage` insieme al ristorante.
+- Frontend: nel dettaglio del ristorante compare la sezione "Foto dei piatti" **solo se** ci
+  sono immagini. Click su una foto → lightbox responsive (ingrandimento, chiusura con X /
+  click esterno / ESC, navigazione precedente/successiva con pulsanti e frecce).
+- I ristoranti salvati senza il campo ottengono `dishImages: []` alla normalizzazione.
+
+## Linguaggio visivo — PNDR Material
+
+L'interfaccia usa un linguaggio ispirato a Material Design **reinterpretato con la palette e
+l'identità mediterranea di PNDR**: forme più arrotondate con gerarchia (input 14px, pulsanti
+18px, card 22px, modali 28px), superfici con elevazione morbida e diffusa (mai ombre nere),
+pulsanti con stati completi e feedback tattile discreto, focus ring morbido sui campi.
+I token vivono in `tailwind.config.js` (radius, shadow) e le classi condivise in
+`src/index.css` (`btn`/`btn-*`, `.surface`, `.field-control`). Palette, logica, CRUD,
+ranking, routing, `localStorage` e autenticazione **non sono cambiati**.
+
+Il logo ufficiale è `public/logo.svg` (usato in header, login e come favicon).
+
+## Micro-interazioni e motion
+
+Animazioni leggere solo con CSS/Tailwind (nessuna libreria), basate su `transform`/`opacity`:
+feedback tattile sui controlli (`.press`), hover/active sulle card, reveal progressivo della
+lista, enter/exit di modali e toast, lightbox e galleria, ombra dell'header sullo scroll.
+Tutto rispetta `prefers-reduced-motion` (transizioni azzerate, contenuto sempre visibile).
+L'identità resta calda, mediterranea, editoriale — nessun effetto neon/3D/gradiente.
+
+## Upload immagini (Base64)
+
+Nel form è possibile:
+
+- caricare una foto dal dispositivo: viene ridimensionata via `<canvas>`
+  (larghezza massima ~1200px, aspetto invariato) ed esportata come JPEG in
+  formato data URL Base64 salvato nel campo `imageUrl`;
+- oppure indicare un URL immagine remoto.
+
+In entrambi i casi è mostrata un'anteprima immediata. Poiché `localStorage` ha uno
+spazio limitato, immagini molto grandi possono far fallire il salvataggio: in quel
+caso l'operazione viene annullata con un messaggio e il form resta compilato.
+
+## Accessibilità
+
+- Contrasti verificati (AA) sulle combinazioni della palette.
+- Focus visibile su ogni elemento interattivo; target touch ≥ 48×48px.
+- Label sempre associate ai campi; errori annunciati (`role="alert"`).
+- Modali con `role="dialog"`, focus trap, chiusura con `Esc` e click esterno.
+- `prefers-reduced-motion` rispettato.

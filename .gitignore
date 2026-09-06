@@ -1,0 +1,19 @@
+node_modules
+dist
+dist-ssr
+*.local
+
+# Variabili d'ambiente con segreti — mai versionate.
+# I valori reali vivono in .env.local (sviluppo) e nelle Environment
+# Variables di Vercel (produzione). Nel repo solo .env.example.
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+.DS_Store
+.vercel
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

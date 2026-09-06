@@ -1,0 +1,323 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --pndr-cream: #fff3e2;
+  --pndr-cream-soft: #fff9f1;
+  --pndr-terracotta: #d96b32;
+  --pndr-terracotta-deep: #bb5a20;
+  --pndr-apricot: #e98b4a;
+  --pndr-green: #5f8f3a;
+  --pndr-green-deep: #385c32;
+  --pndr-brown: #3a2a22;
+  --pndr-brown-soft: #6b564b;
+  --pndr-rating: #e39a2d;
+  --pndr-danger: #b23b2e;
+  --pndr-border: rgba(58, 42, 34, 0.12);
+}
+
+@layer base {
+  * {
+    border-color: var(--pndr-border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    background-color: var(--pndr-cream);
+    color: var(--pndr-brown);
+    font-family: 'Karla', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: 'Fraunces', 'Playfair Display', Georgia, serif;
+    color: var(--pndr-brown);
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--pndr-terracotta);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  ::selection {
+    background: rgba(217, 107, 50, 0.22);
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* --------------------------------------------------------------------------
+ * Motion PNDR — morbido, caldo, editoriale. transform + opacity only.
+ * ------------------------------------------------------------------------ */
+@layer components {
+  /* Feedback tattile uniforme su elementi interattivi */
+  .press {
+    transition:
+      transform 0.12s cubic-bezier(0.2, 0.6, 0.2, 1),
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
+      box-shadow 0.2s ease,
+      opacity 0.18s ease;
+  }
+  .press:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  /* Reveal progressivo delle card (montaggio) */
+  .reveal-up {
+    animation: pndr-fade-up 0.42s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .reveal-in {
+    animation: pndr-fade-in 0.3s ease-out both;
+  }
+
+  /* ----------------------------------------------------------------------
+   * PNDR Material — pulsanti. Radius morbido (non pillola), padding
+   * confortevole, stati default/hover/active/focus/disabled, feedback
+   * tattile discreto tipo ripple (solo CSS, transform+opacity).
+   * -------------------------------------------------------------------- */
+  .btn {
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    min-height: 48px;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 1rem; /* 16px */
+    padding: 0 1.25rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    line-height: 1;
+    white-space: nowrap;
+    user-select: none;
+    transition:
+      transform 0.14s cubic-bezier(0.2, 0.7, 0.2, 1),
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
+      box-shadow 0.22s ease,
+      opacity 0.18s ease;
+  }
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+  .btn:active:not(:disabled)::after {
+    opacity: 0.1;
+    transition: opacity 0s;
+  }
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .btn-primary {
+    background-color: var(--pndr-terracotta-deep);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(58, 42, 34, 0.05), 0 6px 16px rgba(58, 42, 34, 0.06);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--pndr-terracotta);
+    box-shadow: 0 4px 10px rgba(58, 42, 34, 0.06), 0 14px 30px rgba(58, 42, 34, 0.1);
+  }
+
+  .btn-secondary {
+    background-color: var(--pndr-cream-soft);
+    color: var(--pndr-brown);
+    border: 1px solid var(--pndr-border);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--pndr-cream);
+    border-color: rgba(58, 42, 34, 0.22);
+  }
+
+  .btn-outline {
+    background-color: transparent;
+    color: var(--pndr-terracotta);
+    border: 1px solid var(--pndr-terracotta);
+  }
+  .btn-outline:hover:not(:disabled) {
+    background-color: rgba(217, 107, 50, 0.1);
+  }
+
+  .btn-danger {
+    background-color: var(--pndr-danger);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(58, 42, 34, 0.05), 0 6px 16px rgba(58, 42, 34, 0.06);
+  }
+  .btn-danger:hover:not(:disabled) {
+    background-color: #a1352a;
+  }
+
+  .btn-danger-outline {
+    background-color: transparent;
+    color: var(--pndr-danger);
+    border: 1px solid var(--pndr-danger);
+  }
+  .btn-danger-outline:hover:not(:disabled) {
+    background-color: rgba(178, 59, 46, 0.1);
+  }
+
+  .btn-sm {
+    min-height: 44px;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    border-radius: 0.875rem; /* 14px */
+  }
+
+  /* Superfici Material: gerarchia con elevazione morbida */
+  .surface {
+    background-color: var(--pndr-cream-soft);
+    border: 1px solid var(--pndr-border);
+    border-radius: 1.375rem; /* 22px */
+    box-shadow: 0 2px 6px rgba(58, 42, 34, 0.05), 0 6px 16px rgba(58, 42, 34, 0.06);
+  }
+
+  /* Controlli form Material: morbidi, focus ring diffuso */
+  .field-control {
+    width: 100%;
+    min-height: 48px;
+    border-radius: 0.875rem; /* 14px */
+    border: 1px solid rgba(58, 42, 34, 0.2);
+    background-color: #fff;
+    padding: 0.625rem 0.875rem;
+    color: var(--pndr-brown);
+    transition:
+      border-color 0.16s ease,
+      box-shadow 0.16s ease,
+      background-color 0.16s ease;
+  }
+  .field-control::placeholder {
+    color: rgba(107, 86, 75, 0.6);
+  }
+  .field-control:focus {
+    outline: none;
+    border-color: var(--pndr-terracotta);
+    box-shadow: 0 0 0 4px rgba(217, 107, 50, 0.16);
+  }
+  .field-control.is-invalid {
+    border-color: var(--pndr-danger);
+  }
+  .field-control.is-invalid:focus {
+    box-shadow: 0 0 0 4px rgba(178, 59, 46, 0.16);
+  }
+}
+
+@keyframes pndr-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pndr-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pndr-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pndr-toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .press:active:not(:disabled) {
+    transform: none;
+  }
+}

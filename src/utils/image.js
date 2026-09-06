@@ -56,10 +56,3 @@ export async function resizeImageFiles(files, options) {
   });
   return { images, errors };
 }
-
-/** Validazione leggera di un URL immagine inserito a mano. */
-export function isValidImageUrl(value) {
-  const v = String(value ?? '').trim();
-  if (!v) return true; // campo opzionale
-  return /^https?:\/\/.+/i.test(v) || v.startsWith('data:image/');
-}

@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import Field, { controlClasses } from './Field.jsx';
 import Icon from './Icon.jsx';
 import { CATEGORIES } from '../config/categories.js';
-import { isValidImageUrl, resizeImageFile, resizeImageFiles } from '../utils/image.js';
+import { resizeImageFile, resizeImageFiles } from '../utils/image.js';
 
 const EMPTY = {
   name: '',
@@ -35,8 +35,6 @@ function validate(values) {
   if (values.town.trim().length < 2) errors.town = 'Inserisci la città del locale.';
   if (!/^[A-Za-z]{2}$/.test(values.province.trim()))
     errors.province = 'La provincia va indicata con due lettere (es. FI).';
-  if (!isValidImageUrl(values.imageUrl))
-    errors.imageUrl = 'Inserisci un indirizzo immagine che inizi con http:// o https://';
   return errors;
 }
 
@@ -264,28 +262,6 @@ export default function PlaceForm({ initial, onSubmit, onCancel }) {
             {imageError}
           </p>
         )}
-
-        <Field
-          label="Oppure indirizzo immagine (URL)"
-          error={errors.imageUrl}
-          hint="Alternativa al caricamento: incolla un link a un’immagine."
-        >
-          {({ id, describedBy, invalid }) => (
-            <input
-              id={id}
-              name="imageUrl"
-              type="url"
-              value={values.imageUrl}
-              onChange={(e) => setField('imageUrl', e.target.value)}
-              onBlur={() => handleBlur('imageUrl')}
-              aria-describedby={describedBy}
-              aria-invalid={invalid}
-              className={controlClasses(invalid)}
-              placeholder="https://…"
-              disabled={Boolean(values.imageData)}
-            />
-          )}
-        </Field>
       </div>
 
       <div className="space-y-3">

@@ -73,13 +73,21 @@ function Dashboard({ onLogout, user }) {
       title={reviewerGreeting(user)}
       description="Crea un locale una sola volta, poi ognuno scrive la propria recensione."
       action={
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => setPlaceForm({ editing: null })} className="btn btn-primary">
-            <Icon name="plus" size={18} />
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={() => setPlaceForm({ editing: null })}
+            className="btn btn-primary w-full whitespace-normal text-center leading-tight"
+          >
+            <Icon name="plus" size={18} className="shrink-0" />
             Crea locale
           </button>
-          <button type="button" onClick={() => setPickerOpen(true)} className="btn btn-secondary">
-            <Icon name="edit" size={18} />
+          <button
+            type="button"
+            onClick={() => setPickerOpen(true)}
+            className="btn btn-secondary w-full whitespace-normal text-center leading-tight"
+          >
+            <Icon name="edit" size={18} className="shrink-0" />
             Scrivi recensione
           </button>
         </div>

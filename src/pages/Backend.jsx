@@ -12,7 +12,7 @@ import Icon from '../components/Icon.jsx';
 import { useRestaurants } from '../hooks/useRestaurants.js';
 import { useToast } from '../context/ToastContext.jsx';
 import { compareByRanking } from '../utils/ratings.js';
-import { reviewerLabel } from '../config/users.js';
+import { reviewerGreeting, reviewerLabel } from '../config/users.js';
 
 function Dashboard({ onLogout, user }) {
   const { restaurants, createPlace, updatePlace, saveReview, deleteRestaurant } = useRestaurants();
@@ -70,8 +70,8 @@ function Dashboard({ onLogout, user }) {
   return (
     <BackendLayout
       onLogout={onLogout}
-      title="Recensioni"
-      description={`Benvenuto/a ${currentLabel}. Crea un locale una sola volta, poi ognuno scrive la propria recensione.`}
+      title={reviewerGreeting(user)}
+      description="Crea un locale una sola volta, poi ognuno scrive la propria recensione."
       action={
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => setPlaceForm({ editing: null })} className="btn btn-primary">

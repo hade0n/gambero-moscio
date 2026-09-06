@@ -7,8 +7,8 @@
  */
 
 export const REVIEWERS = [
-  { key: 'ilenia', label: 'Ilenia' },
-  { key: 'salvatore', label: 'Salvatore' },
+  { key: 'ilenia', label: 'Ilenia', greeting: 'Benvenuta' },
+  { key: 'salvatore', label: 'Salvatore', greeting: 'Benvenuto' },
 ];
 
 export const REVIEWER_KEYS = REVIEWERS.map((r) => r.key);
@@ -16,6 +16,12 @@ export const REVIEWER_KEYS = REVIEWERS.map((r) => r.key);
 /** Etichetta leggibile per una chiave recensore. */
 export function reviewerLabel(key) {
   return REVIEWERS.find((r) => r.key === key)?.label ?? key;
+}
+
+/** Saluto di benvenuto per una chiave recensore (es. "Benvenuta Ilenia"). */
+export function reviewerGreeting(key) {
+  const r = REVIEWERS.find((x) => x.key === key);
+  return r ? `${r.greeting} ${r.label}` : 'Benvenuto/a';
 }
 
 /** true se la chiave è un recensore valido. */

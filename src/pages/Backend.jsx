@@ -71,7 +71,7 @@ function Dashboard({ onLogout, user }) {
     <BackendLayout
       onLogout={onLogout}
       title="Recensioni"
-      description={`Sei collegato come ${currentLabel}. Crea un locale una sola volta, poi ognuno scrive la propria recensione.`}
+      description={`Benvenuto/a ${currentLabel}. Crea un locale una sola volta, poi ognuno scrive la propria recensione.`}
       action={
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => setPlaceForm({ editing: null })} className="btn btn-primary">

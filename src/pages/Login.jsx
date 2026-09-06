@@ -50,8 +50,7 @@ export default function Login({ onSuccess }) {
       <main className="mx-auto flex max-w-md flex-col px-4 py-10 md:py-16">
         <h1 className="font-display text-2xl font-bold">Area riservata</h1>
         <p className="mt-1 text-sm text-brown-soft">
-          Accedi con l’account di Ilenia o di Salvatore per gestire i locali e scrivere le
-          recensioni di Gambero Moscio - Recensioni Locali.
+          Accedi per gestire i locali e le recensioni.
         </p>
 
         <form

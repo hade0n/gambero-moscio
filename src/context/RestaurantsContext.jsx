@@ -1,125 +1,153 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
-  STORAGE_KEY,
-  createId,
-  loadRestaurants,
-  normalizeRestaurant,
-  readRestaurantsFromStorage,
-  saveRestaurants,
-} from '../utils/storage.js';
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { ApiError, getCollection, sendMutation } from '../utils/api.js';
 import { compareByRanking } from '../utils/ratings.js';
-import { isReviewer } from '../config/users.js';
-import { authorizeAdminAction } from '../utils/auth.js';
 
 const RestaurantsContext = createContext(null);
 
-/** Campi condivisi del locale (non appartengono alle singole recensioni). */
-const PLACE_FIELDS = ['name', 'category', 'town', 'province', 'imageUrl', 'dishImages'];
-
-function pickPlaceFields(data) {
-  const out = {};
-  PLACE_FIELDS.forEach((k) => {
-    if (data[k] !== undefined) out[k] = data[k];
-  });
-  return out;
-}
+/** Intervallo di polling per la sincronizzazione fra dispositivi (ms). */
+const POLL_INTERVAL = 12000;
 
 /**
- * Provider unico della collezione locali.
- * Home e Backend condividono questa stessa istanza: nessuna lista separata.
- * Un locale = dati condivisi + fino a due recensioni indipendenti (`reviews`).
+ * Provider unico della collezione locali — punto di sincronizzazione dell'app.
+ *
+ * I dati vivono nell'archivio centrale su Vercel Blob e si leggono/scrivono
+ * solo tramite `/api/restaurants`. Non c'è più `localStorage` come fonte dati.
+ *
+ * - all'avvio: `GET /api/restaurants` (stato `loading` → `ready` | `error`);
+ * - ogni ~12s (solo a scheda visibile) ricontrolla `version`/`updatedAt` e
+ *   aggiorna lo stato solo se il documento è cambiato, senza reload;
+ * - create / update / delete / recensioni: chiamano l'API e sostituiscono lo
+ *   stato con il documento restituito dal server (fonte autorevole).
  */
 export function RestaurantsProvider({ children }) {
-  const [restaurants, setRestaurants] = useState(() => loadRestaurants());
+  const [restaurants, setRestaurants] = useState([]);
+  const [version, setVersion] = useState(0);
+  const [updatedAt, setUpdatedAt] = useState(null);
+  const [status, setStatus] = useState('loading'); // 'loading' | 'ready' | 'error'
+  const [error, setError] = useState('');
 
-  // Sincronizzazione fra tab: se un'altra scheda modifica lo storage, riallineiamo.
+  // Riferimento sempre aggiornato alla versione corrente: il polling lo legge
+  // senza dover ricreare l'intervallo a ogni cambiamento di stato.
+  const versionRef = useRef(0);
+
+  const applyDoc = useCallback((doc) => {
+    versionRef.current = doc.version;
+    setRestaurants(doc.restaurants);
+    setVersion(doc.version);
+    setUpdatedAt(doc.updatedAt);
+    setStatus('ready');
+    setError('');
+  }, []);
+
+  /** Carica (o ricarica) il documento completo dall'archivio. */
+  const fetchCollection = useCallback(
+    async ({ silent = false } = {}) => {
+      if (!silent) setStatus('loading');
+      try {
+        const doc = await getCollection();
+        applyDoc(doc);
+        return doc;
+      } catch (err) {
+        if (!silent) {
+          setStatus('error');
+          setError(err.message || 'Non è stato possibile caricare i locali.');
+        }
+        throw err;
+      }
+    },
+    [applyDoc],
+  );
+
+  // Primo caricamento.
   useEffect(() => {
-    function onStorage(event) {
-      if (event.key === STORAGE_KEY) {
-        setRestaurants(readRestaurantsFromStorage());
+    fetchCollection().catch(() => {
+      /* errore già riflesso in `status`/`error` */
+    });
+  }, [fetchCollection]);
+
+  // Polling leggero + refetch quando la scheda torna in primo piano.
+  useEffect(() => {
+    let timer = null;
+
+    async function poll() {
+      if (document.hidden) return;
+      try {
+        const doc = await getCollection();
+        // Aggiorna solo se il documento è davvero cambiato.
+        if (doc.version !== versionRef.current) applyDoc(doc);
+      } catch {
+        /* problema di rete temporaneo: si riprova al giro successivo */
       }
     }
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  }, []);
 
-  /** Applica un aggiornamento allo stato e allo storage in modo atomico. */
-  const commit = useCallback((nextList) => {
-    saveRestaurants(nextList); // può lanciare: il chiamante gestisce l'errore
-    setRestaurants(nextList);
-  }, []);
+    function start() {
+      if (timer) return;
+      timer = window.setInterval(poll, POLL_INTERVAL);
+    }
+    function stop() {
+      if (!timer) return;
+      window.clearInterval(timer);
+      timer = null;
+    }
 
-  // Ogni operazione amministrativa è prima autorizzata dal server
-  // (`/api/restaurants`): senza sessione valida non viene scritta in localStorage.
+    function onVisibility() {
+      if (document.hidden) {
+        stop();
+      } else {
+        poll();
+        start();
+      }
+    }
+
+    if (!document.hidden) start();
+    document.addEventListener('visibilitychange', onVisibility);
+    window.addEventListener('focus', poll);
+    return () => {
+      stop();
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('focus', poll);
+    };
+  }, [applyDoc]);
 
   /** Crea un solo locale condiviso (nessuna recensione automatica). */
-  const createPlace = useCallback(
-    async (data) => {
-      await authorizeAdminAction('POST');
-      const record = normalizeRestaurant({
-        ...pickPlaceFields(data),
-        id: createId(),
-        reviews: {},
-      });
-      if (!record) throw new Error('I dati del locale non sono completi.');
-      commit([record, ...restaurants]);
-      return record;
-    },
-    [restaurants, commit],
-  );
+  const createPlace = useCallback(async (data) => {
+    const doc = await sendMutation('POST', { op: 'createPlace', data });
+    applyDoc(doc);
+    return doc;
+  }, [applyDoc]);
 
   /** Aggiorna solo i dati condivisi del locale: le recensioni restano intatte. */
-  const updatePlace = useCallback(
-    async (id, data) => {
-      await authorizeAdminAction('PUT');
-      const next = restaurants.map((r) => {
-        if (r.id !== id) return r;
-        const merged = normalizeRestaurant({
-          ...r,
-          ...pickPlaceFields(data),
-          reviews: r.reviews,
-          id,
-        });
-        return merged ?? r;
-      });
-      commit(next);
-    },
-    [restaurants, commit],
-  );
+  const updatePlace = useCallback(async (id, data) => {
+    const doc = await sendMutation('PUT', { op: 'updatePlace', id, data });
+    applyDoc(doc);
+    return doc;
+  }, [applyDoc]);
 
   /**
-   * Inserisce o sostituisce la recensione di un singolo utente su un locale
-   * esistente. Non tocca la recensione dell'altro utente né i dati del locale.
+   * Inserisce o sostituisce la propria recensione su un locale esistente.
+   * L'utente NON viene passato dal client: il server lo ricava dalla sessione
+   * autenticata e tocca solo la recensione di quell'utente.
    */
-  const saveReview = useCallback(
-    async (id, user, reviewData) => {
-      if (!isReviewer(user)) throw new Error('Utente non valido.');
-      await authorizeAdminAction('PUT');
-      const next = restaurants.map((r) => {
-        if (r.id !== id) return r;
-        const merged = normalizeRestaurant({
-          ...r,
-          reviews: {
-            ...r.reviews,
-            [user]: { ratings: reviewData.ratings, review: reviewData.review },
-          },
-          id,
-        });
-        return merged ?? r;
-      });
-      commit(next);
-    },
-    [restaurants, commit],
-  );
+  const saveReview = useCallback(async (id, reviewData) => {
+    const doc = await sendMutation('PUT', { op: 'saveReview', id, review: reviewData });
+    applyDoc(doc);
+    return doc;
+  }, [applyDoc]);
 
   /** Elimina l'intero locale (con entrambe le recensioni). */
-  const deleteRestaurant = useCallback(
-    async (id) => {
-      await authorizeAdminAction('DELETE');
-      commit(restaurants.filter((r) => r.id !== id));
-    },
-    [restaurants, commit],
-  );
+  const deleteRestaurant = useCallback(async (id) => {
+    const doc = await sendMutation('DELETE', { id });
+    applyDoc(doc);
+    return doc;
+  }, [applyDoc]);
 
   const getRestaurant = useCallback(
     (id) => restaurants.find((r) => r.id === id) ?? null,
@@ -129,6 +157,11 @@ export function RestaurantsProvider({ children }) {
   const value = useMemo(
     () => ({
       restaurants,
+      version,
+      updatedAt,
+      status,
+      error,
+      refetch: fetchCollection,
       createPlace,
       updatePlace,
       saveReview,
@@ -136,7 +169,19 @@ export function RestaurantsProvider({ children }) {
       getRestaurant,
       compareByRanking,
     }),
-    [restaurants, createPlace, updatePlace, saveReview, deleteRestaurant, getRestaurant],
+    [
+      restaurants,
+      version,
+      updatedAt,
+      status,
+      error,
+      fetchCollection,
+      createPlace,
+      updatePlace,
+      saveReview,
+      deleteRestaurant,
+      getRestaurant,
+    ],
   );
 
   return <RestaurantsContext.Provider value={value}>{children}</RestaurantsContext.Provider>;
@@ -149,3 +194,5 @@ export function useRestaurants() {
   }
   return ctx;
 }
+
+export { ApiError };

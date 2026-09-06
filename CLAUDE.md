@@ -71,7 +71,81 @@ Questa sezione **sostituisce** le parti in conflitto più avanti nel documento.
   (`compareByRanking` sull'aggregato).
 
 Restano invariati: palette, PNDR Material, animazioni, galleria/lightbox foto piatti,
-sistema di voti (`ratings.js`), routing, `localStorage`, tono di voce, requisiti Vercel.
+sistema di voti (`ratings.js`), routing, tono di voce, requisiti Vercel.
+
+---
+
+## Aggiornamento — Persistenza su Vercel Blob (override)
+
+Questa sezione **sostituisce** *localStorage Architecture*, *Image Upload* (parte storage) e
+ogni riferimento più avanti a «`localStorage` è il database» / «nessun backend server».
+La persistenza **non** è più nel browser: c'è un **archivio centrale unico** su
+**Vercel Blob**, condiviso da tutti i dispositivi. Ilenia e Salvatore vedono gli stessi dati
+da qualsiasi browser.
+
+### Dipendenze
+- Unica dipendenza aggiunta: **`@vercel/blob`**. Nessun Redis/KV/Upstash/Supabase/Firebase/
+  Mongo/Postgres/MySQL o altro servizio di database.
+
+### Segreto
+- `BLOB_READ_WRITE_TOKEN`: **solo lato server** (`process.env`), mai `VITE_*`, mai nel bundle
+  client / props / `localStorage` / JSON pubblici. In `.env.example` è presente come
+  `BLOB_READ_WRITE_TOKEN=` senza valore. `.env.local` e varianti restano git-ignored.
+- Su Vercel il token viene iniettato automaticamente collegando lo Store Blob al progetto.
+
+### Documento centrale
+- Un solo blob, pathname stabile **`restaurants.json`**, sempre sovrascritto (mai
+  `restaurants-1.json`, `-2.json`…). `addRandomSuffix: false`, `allowOverwrite: true`.
+- Forma: `{ version, updatedAt, restaurants: [...] }`.
+- `version` si incrementa e `updatedAt` si aggiorna **solo su modifica reale**, mai su una GET.
+- `src/data/restaurants.json` resta **solo come seed**: usato unicamente se il blob non
+  esiste ancora; non sovrascrive mai un documento già presente.
+
+### API — `/api/restaurants` (intermediario sottile verso il Blob, non un database)
+| Metodo | Accesso | Body | Effetto |
+|---|---|---|---|
+| `GET` | pubblico | — | ritorna il documento corrente `{ version, updatedAt, restaurants }` |
+| `POST` | sessione | `{ op: 'createPlace', data }` | crea un locale; **controllo duplicati** su `name`+`town`+`province` (case-insensitive, spazi normalizzati) sul dataset corrente → se esiste `409 { error, existingId }` |
+| `PUT` | sessione | `{ op: 'updatePlace', id, data }` | aggiorna **solo** i dati condivisi; recensioni intatte |
+| `PUT` | sessione | `{ op: 'saveReview', id, review }` | crea/sostituisce **solo** la recensione dell'utente **autenticato** (mai un `username` dal body) |
+| `DELETE` | sessione | `{ id }` | elimina l'intero locale |
+- Concorrenza: ogni mutazione fa **read → modifica della sola porzione necessaria →
+  preserva il resto → write** (`mutateDoc` in `lib/blob-store.js`). Modificare
+  `reviews.ilenia` non tocca mai `reviews.salvatore` e viceversa.
+- Errori: Blob non configurato / token mancante → `503`; JSON corrotto / timeout / errore di
+  lettura-scrittura → `500` con messaggio comprensibile. Mai un finto «Nessun locale presente».
+- `lib/blob-store.js` (server-only): `readDoc`, `mutateDoc`, `BlobNotConfiguredError`,
+  init dal seed se il blob manca, lettura con cache-buster `?v=` + `cache: 'no-store'`.
+
+### Immagini → Blob
+- `/api/upload` (POST, sessione): riceve `{ image: dataURL, kind: 'place' | 'dish' }`,
+  decodifica il Base64 e fa `put()` in cartella `restaurants/` o `dishes/`, ritorna `{ url }`.
+- Nel JSON dei locali si salvano **solo URL** (`imageUrl`, `dishImages: string[]`), mai il
+  Base64. `PlaceForm` carica le immagini su Blob al submit e assembla gli URL; gli URL http
+  già presenti restano invariati. UX invariata: upload multiplo, anteprime, rimozione,
+  galleria, lightbox. Nessun sistema di gestione dei piatti.
+- `src/utils/image.js` continua a ridimensionare lato client (max ~1200px, JPEG 0.8) e a
+  restituire data URL; l'upload avviene subito dopo, nel form.
+
+### Client — `RestaurantsContext` è l'unico punto di sincronizzazione
+- `src/utils/api.js`: `getCollection()`, `sendMutation(method, body)` (lancia `ApiError` con
+  `status`/`data` su 401/409/503/500), `uploadImage(dataUrl, kind)`.
+- All'avvio: `GET /api/restaurants` → stato `status: 'loading' | 'ready' | 'error'`
+  (`error` con messaggio). Loading ≠ lista vuota ≠ errore: tre stati distinti in Home e Backend.
+- Mutazioni (`createPlace`, `updatePlace`, `saveReview(id, reviewData)` — **senza** parametro
+  utente —, `deleteRestaurant`) passano dall'API e **sostituiscono** lo stato col documento
+  restituito dal server (autorevole). Nessun `window.location.reload()`.
+- **Polling** ogni ~12s: `GET /api/restaurants`, confronta `version`, aggiorna lo stato solo
+  se è cambiato; in pausa quando `document.hidden`, refetch immediato al ritorno in focus.
+- **Niente `localStorage`** come database: nessuna chiave `pndr_restaurants`, nessun listener
+  `storage`. Nessuna cache locale che possa sovrascrivere i dati del server.
+- Dopo create/mutate, lista backend / picker / conteggi / classifica / medie si aggiornano
+  subito (stato React), senza reload.
+
+### Invariato
+Due account (`ilenia` / `salvatore`) con credenziali in Environment Variables, sistema a due
+recensioni, pill del dettaglio, classifica, calcolo dei voti (`ratings.js`), UI del backend,
+nome, logo, palette, layout, componenti, animazioni, responsive, routing, tono di voce.
 
 ---
 
@@ -83,7 +157,9 @@ PNDR è una piattaforma web per consultare recensioni di locali e ristoranti.
 - **Sottotitolo:** Recensioni per gente non da ristorante
 - **Parte pubblica:** homepage con filtro categorie, classifica automatica, schede locale, dettaglio.
 - **Parte riservata:** area amministrativa (`/backend`) con login e CRUD completo delle recensioni.
-- **Persistenza:** `localStorage` (nessun backend server). Seed iniziale da `src/data/restaurants.json`.
+- **Persistenza:** archivio centrale unico su **Vercel Blob** (`restaurants.json`), condiviso
+  fra tutti i dispositivi, letto/scritto via `/api/restaurants` (vedi *Aggiornamento —
+  Persistenza su Vercel Blob*). `src/data/restaurants.json` è solo il seed iniziale.
 - **Deployment target:** Vercel (SPA statica).
 
 Criterio di completamento: **l'app deve funzionare davvero** (visitare → filtrare → consultare → dettaglio; login → create → update → delete con persistenza al refresh). `npm run build` deve terminare senza errori.

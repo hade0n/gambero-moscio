@@ -3,6 +3,12 @@ import Field, { controlClasses } from './Field.jsx';
 import Icon from './Icon.jsx';
 import { CATEGORIES } from '../config/categories.js';
 import { resizeImageFile, resizeImageFiles } from '../utils/image.js';
+import { uploadImage } from '../utils/api.js';
+
+/** true se la stringa è un data URL da caricare (non un URL http già remoto). */
+function isDataUrl(src) {
+  return typeof src === 'string' && src.startsWith('data:');
+}
 
 const EMPTY = {
   name: '',
@@ -47,6 +53,7 @@ export default function PlaceForm({ initial, onSubmit, onCancel }) {
   const [values, setValues] = useState(() => toFormState(initial));
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [submitLabel, setSubmitLabel] = useState('');
   const [imageBusy, setImageBusy] = useState(false);
   const [imageError, setImageError] = useState('');
   const [dishBusy, setDishBusy] = useState(false);
@@ -117,22 +124,40 @@ export default function PlaceForm({ initial, onSubmit, onCancel }) {
       return;
     }
 
-    const payload = {
-      name: values.name.trim(),
-      category: values.category,
-      town: values.town.trim(),
-      province: values.province.trim().toUpperCase(),
-      imageUrl: values.imageData || values.imageUrl.trim(),
-      dishImages: values.dishImages,
-    };
-
     setSubmitting(true);
     try {
-      await onSubmit(payload);
+      // Le immagini vanno su Vercel Blob: nel JSON dei locali si salvano solo
+      // gli URL, mai il Base64. Gli URL http già presenti restano invariati.
+      let imageUrl = '';
+      if (isDataUrl(values.imageData)) {
+        setSubmitLabel('Caricamento foto…');
+        imageUrl = await uploadImage(values.imageData, 'place');
+      } else if (values.imageUrl.trim()) {
+        imageUrl = values.imageUrl.trim();
+      }
+
+      let dishImages = [];
+      if (values.dishImages.length) {
+        setSubmitLabel('Caricamento foto dei piatti…');
+        dishImages = await Promise.all(
+          values.dishImages.map((src) => (isDataUrl(src) ? uploadImage(src, 'dish') : src)),
+        );
+      }
+
+      setSubmitLabel('Salvataggio…');
+      await onSubmit({
+        name: values.name.trim(),
+        category: values.category,
+        town: values.town.trim(),
+        province: values.province.trim().toUpperCase(),
+        imageUrl,
+        dishImages,
+      });
     } catch (err) {
       setFormError(err.message || 'Non è stato possibile salvare. Riprova.');
     } finally {
       setSubmitting(false);
+      setSubmitLabel('');
     }
   }
 
@@ -333,7 +358,7 @@ export default function PlaceForm({ initial, onSubmit, onCancel }) {
           Annulla
         </button>
         <button type="submit" disabled={submitting || imageBusy || dishBusy} className="btn btn-primary">
-          {submitting ? 'Salvataggio…' : 'Salva locale'}
+          {submitting ? submitLabel || 'Salvataggio…' : 'Salva locale'}
         </button>
       </div>
     </form>

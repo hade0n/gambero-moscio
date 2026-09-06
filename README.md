@@ -3,18 +3,21 @@
 Piattaforma web per consultare le recensioni di **Ilenia** e **Salvatore** su locali e
 ristoranti: homepage pubblica con filtro per categoria e classifica automatica, area
 riservata con due account. Un locale si crea **una sola volta** e può contenere **fino a due
-recensioni indipendenti** (una per recensore). Dati persistiti nel browser tramite
-`localStorage`, autenticazione server-side su Vercel Functions.
+recensioni indipendenti** (una per recensore). I dati vivono in un **archivio centrale unico
+su Vercel Blob**, condiviso fra tutti i dispositivi; autenticazione server-side su Vercel
+Functions.
 
 ## Stack
 
 - React 18 + Vite 5
 - React Router DOM 6
 - Tailwind CSS 3
-- `localStorage` per la persistenza dei contenuti (nessun database)
-- Vercel Functions (`api/`) per l'autenticazione server-side — solo `node:crypto`, nessuna dipendenza
+- **Vercel Blob** (`@vercel/blob`) come archivio centrale dei contenuti — un solo documento
+  `restaurants.json`, letto/scritto solo lato server
+- Vercel Functions (`api/`) per l'autenticazione e l'accesso all'archivio — `node:crypto` +
+  `@vercel/blob`, nessun database (niente Redis/KV/Supabase/Firebase/SQL…)
 
-Nessuna dipendenza npm oltre a quelle già presenti.
+Unica dipendenza npm aggiunta: `@vercel/blob`.
 
 ## Requisiti
 
@@ -60,7 +63,10 @@ npm run preview
    - Serverless functions: cartella `api/` (rilevata automaticamente)
 4. `vercel.json` è già incluso: reindirizza le route a `index.html` per il routing SPA,
    **escludendo `/api/*`** (che resta servito dalle serverless function).
-5. Configura le Environment Variables (vedi sotto).
+5. **Storage → Blob**: su Vercel crea uno Store **Blob** e collegalo al progetto
+   (*Storage → Create → Blob → Connect Project*). Vercel inietta automaticamente
+   `BLOB_READ_WRITE_TOKEN` nelle Environment Variables del progetto (Production + Preview).
+6. Configura le altre Environment Variables (vedi sotto).
 
 ## Configurazione Vercel — Environment Variables
 
@@ -70,6 +76,12 @@ Su Vercel → **Project Settings → Environment Variables**, crea le **password
 ```text
 ILENIA_PASSWORD
 SALVATORE_PASSWORD
+```
+
+Inoltre serve il token dell'archivio Blob (di norma già iniettato da Vercel al passo 5):
+
+```text
+BLOB_READ_WRITE_TOKEN
 ```
 
 (opzionale: `AUTH_SECRET`, chiave per firmare i cookie di sessione; se assente viene derivata
@@ -83,9 +95,13 @@ dalle due password).
   ```text
   ILENIA_PASSWORD=...
   SALVATORE_PASSWORD=...
+  BLOB_READ_WRITE_TOKEN=...
   ```
 
-  `npm run dev` esegue le funzioni in `api/` e legge queste variabili lato server.
+  Il valore di `BLOB_READ_WRITE_TOKEN` si ottiene con `vercel env pull .env.local` (dopo aver
+  collegato lo Store Blob) oppure copiandolo da *Vercel → Storage → il tuo Blob → .env.local*.
+  `npm run dev` esegue le funzioni in `api/` e legge queste variabili **solo lato server**
+  (mai nel bundle client).
 - Nel repository è versionato solo `.env.example`, **senza valori**.
 
 ## Struttura del progetto
@@ -94,42 +110,58 @@ dalle due password).
 src/
 ├── components/        Componenti UI (Header, CategoryFilter, RestaurantCard, Modal, form, toast…)
 ├── pages/             Home, Login, Backend
-├── context/           RestaurantsContext (fonte dati unica), ToastContext
+├── context/           RestaurantsContext (fonte dati unica, sync con l'archivio), ToastContext
 ├── hooks/             useRestaurants (re-export del context)
-├── utils/             storage.js, ratings.js, auth.js (client HTTP), image.js
+├── utils/             api.js (client archivio + upload), model.js (modello dati puro),
+│                      ratings.js, auth.js (client HTTP), image.js
 ├── config/            categories.js, users.js (i due recensori)
-├── data/              restaurants.json (seed vuoto: [])
+├── data/              restaurants.json (seed: usato solo se il blob non esiste ancora)
 ├── App.jsx            Routing
 ├── main.jsx           Bootstrap + Provider
 └── index.css          Token colore, base tipografica, utility
 
-api/                   Vercel Functions (auth server-side)
+api/                   Vercel Functions (server-side)
 ├── auth/login.js      POST — verifica password (process.env.ILENIA_/SALVATORE_PASSWORD), ritorna { user }
 ├── auth/session.js    GET  — stato sessione { authenticated, user }
 ├── auth/logout.js     POST — invalida la sessione
-└── restaurants.js     gate di autorizzazione per creazione/modifica/eliminazione
+├── restaurants.js     GET pubblico + POST/PUT/DELETE (sessione) sull'archivio Blob
+└── upload.js          POST (sessione) — carica un'immagine su Blob, ritorna { url }
 
 lib/session.js         Firma/verifica token, helper cookie (server-only)
+lib/blob-store.js      Archivio centrale su Vercel Blob: readDoc / mutateDoc (server-only)
 ```
 
 Documento di riferimento del design e delle regole di progetto: [`CLAUDE.md`](./CLAUDE.md).
 
-## Persistenza (localStorage)
+## Persistenza (Vercel Blob)
 
-- Chiave dati: `pndr_restaurants`
-- La sessione dell'area riservata **non** è in `localStorage`: è un cookie HttpOnly
-  gestito dal server (vedi *Autenticazione*).
+I dati **non** vivono più nel browser. C'è un **archivio centrale unico** su Vercel Blob,
+condiviso da tutti i dispositivi: Ilenia e Salvatore vedono gli stessi locali da qualsiasi
+browser.
 
-Il seed `src/data/restaurants.json` è **vuoto** (`[]`): l'app parte senza locali di esempio,
-il contenuto lo inserisce l'amministratore. Da quel momento `localStorage` è la fonte
-persistente: ogni operazione di create / update / delete aggiorna lo stato React **e**
-`localStorage`. Il refresh non cancella i dati.
+- **Un solo documento**, pathname stabile `restaurants.json`, sempre sovrascritto (mai
+  `restaurants-1.json`, `-2.json`…). Forma: `{ version, updatedAt, restaurants: [...] }`.
+- **Solo lato server**: il token `BLOB_READ_WRITE_TOKEN` è usato unicamente nelle funzioni
+  `api/` (`lib/blob-store.js`), mai nel bundle client.
+- **`/api/restaurants`**: `GET` pubblico ritorna il documento; `POST` / `PUT` / `DELETE`
+  (con sessione) lo modificano. Il server è un intermediario sottile verso il Blob, non un
+  database.
+- **Concorrenza**: ogni modifica legge il documento corrente, cambia solo la porzione
+  necessaria e riscrive il resto invariato. Toccare la recensione di Ilenia non altera mai
+  quella di Salvatore.
+- **`version` / `updatedAt`** cambiano solo su modifica reale, mai su una GET.
+- **Sincronizzazione fra dispositivi**: il client (`RestaurantsContext`) fa polling ogni
+  ~12 s, confronta `version` e aggiorna lo stato solo se è cambiato — senza reload; il
+  polling è in pausa quando la scheda non è visibile.
+- **Seed**: `src/data/restaurants.json` viene usato **solo** se il documento non esiste
+  ancora nel Blob; non sovrascrive mai un archivio già presente.
+- I record corrotti vengono scartati in lettura; i dati nel vecchio formato piatto
+  (`ratings`/`review` senza `reviews`) vengono migrati a `reviews.ilenia` senza perdita.
+- La sessione dell'area riservata resta un cookie HttpOnly gestito dal server
+  (vedi *Autenticazione*).
 
-- I record corrotti vengono scartati in lettura; i dati salvati nel vecchio formato
-  (`food`/`service`/`price`) vengono migrati alle 8 categorie.
-- Le modifiche fatte in un'altra scheda del browser vengono recepite tramite l'evento `storage`.
-- Se lo spazio di `localStorage` è esaurito (immagini troppo grandi), il salvataggio
-  viene annullato e viene mostrato un messaggio; i dati già presenti restano intatti.
+Le immagini vengono caricate su Blob (`/api/upload`, cartelle `restaurants/` e `dishes/`) e
+nel documento si salvano **solo gli URL** (`imageUrl`, `dishImages`), mai il Base64.
 
 ## Autenticazione
 
@@ -147,13 +179,13 @@ tramite Vercel Functions.
 - Il frontend interroga `GET /api/auth/session` per sapere se mostrare il Backend o il Login:
   la fonte autorevole è il server, non `localStorage`.
 - `POST /api/auth/logout` invalida la sessione.
-- Le operazioni amministrative (CREATE / UPDATE / DELETE) passano prima da
-  `/api/restaurants`, che risponde `401` senza sessione valida: un utente non autenticato
-  non può modificare i dati nemmeno chiamando direttamente le API.
+- Le operazioni sui contenuti (CREATE / UPDATE / DELETE, recensioni, upload immagini)
+  passano da `/api/restaurants` e `/api/upload`, che rispondono `401` senza sessione valida:
+  un utente non autenticato non può modificare l'archivio nemmeno chiamando direttamente le
+  API. La sola `GET` di `/api/restaurants` è pubblica (serve la homepage).
+- Quando si scrive una recensione, **l'utente è determinato dalla sessione**, non da un
+  valore inviato dal client: ciascuno può modificare solo la propria recensione.
 - Messaggio di errore login (non rivela quale campo è errato): `Username o password non corretti.`
-
-I dati dei ristoranti restano in `localStorage` (nessun database): l'autenticazione e
-l'autorizzazione sono lato server, la persistenza dei contenuti è lato client.
 
 ## Locali e recensioni
 
@@ -193,14 +225,14 @@ Tutta la matematica è in [`src/utils/ratings.js`](src/utils/ratings.js):
 
 ## Foto dei piatti
 
-Ogni ristorante ha un campo `dishImages` (array di immagini Base64), gestito come **semplice
-galleria** — nessun nome, descrizione, prezzo o CRUD del singolo piatto.
+Ogni ristorante ha un campo `dishImages` (array di URL di immagini su Vercel Blob), gestito
+come **semplice galleria** — nessun nome, descrizione, prezzo o CRUD del singolo piatto.
 
 - Backend: nel form del ristorante, sezione "Foto dei piatti" → `[+ Aggiungi foto]` con
   `<input type="file" accept="image/*" multiple>` (selezione multipla). Miniature con pulsante
   di rimozione. Nessun campo URL per queste foto (solo caricamento da dispositivo).
-- Le immagini sono ridimensionate (max ~1200px) e salvate come data URL in `dishImages`,
-  persistite in `localStorage` insieme al ristorante.
+- Le immagini sono ridimensionate lato client (max ~1200px), caricate su Vercel Blob
+  (cartella `dishes/`) e nel documento si salva solo l'array di URL `dishImages`.
 - Frontend: nel dettaglio del ristorante compare la sezione "Foto dei piatti" **solo se** ci
   sono immagini. Click su una foto → lightbox responsive (ingrandimento, chiusura con X /
   click esterno / ESC, navigazione precedente/successiva con pulsanti e frecce).
@@ -214,7 +246,7 @@ l'identità mediterranea di PNDR**: forme più arrotondate con gerarchia (input 
 pulsanti con stati completi e feedback tattile discreto, focus ring morbido sui campi.
 I token vivono in `tailwind.config.js` (radius, shadow) e le classi condivise in
 `src/index.css` (`btn`/`btn-*`, `.surface`, `.field-control`). Palette, logica, CRUD,
-ranking, routing, `localStorage` e autenticazione **non sono cambiati**.
+ranking, routing e autenticazione **non sono cambiati**.
 
 Il logo ufficiale è `public/logo.svg` (usato in header, login e come favicon).
 
@@ -226,18 +258,15 @@ lista, enter/exit di modali e toast, lightbox e galleria, ombra dell'header sull
 Tutto rispetta `prefers-reduced-motion` (transizioni azzerate, contenuto sempre visibile).
 L'identità resta calda, mediterranea, editoriale — nessun effetto neon/3D/gradiente.
 
-## Upload immagini (Base64)
+## Upload immagini
 
-Nel form è possibile:
-
-- caricare una foto dal dispositivo: viene ridimensionata via `<canvas>`
-  (larghezza massima ~1200px, aspetto invariato) ed esportata come JPEG in
-  formato data URL Base64 salvato nel campo `imageUrl`;
-- oppure indicare un URL immagine remoto.
-
-In entrambi i casi è mostrata un'anteprima immediata. Poiché `localStorage` ha uno
-spazio limitato, immagini molto grandi possono far fallire il salvataggio: in quel
-caso l'operazione viene annullata con un messaggio e il form resta compilato.
+Nel form del locale si carica una foto dal dispositivo: viene ridimensionata via `<canvas>`
+(larghezza massima ~1200px, aspetto invariato) ed esportata in JPEG, con anteprima immediata.
+Al salvataggio l'immagine viene inviata a `/api/upload`, che la carica su Vercel Blob e
+restituisce un URL pubblico; nel documento `restaurants.json` si salva **solo quell'URL**
+(`imageUrl` per la foto del locale, `dishImages` per le foto dei piatti). Gli URL http già
+presenti in fase di modifica restano invariati. Se un upload non riesce, l'operazione viene
+annullata con un messaggio e il form resta compilato.
 
 ## Accessibilità
 

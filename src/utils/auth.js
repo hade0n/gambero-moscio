@@ -61,23 +61,3 @@ export async function checkSession() {
     return { authenticated: false, user: null };
   }
 }
-
-/**
- * Autorizza un'operazione amministrativa (create/update/delete) prima di
- * scriverla in localStorage. Se la sessione non è valida, lancia: il
- * chiamante mostra l'errore e la modifica non viene persistita.
- */
-export async function authorizeAdminAction(method = 'POST') {
-  let res;
-  try {
-    res = await fetch('/api/restaurants', { method, credentials: 'same-origin' });
-  } catch {
-    throw new Error('Non è stato possibile contattare il server. Riprova.');
-  }
-  if (res.status === 401) {
-    throw new Error('Sessione scaduta. Effettua di nuovo l’accesso.');
-  }
-  if (!res.ok) {
-    throw new Error('Operazione non autorizzata.');
-  }
-}

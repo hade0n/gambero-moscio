@@ -3,13 +3,14 @@ import Header from '../components/Header.jsx';
 import CategoryFilter from '../components/CategoryFilter.jsx';
 import RestaurantList from '../components/RestaurantList.jsx';
 import RestaurantModal from '../components/RestaurantModal.jsx';
+import EmptyState from '../components/EmptyState.jsx';
 import { useRestaurants } from '../hooks/useRestaurants.js';
 import { compareByRanking } from '../utils/ratings.js';
 import { ALL } from '../config/categories.js';
 
 /** Homepage pubblica: filtro categorie + classifica ordinata per voto complessivo. */
 export default function Home() {
-  const { restaurants } = useRestaurants();
+  const { restaurants, status, error, refetch } = useRestaurants();
   const [activeCategory, setActiveCategory] = useState(ALL);
   const [selected, setSelected] = useState(null);
 
@@ -25,6 +26,7 @@ export default function Home() {
   }, [restaurants, activeCategory]);
 
   const count = ranked.length;
+  const showList = status === 'ready';
 
   return (
     <div className="min-h-dvh bg-cream">
@@ -34,7 +36,7 @@ export default function Home() {
       <main className="mx-auto max-w-content px-3 py-6 md:px-6 md:py-10">
         <div className="flex items-baseline justify-between gap-3">
           <h1 className="font-display text-2xl font-bold sm:text-[2rem]">Classifica</h1>
-          {count > 0 && (
+          {showList && count > 0 && (
             <p className="text-sm font-medium text-brown-soft">
               {count === 1 ? '1 locale' : `${count} locali`}
             </p>
@@ -47,11 +49,32 @@ export default function Home() {
         </p>
 
         <div className="mt-6">
-          <RestaurantList
-            restaurants={ranked}
-            onOpen={setSelected}
-            isFiltered={activeCategory !== ALL}
-          />
+          {status === 'loading' && (
+            <EmptyState
+              title="Caricamento dei locali in corso…"
+              description="Stiamo recuperando la classifica dall’archivio."
+            />
+          )}
+
+          {status === 'error' && (
+            <EmptyState
+              title="Non è stato possibile caricare i locali."
+              description={error || 'Controlla la connessione e riprova.'}
+              action={
+                <button type="button" onClick={() => refetch()} className="btn btn-primary">
+                  Riprova
+                </button>
+              }
+            />
+          )}
+
+          {showList && (
+            <RestaurantList
+              restaurants={ranked}
+              onOpen={setSelected}
+              isFiltered={activeCategory !== ALL}
+            />
+          )}
         </div>
       </main>
 

@@ -1,8 +1,77 @@
 # PNDR Project Guidelines
 
-> Documento di riferimento principale per lo sviluppo di **PNDR — Recensioni per gente non da ristorante**.
+> Documento di riferimento principale per lo sviluppo di **Fiat Multipla Recensioni Locali**
+> (ex «PNDR — Recensioni per gente non da ristorante»: il resto del documento usa ancora
+> il vecchio nome nei testi descrittivi, ma il nome visibile all'utente è quello nuovo).
 > Ogni componente, pagina, stile o logica va verificato contro questo file **prima** di essere implementato.
 > Le decisioni di design seguono il brief del prodotto e i principi della skill **UI/UX Pro Max**.
+
+---
+
+## Aggiornamento — Fiat Multipla Recensioni Locali (override)
+
+Questa sezione **sostituisce** le parti in conflitto più avanti nel documento.
+
+### Nome
+- Nome visibile ovunque (header, `<title>`, meta, login, backend, branding): **Fiat Multipla Recensioni Locali**.
+- Logo: `public/logo.svg` aggiornato (fornito dal committente), usato come `<img>` in `Header`/`Login` e come favicon.
+
+### Due account (una coppia che recensisce insieme)
+- Account: `ilenia` / `salvatore`. Password **solo** in Environment Variables server-side:
+  `ILENIA_PASSWORD`, `SALVATORE_PASSWORD` (+ opzionale `AUTH_SECRET`). Nessun `ADMIN_*`.
+  Gli username non sono segreti: vivono in `src/config/users.js` (fonte unica: `REVIEWERS`).
+- `POST /api/auth/login` → `{ ok, user }`; `GET /api/auth/session` → `{ authenticated, user }`.
+  Il token di sessione porta `user`. `ProtectedRoute` passa `{ logout, user }` ai figli.
+- `.env.example`: solo `ILENIA_PASSWORD=` e `SALVATORE_PASSWORD=` (senza valori).
+
+### Modello dati — un locale, fino a due recensioni indipendenti
+```jsonc
+{
+  "id": "...", "name": "...", "category": "...", "town": "...", "province": "..",
+  "imageUrl": "...", "dishImages": [],           // dati CONDIVISI del locale
+  "reviews": {                                   // 0, 1 o 2 recensioni indipendenti
+    "ilenia":    { "ratings": { …8 + overall }, "review": "…", "rankingScore": 8.7 },
+    "salvatore": { … }
+  },
+  "ratings": { …8 + overall },  "rankingScore": …,  "reviewCount": 0|1|2  // AGGREGATI (derivati)
+}
+```
+- L'aggregato = media per categoria delle recensioni presenti → `calculateRankingScore` /
+  `calculateOverall` esistenti (`aggregateReviews()` in `ratings.js`). Con una sola recensione
+  l'aggregato coincide con essa. Nessun campo modificabile a mano.
+- `normalizeRestaurant` migra i dati legacy (record piatto con `ratings`/`review`) in
+  `reviews.ilenia` (l'unico account precedente).
+- **Nessun duplicato del locale**: il locale si crea una sola volta; le recensioni si
+  aggiungono sullo stesso `id`.
+
+### Context (`useRestaurants()`)
+`restaurants`, `createPlace(data)` (solo dati condivisi, nessuna recensione automatica),
+`updatePlace(id, data)` (solo dati condivisi, recensioni intatte),
+`saveReview(id, user, {ratings, review})` (crea/sostituisce la recensione di **quell'utente**),
+`deleteRestaurant(id)` (elimina l'intero locale), `getRestaurant`, `compareByRanking`.
+
+### Backend — due azioni separate
+- `+ Crea locale` → `PlaceForm` (nome/categoria/città/provincia + foto locale + foto piatti).
+- `Scrivi recensione` → `ReviewPicker` (elenco locali con stato «Ilenia ✓ / Salvatore —»,
+  bottone per l'utente corrente: *Scrivi* / *Modifica la recensione di …*) → `ReviewForm`
+  (8 voti + testo). Ilenia modifica solo la propria, Salvatore solo la propria.
+- `RestaurantListAdmin`: elenco locali con stato recensioni (`ReviewStatus`), azioni
+  `Modifica locale` / `Elimina` (elimina l'intero locale, con conferma).
+- Componenti nuovi: `PlaceForm.jsx`, `ReviewForm.jsx`, `ReviewPicker.jsx`, `ReviewStatus.jsx`.
+  `RestaurantForm.jsx` **rimosso**.
+
+### Dettaglio pubblico (`RestaurantModal`)
+- Pill dinamiche `Recensione Ilenia` / `Recensione Salvatore`, mostrate **solo** per le
+  recensioni presenti (una sola presente → nessuna pill, si mostra direttamente quella;
+  nessuna → «Nessuna recensione disponibile.»). La pill selezionata cambia voti e testo.
+- Heading: «La valutazione di {nome}».
+
+### Homepage
+- In classifica compaiono solo i locali con `reviewCount > 0`. Ordinamento invariato
+  (`compareByRanking` sull'aggregato).
+
+Restano invariati: palette, PNDR Material, animazioni, galleria/lightbox foto piatti,
+sistema di voti (`ratings.js`), routing, `localStorage`, tono di voce, requisiti Vercel.
 
 ---
 

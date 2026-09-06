@@ -25,14 +25,14 @@ async function request(url, { method = 'GET', body } = {}) {
   return { res, data };
 }
 
-/** Invia le credenziali all'endpoint server-side di login. */
+/** Invia le credenziali all'endpoint server-side di login. Ritorna anche lo `user` autenticato. */
 export async function login(username, password) {
   try {
     const { res, data } = await request('/api/auth/login', {
       method: 'POST',
       body: { username, password },
     });
-    if (res.ok) return { ok: true };
+    if (res.ok) return { ok: true, user: data.user ?? null };
     return { ok: false, error: data.error || CREDENTIALS_ERROR };
   } catch {
     return { ok: false, error: 'Non è stato possibile contattare il server. Riprova.' };
@@ -48,13 +48,17 @@ export async function logout() {
   }
 }
 
-/** Verifica lato server se esiste una sessione valida. */
+/**
+ * Verifica lato server se esiste una sessione valida.
+ * @returns {Promise<{authenticated: boolean, user: string|null}>}
+ */
 export async function checkSession() {
   try {
     const { res, data } = await request('/api/auth/session');
-    return res.ok && Boolean(data.authenticated);
+    if (res.ok && data.authenticated) return { authenticated: true, user: data.user ?? null };
+    return { authenticated: false, user: null };
   } catch {
-    return false;
+    return { authenticated: false, user: null };
   }
 }
 

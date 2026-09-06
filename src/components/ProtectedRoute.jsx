@@ -3,17 +3,20 @@ import Login from '../pages/Login.jsx';
 import { checkSession, logout as endSession } from '../utils/auth.js';
 
 /**
- * Protegge l'area riservata. Lo stato di autenticazione è deciso dal server
- * (`GET /api/auth/session`), non da localStorage.
- * `children` è una render-prop che riceve `{ logout }`.
+ * Protegge l'area riservata. Lo stato di autenticazione (e quale dei due
+ * account è collegato) è deciso dal server (`GET /api/auth/session`).
+ * `children` è una render-prop che riceve `{ logout, user }`.
  */
 export default function ProtectedRoute({ children }) {
   const [status, setStatus] = useState('checking'); // 'checking' | 'authed' | 'guest'
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     let active = true;
-    checkSession().then((ok) => {
-      if (active) setStatus(ok ? 'authed' : 'guest');
+    checkSession().then(({ authenticated, user: sessionUser }) => {
+      if (!active) return;
+      setUser(sessionUser);
+      setStatus(authenticated ? 'authed' : 'guest');
     });
     return () => {
       active = false;
@@ -22,6 +25,7 @@ export default function ProtectedRoute({ children }) {
 
   const logout = useCallback(async () => {
     await endSession();
+    setUser(null);
     setStatus('guest');
   }, []);
 
@@ -34,8 +38,15 @@ export default function ProtectedRoute({ children }) {
   }
 
   if (status === 'guest') {
-    return <Login onSuccess={() => setStatus('authed')} />;
+    return (
+      <Login
+        onSuccess={(loggedUser) => {
+          setUser(loggedUser);
+          setStatus('authed');
+        }}
+      />
+    );
   }
 
-  return children({ logout });
+  return children({ logout, user });
 }

@@ -219,6 +219,33 @@ export function calculateOverall(ratings) {
 }
 
 /**
+ * Aggregato di un locale con più recensioni indipendenti: media per categoria
+ * dei voti delle recensioni presenti, poi `overall` e `rankingScore` calcolati
+ * col sistema esistente. Con una sola recensione l'aggregato coincide con essa.
+ * @param {Array<{ratings:object}>} reviews recensioni presenti (0, 1 o 2)
+ */
+export function aggregateReviews(reviews) {
+  const present = (reviews || []).filter((r) => r && r.ratings);
+  const ratings = {};
+
+  if (present.length === 0) {
+    RATING_KEYS.forEach((key) => {
+      ratings[key] = 0;
+    });
+    ratings.overall = 0;
+    return { ratings, rankingScore: 0, reviewCount: 0 };
+  }
+
+  RATING_KEYS.forEach((key) => {
+    const sum = present.reduce((acc, r) => acc + clampRating(r.ratings[key]), 0);
+    ratings[key] = roundToStep(sum / present.length);
+  });
+  const rankingScore = calculateRankingScore(ratings);
+  ratings.overall = Math.round(rankingScore * 10) / 10;
+  return { ratings, rankingScore, reviewCount: present.length };
+}
+
+/**
  * Confronto deterministico per la classifica: rankingScore desc, poi la
  * catena di tie-break (food, ingredients, experience, service, price, nome).
  */

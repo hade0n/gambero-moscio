@@ -14,11 +14,13 @@ export default function Home() {
   const [selected, setSelected] = useState(null);
 
   const ranked = useMemo(() => {
+    // In classifica compaiono solo i locali con almeno una recensione pubblicata.
+    const reviewed = restaurants.filter((r) => r.reviewCount > 0);
     const filtered =
       activeCategory === ALL
-        ? restaurants
-        : restaurants.filter((r) => r.category === activeCategory);
-    // La classifica è ordinata sul rankingScore ad alta precisione, non sull'overall arrotondato.
+        ? reviewed
+        : reviewed.filter((r) => r.category === activeCategory);
+    // Ordinata sul rankingScore ad alta precisione, non sull'overall arrotondato.
     return [...filtered].sort(compareByRanking);
   }, [restaurants, activeCategory]);
 

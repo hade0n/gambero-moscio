@@ -2,13 +2,6 @@ import { useRef, useState } from 'react';
 import Field, { controlClasses } from './Field.jsx';
 import Icon from './Icon.jsx';
 import { CATEGORIES } from '../config/categories.js';
-import {
-  RATING_CATEGORIES,
-  RATING_KEYS,
-  calculateOverall,
-  calculateRankingScore,
-  formatRating,
-} from '../utils/ratings.js';
 import { isValidImageUrl, resizeImageFile, resizeImageFiles } from '../utils/image.js';
 
 const EMPTY = {
@@ -16,93 +9,54 @@ const EMPTY = {
   category: '',
   town: '',
   province: '',
-  review: '',
   imageUrl: '',
   imageData: '',
   dishImages: [],
-  ...Object.fromEntries(RATING_KEYS.map((k) => [k, ''])),
 };
 
-/** Prepara i valori iniziali (per la modifica) mantenendoli come stringhe nel form. */
 function toFormState(initial) {
   if (!initial) return { ...EMPTY };
   const isData = typeof initial.imageUrl === 'string' && initial.imageUrl.startsWith('data:');
-  const ratingValues = Object.fromEntries(
-    RATING_KEYS.map((k) => [k, initial.ratings?.[k] != null ? String(initial.ratings[k]) : '']),
-  );
   return {
     name: initial.name ?? '',
     category: initial.category ?? '',
     town: initial.town ?? '',
     province: initial.province ?? '',
-    review: initial.review ?? '',
     imageUrl: isData ? '' : initial.imageUrl ?? '',
     imageData: isData ? initial.imageUrl : '',
     dishImages: Array.isArray(initial.dishImages) ? [...initial.dishImages] : [],
-    ...ratingValues,
   };
-}
-
-function parseRating(value) {
-  return parseFloat(String(value).replace(',', '.'));
-}
-
-/** Un valore rating è valido se numero finito in 0–10. */
-function ratingError(raw, label) {
-  const n = parseRating(raw);
-  if (String(raw).trim() === '' || Number.isNaN(n) || !Number.isFinite(n))
-    return `Indica il voto per ${label.toLowerCase()}.`;
-  if (n < 0 || n > 10) return `Il voto per ${label.toLowerCase()} deve essere tra 0 e 10.`;
-  return undefined;
 }
 
 function validate(values) {
   const errors = {};
-
   if (values.name.trim().length < 2) errors.name = 'Inserisci il nome del locale (almeno 2 caratteri).';
   if (!CATEGORIES.includes(values.category)) errors.category = 'Scegli una categoria dall’elenco.';
   if (values.town.trim().length < 2) errors.town = 'Inserisci la città del locale.';
   if (!/^[A-Za-z]{2}$/.test(values.province.trim()))
     errors.province = 'La provincia va indicata con due lettere (es. FI).';
-
-  RATING_CATEGORIES.forEach(({ key, label }) => {
-    const err = ratingError(values[key], label);
-    if (err) errors[key] = err;
-  });
-
-  if (values.review.trim().length < 20)
-    errors.review = 'Scrivi una recensione un po’ più estesa (almeno 20 caratteri).';
-
   if (!isValidImageUrl(values.imageUrl))
     errors.imageUrl = 'Inserisci un indirizzo immagine che inizi con http:// o https://';
-
   return errors;
 }
 
 /**
- * Form create/update mobile-first. Voto complessivo e punteggio classifica
- * ricalcolati in tempo reale a ogni modifica di una delle 8 categorie.
- * onSubmit(payload) può essere asincrono e lanciare: l'errore resta nel form.
+ * Form dei DATI CONDIVISI del locale: nome, categoria, città, provincia, foto
+ * del locale e foto dei piatti. Nessun voto e nessun testo di recensione:
+ * le recensioni si scrivono separatamente con `ReviewForm`.
  */
-export default function RestaurantForm({ initial, onSubmit, onCancel }) {
+export default function PlaceForm({ initial, onSubmit, onCancel }) {
   const [values, setValues] = useState(() => toFormState(initial));
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [imageBusy, setImageBusy] = useState(false);
   const [imageError, setImageError] = useState('');
-  const [formError, setFormError] = useState('');
   const [dishBusy, setDishBusy] = useState(false);
   const [dishError, setDishError] = useState('');
+  const [formError, setFormError] = useState('');
   const formRef = useRef(null);
   const fileInputRef = useRef(null);
   const dishInputRef = useRef(null);
-
-  // Ricalcolo a ogni render: dipende solo dai valori correnti degli 8 campi.
-  const liveRatings = Object.fromEntries(
-    RATING_KEYS.map((k) => [k, parseRating(values[k]) || 0]),
-  );
-  const overall = calculateOverall(liveRatings);
-  const rankingScore = calculateRankingScore(liveRatings);
 
   const preview = values.imageData || values.imageUrl.trim();
 
@@ -111,10 +65,7 @@ export default function RestaurantForm({ initial, onSubmit, onCancel }) {
   }
 
   function handleBlur(key) {
-    setErrors((prev) => {
-      const next = validate(values);
-      return { ...prev, [key]: next[key] };
-    });
+    setErrors((prev) => ({ ...prev, [key]: validate(values)[key] }));
   }
 
   async function handleFile(event) {
@@ -144,9 +95,9 @@ export default function RestaurantForm({ initial, onSubmit, onCancel }) {
     setDishError('');
     setDishBusy(true);
     try {
-      const { images, errors } = await resizeImageFiles(files);
+      const { images, errors: fileErrors } = await resizeImageFiles(files);
       if (images.length) setValues((v) => ({ ...v, dishImages: [...v.dishImages, ...images] }));
-      if (errors.length) setDishError(`Alcune foto non sono state aggiunte. ${errors[0]}`);
+      if (fileErrors.length) setDishError(`Alcune foto non sono state aggiunte. ${fileErrors[0]}`);
     } finally {
       setDishBusy(false);
       if (dishInputRef.current) dishInputRef.current.value = '';
@@ -162,7 +113,6 @@ export default function RestaurantForm({ initial, onSubmit, onCancel }) {
     setFormError('');
     const nextErrors = validate(values);
     setErrors(nextErrors);
-
     const firstInvalid = Object.keys(nextErrors)[0];
     if (firstInvalid) {
       formRef.current?.querySelector(`[name="${firstInvalid}"]`)?.focus();
@@ -174,10 +124,8 @@ export default function RestaurantForm({ initial, onSubmit, onCancel }) {
       category: values.category,
       town: values.town.trim(),
       province: values.province.trim().toUpperCase(),
-      review: values.review.trim(),
       imageUrl: values.imageData || values.imageUrl.trim(),
       dishImages: values.dishImages,
-      ratings: Object.fromEntries(RATING_KEYS.map((k) => [k, parseRating(values[k])])),
     };
 
     setSubmitting(true);
@@ -205,7 +153,7 @@ export default function RestaurantForm({ initial, onSubmit, onCancel }) {
             aria-invalid={invalid}
             aria-required="true"
             className={controlClasses(invalid)}
-            placeholder="Es. La Vecchia Osteria"
+            placeholder="Es. Pizzeria Mario"
           />
         )}
       </Field>
@@ -247,7 +195,7 @@ export default function RestaurantForm({ initial, onSubmit, onCancel }) {
               aria-invalid={invalid}
               aria-required="true"
               className={controlClasses(invalid)}
-              placeholder="Es. Firenze"
+              placeholder="Es. Napoli"
             />
           )}
         </Field>
@@ -265,96 +213,11 @@ export default function RestaurantForm({ initial, onSubmit, onCancel }) {
               aria-invalid={invalid}
               aria-required="true"
               className={`${controlClasses(invalid)} uppercase`}
-              placeholder="FI"
+              placeholder="NA"
             />
           )}
         </Field>
       </div>
-
-      <fieldset className="rounded-2xl border bg-cream/60 p-4 sm:p-5">
-        <legend className="px-1 font-display text-base font-semibold text-brown">
-          Valutazione del locale
-        </legend>
-        <p className="mb-3 px-1 text-xs text-brown-soft">
-          Otto categorie indipendenti, da 0.0 a 10.0 (passo 0.1). Sono tutte obbligatorie.
-        </p>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          {RATING_CATEGORIES.map(({ key, label, description }) => (
-            <Field key={key} label={label} required error={errors[key]} hint={description}>
-              {({ id, describedBy, invalid }) => (
-                <input
-                  id={id}
-                  name={key}
-                  type="number"
-                  min="0"
-                  max="10"
-                  step="0.1"
-                  inputMode="decimal"
-                  value={values[key]}
-                  onChange={(e) => setField(key, e.target.value)}
-                  onBlur={() => handleBlur(key)}
-                  aria-describedby={describedBy}
-                  aria-invalid={invalid}
-                  aria-required="true"
-                  className={`${controlClasses(invalid)} tabular`}
-                  placeholder="0.0"
-                />
-              )}
-            </Field>
-          ))}
-        </div>
-
-        <div className="mt-4 space-y-2 rounded-xl border bg-white px-4 py-3 shadow-xs">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-semibold text-brown-soft">Voto complessivo</span>
-            <span className="flex items-center gap-2">
-              <Icon name="star" size={20} className="text-rating" />
-              <span key={formatRating(overall)} className="reveal-in tabular text-lg font-bold text-brown">
-                {formatRating(overall)}
-              </span>
-            </span>
-          </div>
-          <div className="flex items-center justify-between border-t pt-2">
-            <span className="text-xs font-semibold uppercase tracking-wide text-brown-soft">
-              Punteggio classifica
-            </span>
-            <span
-              key={rankingScore.toFixed(4)}
-              className="reveal-in tabular text-sm font-semibold text-green-deep"
-            >
-              {rankingScore.toFixed(4)}
-            </span>
-          </div>
-          <p className="text-xs text-brown-soft">
-            Il voto pubblico deriva dal punteggio classifica: pesi differenti per categoria, più
-            coerenza, qualità gastronomica, eccellenza e penalità dei punti deboli.
-          </p>
-        </div>
-      </fieldset>
-
-      <Field
-        label="Recensione"
-        required
-        error={errors.review}
-        hint="Racconta l’esperienza in modo semplice e sincero."
-      >
-        {({ id, describedBy, invalid }) => (
-          <textarea
-            id={id}
-            name="review"
-            rows={6}
-            value={values.review}
-            onChange={(e) => setField('review', e.target.value)}
-            onBlur={() => handleBlur('review')}
-            aria-describedby={describedBy}
-            aria-invalid={invalid}
-            aria-required="true"
-            className={`${controlClasses(invalid)} min-h-[8rem] resize-y`}
-            placeholder="La cucina, il servizio, l’ambiente, il rapporto qualità-prezzo…"
-          />
-        )}
-      </Field>
 
       <div className="space-y-3">
         <span className="block text-sm font-semibold text-brown">Foto del locale</span>
@@ -494,7 +357,7 @@ export default function RestaurantForm({ initial, onSubmit, onCancel }) {
           Annulla
         </button>
         <button type="submit" disabled={submitting || imageBusy || dishBusy} className="btn btn-primary">
-          {submitting ? 'Salvataggio…' : 'Salva'}
+          {submitting ? 'Salvataggio…' : 'Salva locale'}
         </button>
       </div>
     </form>

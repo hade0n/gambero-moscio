@@ -1,6 +1,13 @@
 import seed from '../data/restaurants.json';
 import { isValidCategory } from '../config/categories.js';
-import { calculateRankingScore, normalizeRatings } from './ratings.js';
+import { REVIEWER_KEYS } from '../config/users.js';
+import {
+  RATING_KEYS,
+  aggregateReviews,
+  calculateRankingScore,
+  clampRating,
+  normalizeRatings,
+} from './ratings.js';
 
 export const STORAGE_KEY = 'pndr_restaurants';
 
@@ -18,7 +25,27 @@ export function createId() {
 }
 
 /**
+ * Normalizza una singola recensione (voti + testo). Ritorna null se la
+ * recensione non ha contenuto (né testo né voti > 0): in quel caso il
+ * recensore non ha ancora recensito il locale.
+ */
+function normalizeReview(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const ratings = normalizeRatings(raw.ratings && typeof raw.ratings === 'object' ? raw.ratings : {});
+  const review = cleanText(raw.review);
+  const hasContent = review.length > 0 || RATING_KEYS.some((k) => clampRating(ratings[k]) > 0);
+  if (!hasContent) return null;
+  return { ratings, review, rankingScore: calculateRankingScore(ratings) };
+}
+
+/**
  * Riporta un record grezzo alla forma canonica di Restaurant.
+ *
+ * Modello: un locale condiviso (nome, categoria, città, provincia, foto) +
+ * fino a due recensioni indipendenti in `reviews` (chiavi `ilenia` /
+ * `salvatore`). L'aggregato (`ratings` / `rankingScore` / `reviewCount`) è
+ * ricalcolato dalle recensioni presenti col sistema di voti esistente.
+ *
  * Ritorna null se i campi minimi non sono utilizzabili.
  */
 export function normalizeRestaurant(raw) {
@@ -31,11 +58,24 @@ export function normalizeRestaurant(raw) {
   const category = isValidCategory(raw.category) ? raw.category : 'Trattoria';
   const province = cleanText(raw.province).toUpperCase().slice(0, 2) || '—';
 
-  const rawRatings = raw.ratings && typeof raw.ratings === 'object' ? raw.ratings : {};
-  const ratings = normalizeRatings(rawRatings); // gestisce anche i dati legacy
-  const rankingScore = calculateRankingScore(ratings);
+  // Recensioni. Formato legacy (record con `ratings`/`review` piatti e nessun
+  // `reviews`): la recensione dell'unico account precedente diventa quella di Ilenia.
+  const rawReviews =
+    raw.reviews && typeof raw.reviews === 'object'
+      ? raw.reviews
+      : raw.ratings || raw.review
+        ? { ilenia: { ratings: raw.ratings, review: raw.review } }
+        : {};
 
-  // Galleria foto dei piatti: semplice array di immagini (data URL o http).
+  const reviews = {};
+  REVIEWER_KEYS.forEach((key) => {
+    const r = normalizeReview(rawReviews[key]);
+    if (r) reviews[key] = r;
+  });
+
+  const { ratings, rankingScore, reviewCount } = aggregateReviews(Object.values(reviews));
+
+  // Galleria foto dei piatti: semplice array di immagini (data URL o http). Condivisa.
   const dishImages = Array.isArray(raw.dishImages)
     ? raw.dishImages
         .filter((src) => typeof src === 'string')
@@ -49,11 +89,13 @@ export function normalizeRestaurant(raw) {
     category,
     town,
     province,
-    ratings,
-    rankingScore,
-    review: cleanText(raw.review),
     imageUrl: typeof raw.imageUrl === 'string' ? raw.imageUrl.trim() : '',
     dishImages,
+    reviews,
+    // aggregati (derivati, non modificabili a mano)
+    ratings,
+    rankingScore,
+    reviewCount,
   };
 }
 

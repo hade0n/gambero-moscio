@@ -8,13 +8,26 @@ import {
   saveRestaurants,
 } from '../utils/storage.js';
 import { compareByRanking } from '../utils/ratings.js';
+import { isReviewer } from '../config/users.js';
 import { authorizeAdminAction } from '../utils/auth.js';
 
 const RestaurantsContext = createContext(null);
 
+/** Campi condivisi del locale (non appartengono alle singole recensioni). */
+const PLACE_FIELDS = ['name', 'category', 'town', 'province', 'imageUrl', 'dishImages'];
+
+function pickPlaceFields(data) {
+  const out = {};
+  PLACE_FIELDS.forEach((k) => {
+    if (data[k] !== undefined) out[k] = data[k];
+  });
+  return out;
+}
+
 /**
  * Provider unico della collezione locali.
  * Home e Backend condividono questa stessa istanza: nessuna lista separata.
+ * Un locale = dati condivisi + fino a due recensioni indipendenti (`reviews`).
  */
 export function RestaurantsProvider({ children }) {
   const [restaurants, setRestaurants] = useState(() => loadRestaurants());
@@ -38,10 +51,16 @@ export function RestaurantsProvider({ children }) {
 
   // Ogni operazione amministrativa è prima autorizzata dal server
   // (`/api/restaurants`): senza sessione valida non viene scritta in localStorage.
-  const addRestaurant = useCallback(
+
+  /** Crea un solo locale condiviso (nessuna recensione automatica). */
+  const createPlace = useCallback(
     async (data) => {
       await authorizeAdminAction('POST');
-      const record = normalizeRestaurant({ ...data, id: createId() });
+      const record = normalizeRestaurant({
+        ...pickPlaceFields(data),
+        id: createId(),
+        reviews: {},
+      });
       if (!record) throw new Error('I dati del locale non sono completi.');
       commit([record, ...restaurants]);
       return record;
@@ -49,12 +68,18 @@ export function RestaurantsProvider({ children }) {
     [restaurants, commit],
   );
 
-  const updateRestaurant = useCallback(
+  /** Aggiorna solo i dati condivisi del locale: le recensioni restano intatte. */
+  const updatePlace = useCallback(
     async (id, data) => {
       await authorizeAdminAction('PUT');
       const next = restaurants.map((r) => {
         if (r.id !== id) return r;
-        const merged = normalizeRestaurant({ ...r, ...data, id }); // id invariato
+        const merged = normalizeRestaurant({
+          ...r,
+          ...pickPlaceFields(data),
+          reviews: r.reviews,
+          id,
+        });
         return merged ?? r;
       });
       commit(next);
@@ -62,6 +87,32 @@ export function RestaurantsProvider({ children }) {
     [restaurants, commit],
   );
 
+  /**
+   * Inserisce o sostituisce la recensione di un singolo utente su un locale
+   * esistente. Non tocca la recensione dell'altro utente né i dati del locale.
+   */
+  const saveReview = useCallback(
+    async (id, user, reviewData) => {
+      if (!isReviewer(user)) throw new Error('Utente non valido.');
+      await authorizeAdminAction('PUT');
+      const next = restaurants.map((r) => {
+        if (r.id !== id) return r;
+        const merged = normalizeRestaurant({
+          ...r,
+          reviews: {
+            ...r.reviews,
+            [user]: { ratings: reviewData.ratings, review: reviewData.review },
+          },
+          id,
+        });
+        return merged ?? r;
+      });
+      commit(next);
+    },
+    [restaurants, commit],
+  );
+
+  /** Elimina l'intero locale (con entrambe le recensioni). */
   const deleteRestaurant = useCallback(
     async (id) => {
       await authorizeAdminAction('DELETE');
@@ -78,13 +129,14 @@ export function RestaurantsProvider({ children }) {
   const value = useMemo(
     () => ({
       restaurants,
-      addRestaurant,
-      updateRestaurant,
+      createPlace,
+      updatePlace,
+      saveReview,
       deleteRestaurant,
       getRestaurant,
       compareByRanking,
     }),
-    [restaurants, addRestaurant, updateRestaurant, deleteRestaurant, getRestaurant],
+    [restaurants, createPlace, updatePlace, saveReview, deleteRestaurant, getRestaurant],
   );
 
   return <RestaurantsContext.Provider value={value}>{children}</RestaurantsContext.Provider>;

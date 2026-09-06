@@ -1,28 +1,45 @@
 import Icon from './Icon.jsx';
+import ReviewStatus from './ReviewStatus.jsx';
 import { calculateRankingScore, formatRating } from '../utils/ratings.js';
 
-/** Punteggio classifica ad alta precisione: informazione tecnica solo per il backend. */
 function rankScore(r) {
   return typeof r.rankingScore === 'number' ? r.rankingScore : calculateRankingScore(r.ratings);
 }
 
-/** Azioni Modifica / Elimina con area interattiva ≥ 48×48px. */
-function RowActions({ restaurant, onEdit, onDelete }) {
+/** Voto aggregato del locale, oppure indicazione "senza recensioni". */
+function AggregateRating({ restaurant }) {
+  if (!restaurant.reviewCount) {
+    return <span className="text-sm font-medium text-brown-soft">Nessuna recensione</span>;
+  }
+  return (
+    <span className="inline-flex items-baseline gap-2 font-semibold">
+      <span className="inline-flex items-center gap-1.5">
+        <Icon name="star" size={15} className="text-rating" />
+        <span className="tabular">{formatRating(restaurant.ratings.overall)}</span>
+      </span>
+      <span className="tabular text-xs font-medium text-brown-soft">
+        classifica {rankScore(restaurant).toFixed(4)}
+      </span>
+    </span>
+  );
+}
+
+function RowActions({ restaurant, onEditPlace, onDelete }) {
   return (
     <div className="flex items-center gap-2">
       <button
         type="button"
-        onClick={() => onEdit(restaurant)}
-        aria-label={`Modifica la recensione di ${restaurant.name}`}
+        onClick={() => onEditPlace(restaurant)}
+        aria-label={`Modifica i dati del locale ${restaurant.name}`}
         className="btn btn-outline btn-sm min-w-[44px]"
       >
         <Icon name="edit" size={16} />
-        <span className="hidden sm:inline">Modifica</span>
+        <span className="hidden sm:inline">Modifica locale</span>
       </button>
       <button
         type="button"
         onClick={() => onDelete(restaurant)}
-        aria-label={`Elimina la recensione di ${restaurant.name}`}
+        aria-label={`Elimina il locale ${restaurant.name}`}
         className="btn btn-danger-outline btn-sm min-w-[44px]"
       >
         <Icon name="trash" size={16} />
@@ -33,35 +50,27 @@ function RowActions({ restaurant, onEdit, onDelete }) {
 }
 
 /**
- * Elenco amministrativo: card verticali su mobile, tabella da lg.
- * Stessa collezione della homepage.
+ * Elenco amministrativo dei locali: card su mobile, tabella da lg.
+ * Ogni riga mostra lo stato delle due recensioni. Le recensioni si scrivono
+ * dal pulsante "Scrivi recensione"; qui si gestiscono i dati del locale.
  */
-export default function RestaurantListAdmin({ restaurants, onEdit, onDelete }) {
+export default function RestaurantListAdmin({ restaurants, onEditPlace, onDelete }) {
   return (
     <>
       {/* Mobile / tablet: card */}
       <ul className="space-y-3 lg:hidden">
         {restaurants.map((r) => (
           <li key={r.id} className="surface reveal-in p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <h3 className="truncate text-base font-semibold">{r.name}</h3>
-                <p className="mt-0.5 text-sm text-brown-soft">
-                  {r.town} ({r.province}) · {r.category}
-                </p>
-                <p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold text-brown">
-                  <span className="flex items-center gap-1.5">
-                    <Icon name="star" size={15} className="text-rating" />
-                    <span className="tabular">{formatRating(r.ratings.overall)}</span>
-                  </span>
-                  <span className="tabular text-xs font-medium text-brown-soft">
-                    classifica {rankScore(r).toFixed(4)}
-                  </span>
-                </p>
-              </div>
+            <h3 className="truncate text-base font-semibold">{r.name}</h3>
+            <p className="mt-0.5 text-sm text-brown-soft">
+              {r.town} ({r.province}) · {r.category}
+            </p>
+            <div className="mt-1.5">
+              <AggregateRating restaurant={r} />
             </div>
+            <ReviewStatus reviews={r.reviews} className="mt-2" />
             <div className="mt-3 flex justify-end">
-              <RowActions restaurant={r} onEdit={onEdit} onDelete={onDelete} />
+              <RowActions restaurant={r} onEditPlace={onEditPlace} onDelete={onDelete} />
             </div>
           </li>
         ))}
@@ -76,7 +85,7 @@ export default function RestaurantListAdmin({ restaurants, onEdit, onDelete }) {
               <th className="px-4 py-3">Città</th>
               <th className="px-4 py-3">Categoria</th>
               <th className="px-4 py-3">Voto</th>
-              <th className="px-4 py-3">Classifica</th>
+              <th className="px-4 py-3">Recensioni</th>
               <th className="px-4 py-3 text-right">Azioni</th>
             </tr>
           </thead>
@@ -93,17 +102,14 @@ export default function RestaurantListAdmin({ restaurants, onEdit, onDelete }) {
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <span className="inline-flex items-center gap-1.5 font-semibold">
-                    <Icon name="star" size={15} className="text-rating" />
-                    <span className="tabular">{formatRating(r.ratings.overall)}</span>
-                  </span>
+                  <AggregateRating restaurant={r} />
                 </td>
                 <td className="px-4 py-3">
-                  <span className="tabular text-sm text-brown-soft">{rankScore(r).toFixed(4)}</span>
+                  <ReviewStatus reviews={r.reviews} />
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end">
-                    <RowActions restaurant={r} onEdit={onEdit} onDelete={onDelete} />
+                    <RowActions restaurant={r} onEditPlace={onEditPlace} onDelete={onDelete} />
                   </div>
                 </td>
               </tr>

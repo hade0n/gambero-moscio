@@ -9,18 +9,18 @@ export default function ConfirmDeleteModal({ open, restaurantName, onCancel, onC
     <Modal
       open={open}
       onClose={onCancel}
-      title="Eliminare questa recensione?"
+      title="Eliminare questo locale?"
       size="sm"
       initialFocusRef={cancelRef}
     >
       <p className="text-brown">
         {restaurantName ? (
           <>
-            La recensione di <span className="font-semibold">{restaurantName}</span> verrà rimossa
-            definitivamente.
+            Il locale <span className="font-semibold">{restaurantName}</span> e le sue recensioni
+            verranno rimossi definitivamente.
           </>
         ) : (
-          'La recensione verrà rimossa definitivamente.'
+          'Il locale e le sue recensioni verranno rimossi definitivamente.'
         )}
       </p>
 

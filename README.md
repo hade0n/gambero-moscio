@@ -1,9 +1,10 @@
-# PNDR — Recensioni per gente non da ristorante
+# Fiat Multipla Recensioni Locali
 
-Piattaforma web per consultare recensioni di locali e ristoranti: homepage pubblica con
-filtro per categoria e classifica automatica, area riservata con gestione completa delle
-recensioni (create, read, update, delete). Dati persistiti nel browser tramite
-`localStorage`. Pronta per il deployment su Vercel.
+Piattaforma web per consultare le recensioni di **Ilenia** e **Salvatore** su locali e
+ristoranti: homepage pubblica con filtro per categoria e classifica automatica, area
+riservata con due account. Un locale si crea **una sola volta** e può contenere **fino a due
+recensioni indipendenti** (una per recensore). Dati persistiti nel browser tramite
+`localStorage`, autenticazione server-side su Vercel Functions.
 
 ## Stack
 
@@ -63,23 +64,25 @@ npm run preview
 
 ## Configurazione Vercel — Environment Variables
 
-Su Vercel → **Project Settings → Environment Variables**, crea:
+Su Vercel → **Project Settings → Environment Variables**, crea le **password** dei due account
+(`ilenia` e `salvatore`):
 
 ```text
-ADMIN_USERNAME
-ADMIN_PASSWORD
+ILENIA_PASSWORD
+SALVATORE_PASSWORD
 ```
 
 (opzionale: `AUTH_SECRET`, chiave per firmare i cookie di sessione; se assente viene derivata
-dai due valori sopra).
+dalle due password).
 
-- I valori reali **non** sono presenti nel repository: vanno inseriti manualmente qui.
+- Gli **username** (`ilenia`, `salvatore`) non sono segreti: sono valori noti dell'app.
+- Le **password** reali **non** sono nel repository: vanno inserite manualmente qui.
 - **Non** usare il prefisso `VITE_`: quelle variabili finirebbero nel bundle e non sarebbero segrete.
 - Per lo sviluppo locale crea un file `.env.local` (già in `.gitignore`) con le stesse chiavi:
 
   ```text
-  ADMIN_USERNAME=...
-  ADMIN_PASSWORD=...
+  ILENIA_PASSWORD=...
+  SALVATORE_PASSWORD=...
   ```
 
   `npm run dev` esegue le funzioni in `api/` e legge queste variabili lato server.
@@ -94,17 +97,17 @@ src/
 ├── context/           RestaurantsContext (fonte dati unica), ToastContext
 ├── hooks/             useRestaurants (re-export del context)
 ├── utils/             storage.js, ratings.js, auth.js (client HTTP), image.js
-├── config/            categories.js (fonte unica delle categorie)
+├── config/            categories.js, users.js (i due recensori)
 ├── data/              restaurants.json (seed vuoto: [])
 ├── App.jsx            Routing
 ├── main.jsx           Bootstrap + Provider
 └── index.css          Token colore, base tipografica, utility
 
 api/                   Vercel Functions (auth server-side)
-├── auth/login.js      POST — verifica credenziali (process.env.ADMIN_*)
-├── auth/session.js    GET  — stato sessione
+├── auth/login.js      POST — verifica password (process.env.ILENIA_/SALVATORE_PASSWORD), ritorna { user }
+├── auth/session.js    GET  — stato sessione { authenticated, user }
 ├── auth/logout.js     POST — invalida la sessione
-└── restaurants.js     gate di autorizzazione per CREATE/UPDATE/DELETE
+└── restaurants.js     gate di autorizzazione per creazione/modifica/eliminazione
 
 lib/session.js         Firma/verifica token, helper cookie (server-only)
 ```
@@ -133,10 +136,11 @@ persistente: ogni operazione di create / update / delete aggiorna lo stato React
 L'area riservata (`/backend`) è protetta da un'autenticazione **verificata lato server**
 tramite Vercel Functions.
 
-- Il frontend **non conosce la password**: invia le credenziali inserite dall'utente a
-  `POST /api/auth/login`, che le confronta con `process.env.ADMIN_USERNAME` /
-  `process.env.ADMIN_PASSWORD` (Environment Variables di Vercel in produzione, `.env.local`
-  in sviluppo). Le credenziali non compaiono nel bundle né nei log.
+- Due account: `ilenia` e `salvatore` (una coppia che recensisce insieme). Il frontend
+  **non conosce le password**: invia le credenziali a `POST /api/auth/login`, che confronta
+  la password con `process.env.ILENIA_PASSWORD` / `process.env.SALVATORE_PASSWORD`
+  (Environment Variables di Vercel in produzione, `.env.local` in sviluppo). Le password non
+  compaiono nel bundle né nei log; la sessione ricorda **quale** dei due è collegato.
 - In caso di successo il server imposta un **cookie di sessione `HttpOnly`** (firmato
   HMAC-SHA256, `Secure` in produzione, `SameSite=Lax`, scadenza 8 h, valore imprevedibile).
   Il cookie non è leggibile da JavaScript.
@@ -151,15 +155,21 @@ tramite Vercel Functions.
 I dati dei ristoranti restano in `localStorage` (nessun database): l'autenticazione e
 l'autorizzazione sono lato server, la persistenza dei contenuti è lato client.
 
-## CRUD
+## Locali e recensioni
 
-Tutte le operazioni sono nell'area riservata, dopo il login:
+Tutte le operazioni sono nell'area riservata, dopo il login. Un locale = dati condivisi
+(nome, categoria, città, provincia, foto) + **fino a due recensioni indipendenti**.
 
-- **Create** — pulsante “Nuovo locale”, form completo, il locale entra subito in classifica.
-- **Read** — elenco di tutte le recensioni (tabella su desktop, card su mobile).
-- **Update** — “Modifica” apre il form precompilato; il salvataggio aggiorna il record
-  esistente (stesso `id`, nessun duplicato).
-- **Delete** — “Elimina” chiede conferma prima di rimuovere definitivamente la recensione.
+- **+ Crea locale** — crea il locale **una sola volta** (solo dati condivisi e foto,
+  nessuna recensione automatica). Entra in classifica solo quando ha almeno una recensione.
+- **Scrivi recensione** — scegli un locale esistente e inserisci/modifica **la tua**
+  recensione (8 voti + testo). Ilenia modifica solo la propria, Salvatore solo la propria;
+  entrambi vedono quella dell'altro. Nessun duplicato del locale.
+- **Modifica locale** / **Elimina** — dall'elenco: la modifica cambia solo i dati condivisi;
+  l'eliminazione (con conferma) rimuove l'intero locale con entrambe le recensioni.
+- Nel dettaglio pubblico, se sono presenti entrambe le recensioni compaiono due pill
+  (`Recensione Ilenia` / `Recensione Salvatore`) per passare dall'una all'altra.
+- Il voto pubblico del locale è l'**aggregato** (media) delle recensioni presenti.
 
 ### Sistema di valutazione
 

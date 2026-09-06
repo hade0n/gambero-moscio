@@ -20,7 +20,7 @@ export default function Login({ onSuccess }) {
     const result = await login(username, password);
     setBusy(false);
     if (result.ok) {
-      onSuccess();
+      onSuccess(result.user);
     } else {
       setError(result.error || CREDENTIALS_ERROR);
       usernameRef.current?.focus();
@@ -34,13 +34,13 @@ export default function Login({ onSuccess }) {
           <Link
             to="/"
             className="press flex min-h-[44px] items-center"
-            aria-label="PNDR — vai alla homepage"
+            aria-label="Fiat Multipla Recensioni Locali — vai alla homepage"
           >
             <img
               src="/logo.svg"
-              alt="PNDR — Recensioni per gente non da ristorante"
-              width="694"
-              height="156"
+              alt="Fiat Multipla Recensioni Locali"
+              width="800"
+              height="160"
               className="h-16 w-auto sm:h-20 md:h-24"
             />
           </Link>
@@ -50,7 +50,8 @@ export default function Login({ onSuccess }) {
       <main className="mx-auto flex max-w-md flex-col px-4 py-10 md:py-16">
         <h1 className="font-display text-2xl font-bold">Area riservata</h1>
         <p className="mt-1 text-sm text-brown-soft">
-          Accedi per gestire le recensioni pubblicate su PNDR.
+          Accedi con l’account di Ilenia o di Salvatore per gestire i locali e scrivere le
+          recensioni di Fiat Multipla Recensioni Locali.
         </p>
 
         <form

@@ -4,16 +4,22 @@ import Icon from './Icon.jsx';
 import RatingStars from './RatingStars.jsx';
 import RatingBreakdown from './RatingBreakdown.jsx';
 import Lightbox from './Lightbox.jsx';
+import { REVIEWER_KEYS, reviewerLabel } from '../config/users.js';
 
-/** Dettaglio completo del locale in modale responsive. */
+/** Dettaglio del locale: dati condivisi + fino a due recensioni indipendenti. */
 export default function RestaurantModal({ restaurant, open, onClose }) {
   const [imgError, setImgError] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(null);
+  const [selectedReviewer, setSelectedReviewer] = useState(null);
 
   if (!restaurant) return null;
 
-  const { name, category, town, province, ratings, review, imageUrl } = restaurant;
+  const { name, category, town, province, imageUrl } = restaurant;
   const dishImages = Array.isArray(restaurant.dishImages) ? restaurant.dishImages : [];
+
+  const available = REVIEWER_KEYS.filter((key) => restaurant.reviews?.[key]);
+  const activeKey = available.includes(selectedReviewer) ? selectedReviewer : available[0] ?? null;
+  const activeReview = activeKey ? restaurant.reviews[activeKey] : null;
 
   return (
     <>
@@ -44,20 +50,55 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
             </p>
           </div>
 
-          <div>
-            <h3 className="mb-2 text-base font-semibold">La nostra valutazione</h3>
-            <div className="mb-4 flex items-center gap-3 rounded-2xl border bg-cream px-4 py-3">
-              <span className="text-sm font-semibold text-brown-soft">Voto complessivo</span>
-              <RatingStars value={ratings.overall} size={20} />
-            </div>
-            <RatingBreakdown ratings={ratings} />
-          </div>
-
-          {review && (
+          {activeReview ? (
             <div>
-              <h3 className="mb-1.5 text-base font-semibold">La recensione</h3>
-              <p className="text-[1.0625rem] leading-relaxed text-brown">{review}</p>
+              {available.length > 1 && (
+                <div
+                  role="tablist"
+                  aria-label="Scegli la recensione"
+                  className="mb-3 flex flex-wrap gap-2"
+                >
+                  {available.map((key) => {
+                    const isActive = key === activeKey;
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        role="tab"
+                        aria-selected={isActive}
+                        onClick={() => setSelectedReviewer(key)}
+                        className={`press inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full border px-4 text-sm ${
+                          isActive
+                            ? 'border-green-deep bg-green-deep font-bold text-white shadow-sm'
+                            : 'border-brown/15 bg-cream-soft font-medium text-brown shadow-xs hover:border-green/50 hover:text-green-deep'
+                        }`}
+                      >
+                        Recensione {reviewerLabel(key)}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              <h3 className="mb-2 text-base font-semibold">
+                La valutazione di {reviewerLabel(activeKey)}
+              </h3>
+              <div className="mb-4 flex items-center gap-3 rounded-2xl border bg-cream px-4 py-3">
+                <span className="text-sm font-semibold text-brown-soft">Voto complessivo</span>
+                <RatingStars value={activeReview.ratings.overall} size={20} />
+              </div>
+              <RatingBreakdown ratings={activeReview.ratings} />
+
+              {activeReview.review && (
+                <p className="mt-4 text-[1.0625rem] leading-relaxed text-brown">
+                  {activeReview.review}
+                </p>
+              )}
             </div>
+          ) : (
+            <p className="rounded-2xl border border-dashed bg-cream/60 px-4 py-6 text-center text-sm text-brown-soft">
+              Nessuna recensione disponibile.
+            </p>
           )}
 
           {dishImages.length > 0 && (

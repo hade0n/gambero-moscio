@@ -110,7 +110,7 @@ export default function Modal({
         type="button"
         aria-label="Chiudi"
         tabIndex={-1}
-        className={`absolute inset-0 h-full w-full cursor-default bg-brown/45 transition-opacity duration-200 ${
+        className={`absolute inset-0 h-full w-full cursor-default bg-brown/45 transition-opacity duration-150 ${
           shown ? 'opacity-100' : 'opacity-0'
         }`}
         onClick={onClose}
@@ -120,8 +120,10 @@ export default function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={headingId}
-        className={`relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-cream-soft shadow-lg transition duration-200 ease-pndr md:max-h-[88dvh] md:rounded-3xl ${width} ${
-          shown ? 'translate-y-0 opacity-100 md:scale-100' : 'translate-y-3 opacity-0 md:translate-y-0 md:scale-[0.97]'
+        className={`relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-cream-soft shadow-lg transition duration-150 ease-pndr md:max-h-[88dvh] md:rounded-3xl ${width} ${
+          shown
+            ? 'translate-y-0 opacity-100 md:scale-100'
+            : 'translate-y-2 opacity-0 md:translate-y-0 md:scale-[0.99]'
         }`}
       >
         <div className="flex items-start justify-between gap-3 border-b px-5 py-4 md:px-6">

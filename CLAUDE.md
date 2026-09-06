@@ -93,29 +93,45 @@ da qualsiasi browser.
   `BLOB_READ_WRITE_TOKEN=` senza valore. `.env.local` e varianti restano git-ignored.
 - Su Vercel il token viene iniettato automaticamente collegando lo Store Blob al progetto.
 
-### Documento centrale
-- Un solo blob, pathname stabile **`restaurants.json`**, sempre sovrascritto (mai
-  `restaurants-1.json`, `-2.json`…). `addRandomSuffix: false`, `allowOverwrite: true`.
-- Forma: `{ version, updatedAt, restaurants: [...] }`.
-- `version` si incrementa e `updatedAt` si aggiorna **solo su modifica reale**, mai su una GET.
-- `src/data/restaurants.json` resta **solo come seed**: usato unicamente se il blob non
-  esiste ancora; non sovrascrive mai un documento già presente.
+### Layout su Blob — un blob per locale (v3)
+- `places/<id>.json` → un singolo locale (`{ id, name, category, town, province, imageUrl,
+  dishImages, reviews:{ilenia?,salvatore?}, …aggregati }`).
+- `manifest.json` → `{ version, updatedAt, migrated }` — contatore informativo, **non** la
+  fonte autorevole (può restare indietro per la cache CDN, il client non ci si affida).
+- **Perché non un unico `restaurants.json`**: le URL pubbliche del Blob passano da una CDN
+  con TTL ~60s che **ignora la query string**. Con un documento unico sovrascritto, per ~60s
+  una GET poteva restituire la copia precedente → una mutazione leggeva dati vecchi e
+  riscriveva perdendo i locali aggiunti nel frattempo (create A, poi create B → A spariva;
+  «l'amica crea il locale, ricarica e non lo vede»). Con un blob per locale l'**elenco** è
+  dato da `list('places/')`, che colpisce l'API (non la CDN) ed è coerente: un locale creato
+  compare subito e non può sparire senza `del()` esplicita; due creazioni in parallelo non
+  sono più una corsa (pathname diversi).
+- `src/data/restaurants.json` resta **solo come seed**. Alla prima lettura, se non esistono
+  `places/*` e non c'è `manifest.migrated`, si **migra una tantum** dal vecchio
+  `restaurants.json` (o dal seed) a `places/<id>.json`; il documento legacy non viene toccato
+  (resta come copia).
 
 ### API — `/api/restaurants` (intermediario sottile verso il Blob, non un database)
 | Metodo | Accesso | Body | Effetto |
 |---|---|---|---|
-| `GET` | pubblico | — | ritorna il documento corrente `{ version, updatedAt, restaurants }` |
-| `POST` | sessione | `{ op: 'createPlace', data }` | crea un locale; **controllo duplicati** su `name`+`town`+`province` (case-insensitive, spazi normalizzati) sul dataset corrente → se esiste `409 { error, existingId }` |
-| `PUT` | sessione | `{ op: 'updatePlace', id, data }` | aggiorna **solo** i dati condivisi; recensioni intatte |
-| `PUT` | sessione | `{ op: 'saveReview', id, review }` | crea/sostituisce **solo** la recensione dell'utente **autenticato** (mai un `username` dal body) |
-| `DELETE` | sessione | `{ id }` | elimina l'intero locale |
-- Concorrenza: ogni mutazione fa **read → modifica della sola porzione necessaria →
-  preserva il resto → write** (`mutateDoc` in `lib/blob-store.js`). Modificare
-  `reviews.ilenia` non tocca mai `reviews.salvatore` e viceversa.
-- Errori: Blob non configurato / token mancante → `503`; JSON corrotto / timeout / errore di
-  lettura-scrittura → `500` con messaggio comprensibile. Mai un finto «Nessun locale presente».
-- `lib/blob-store.js` (server-only): `readDoc`, `mutateDoc`, `BlobNotConfiguredError`,
-  init dal seed se il blob manca, lettura con cache-buster `?v=` + `cache: 'no-store'`.
+| `GET` | pubblico | — | `{ version, updatedAt, signature, restaurants }` — `restaurants` da `list('places/')` + lettura di ogni blob |
+| `POST` | sessione | `{ op: 'createPlace', data }` | scrive `places/<newid>.json` (`allowOverwrite:false`); **controllo duplicati** `name`+`town`+`province` (case-insensitive, spazi normalizzati) → se esiste `409 { error, existingId }` |
+| `PUT` | sessione | `{ op: 'updatePlace', id, data }` | legge quel solo blob (lettura garantita fresca) → aggiorna **solo** i campi condivisi → `put(ifMatch)`; recensioni intatte |
+| `PUT` | sessione | `{ op: 'saveReview', id, review }` | come sopra ma tocca **solo** `reviews[<utente di sessione>]` (mai un `username` dal body) |
+| `DELETE` | sessione | `{ id }` | `del('places/<id>.json')` |
+- **Lettura fresca per le mutazioni**: `head()` (API, non CDN) dà l'ETag autorevole; il corpo
+  si riscarica finché l'ETag della risposta coincide con quello di `head()` (se la CDN resta
+  vecchia oltre qualche secondo si risponde con un errore «riprova», **mai** si scrive sopra
+  dati vecchi). Una copia in memoria per l'istanza serverless evita del tutto la finestra di
+  staleness sulle modifiche sequenziali.
+- **Concorrenza**: scrittura del singolo blob con `ifMatch` sull'ETag; su conflitto
+  (`BlobPreconditionFailedError` / «conflicting operation») si rilegge fresco e si ritenta
+  (fino a 4 volte). Modificare `reviews.ilenia` non tocca mai `reviews.salvatore`.
+- Errori: Blob non configurato / token mancante → `503`; JSON corrotto / archivio non
+  sincronizzato / errore di lettura-scrittura → `500` con messaggio comprensibile. Mai un
+  finto «Nessun locale presente».
+- `lib/blob-store.js` (server-only): `readCollection`, `createPlace`, `updateSharedFields`,
+  `saveReview`, `deletePlace`, `BlobNotConfiguredError`, migrazione una tantum.
 
 ### Immagini → Blob
 - `/api/upload` (POST, sessione): riceve `{ image: dataURL, kind: 'place' | 'dish' }`,
@@ -135,8 +151,11 @@ da qualsiasi browser.
 - Mutazioni (`createPlace`, `updatePlace`, `saveReview(id, reviewData)` — **senza** parametro
   utente —, `deleteRestaurant`) passano dall'API e **sostituiscono** lo stato col documento
   restituito dal server (autorevole). Nessun `window.location.reload()`.
-- **Polling** ogni ~12s: `GET /api/restaurants`, confronta `version`, aggiorna lo stato solo
-  se è cambiato; in pausa quando `document.hidden`, refetch immediato al ritorno in focus.
+- **Polling** ogni ~12s: `GET /api/restaurants`, confronta `signature` (hash dell'elenco
+  lato server, che deriva da `list()` → coerente) e applica **solo se è cambiata**; in pausa
+  quando `document.hidden`, refetch immediato al ritorno in focus. Una risposta di polling
+  «tornata» durante una mutazione viene **scartata** (contatore `mutationSeq`): una modifica
+  appena fatta non può essere sovrascritta da una lettura partita prima.
 - **Niente `localStorage`** come database: nessuna chiave `pndr_restaurants`, nessun listener
   `storage`. Nessuna cache locale che possa sovrascrivere i dati del server.
 - Dopo create/mutate, lista backend / picker / conteggi / classifica / medie si aggiornano
@@ -157,9 +176,10 @@ PNDR è una piattaforma web per consultare recensioni di locali e ristoranti.
 - **Sottotitolo:** Recensioni per gente non da ristorante
 - **Parte pubblica:** homepage con filtro categorie, classifica automatica, schede locale, dettaglio.
 - **Parte riservata:** area amministrativa (`/backend`) con login e CRUD completo delle recensioni.
-- **Persistenza:** archivio centrale unico su **Vercel Blob** (`restaurants.json`), condiviso
-  fra tutti i dispositivi, letto/scritto via `/api/restaurants` (vedi *Aggiornamento —
-  Persistenza su Vercel Blob*). `src/data/restaurants.json` è solo il seed iniziale.
+- **Persistenza:** archivio centrale su **Vercel Blob**, un blob per locale
+  (`places/<id>.json`), condiviso fra tutti i dispositivi, letto/scritto via
+  `/api/restaurants` (vedi *Aggiornamento — Persistenza su Vercel Blob*).
+  `src/data/restaurants.json` è solo il seed iniziale.
 - **Deployment target:** Vercel (SPA statica).
 
 Criterio di completamento: **l'app deve funzionare davvero** (visitare → filtrare → consultare → dettaglio; login → create → update → delete con persistenza al refresh). `npm run build` deve terminare senza errori.

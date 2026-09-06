@@ -128,40 +128,49 @@ api/                   Vercel Functions (server-side)
 └── upload.js          POST (sessione) — carica un'immagine su Blob, ritorna { url }
 
 lib/session.js         Firma/verifica token, helper cookie (server-only)
-lib/blob-store.js      Archivio centrale su Vercel Blob: readDoc / mutateDoc (server-only)
+lib/blob-store.js      Archivio su Vercel Blob, un blob per locale (server-only)
 ```
 
 Documento di riferimento del design e delle regole di progetto: [`CLAUDE.md`](./CLAUDE.md).
 
 ## Persistenza (Vercel Blob)
 
-I dati **non** vivono più nel browser. C'è un **archivio centrale unico** su Vercel Blob,
-condiviso da tutti i dispositivi: Ilenia e Salvatore vedono gli stessi locali da qualsiasi
-browser.
+I dati **non** vivono nel browser. Stanno su Vercel Blob, condivisi da tutti i dispositivi:
+Ilenia e Salvatore vedono gli stessi locali da qualsiasi browser.
 
-- **Un solo documento**, pathname stabile `restaurants.json`, sempre sovrascritto (mai
-  `restaurants-1.json`, `-2.json`…). Forma: `{ version, updatedAt, restaurants: [...] }`.
-- **Solo lato server**: il token `BLOB_READ_WRITE_TOKEN` è usato unicamente nelle funzioni
-  `api/` (`lib/blob-store.js`), mai nel bundle client.
-- **`/api/restaurants`**: `GET` pubblico ritorna il documento; `POST` / `PUT` / `DELETE`
-  (con sessione) lo modificano. Il server è un intermediario sottile verso il Blob, non un
-  database.
-- **Concorrenza**: ogni modifica legge il documento corrente, cambia solo la porzione
-  necessaria e riscrive il resto invariato. Toccare la recensione di Ilenia non altera mai
+- **Un blob per locale**: `places/<id>.json`. L'elenco dei locali si ottiene da
+  `list('places/')`, che interroga l'API del Blob (non la CDN) ed è **coerente**: un locale
+  appena creato compare subito e non può sparire senza un'eliminazione esplicita. Due
+  creazioni in parallelo non sono una corsa (pathname diversi).
+  Un piccolo `manifest.json` tiene un contatore `version`/`updatedAt` (solo indicativo).
+- **Perché non un unico `restaurants.json`**: le URL pubbliche del Blob passano da una CDN
+  con TTL ~60 s che ignora la query string. Con un documento unico sovrascritto, per ~60 s
+  una lettura poteva restituire la copia precedente → chi creava un locale, ricaricando, non
+  lo vedeva, e una modifica successiva poteva riscrivere sopra dati vecchi perdendo un
+  locale. Con un blob per locale il problema sparisce.
+- **Solo lato server**: `BLOB_READ_WRITE_TOKEN` è usato unicamente nelle funzioni `api/`
+  (`lib/blob-store.js`), mai nel bundle client.
+- **`/api/restaurants`**: `GET` pubblico ritorna `{ version, updatedAt, signature,
+  restaurants }`; `POST` / `PUT` / `DELETE` (con sessione) modificano un singolo blob-locale.
+- **Lettura fresca per le modifiche**: `head()` (API, non CDN) dà l'ETag corrente; il corpo
+  si rilegge finché combacia. Scrittura con `ifMatch` sull'ETag: se un'altra scrittura è
+  arrivata prima, si rilegge e si ritenta. Toccare la recensione di Ilenia non altera mai
   quella di Salvatore.
-- **`version` / `updatedAt`** cambiano solo su modifica reale, mai su una GET.
-- **Sincronizzazione fra dispositivi**: il client (`RestaurantsContext`) fa polling ogni
-  ~12 s, confronta `version` e aggiorna lo stato solo se è cambiato — senza reload; il
-  polling è in pausa quando la scheda non è visibile.
-- **Seed**: `src/data/restaurants.json` viene usato **solo** se il documento non esiste
-  ancora nel Blob; non sovrascrive mai un archivio già presente.
+- **Sincronizzazione fra dispositivi**: il client fa polling ogni ~12 s e confronta la
+  `signature` dell'elenco (derivata da `list()`); applica solo se è cambiata, senza reload;
+  in pausa quando la scheda non è visibile. Una lettura di polling che si conclude durante
+  una modifica appena fatta viene scartata.
+- **Seed / migrazione**: `src/data/restaurants.json` (seed vuoto) viene usato solo se non
+  esistono `places/*`. Alla prima esecuzione, se è presente un vecchio `restaurants.json`
+  unico, i suoi locali vengono migrati **una tantum** in `places/<id>.json` senza perdita e
+  senza toccare il documento legacy.
 - I record corrotti vengono scartati in lettura; i dati nel vecchio formato piatto
-  (`ratings`/`review` senza `reviews`) vengono migrati a `reviews.ilenia` senza perdita.
+  (`ratings`/`review` senza `reviews`) vengono migrati a `reviews.ilenia`.
 - La sessione dell'area riservata resta un cookie HttpOnly gestito dal server
   (vedi *Autenticazione*).
 
 Le immagini vengono caricate su Blob (`/api/upload`, cartelle `restaurants/` e `dishes/`) e
-nel documento si salvano **solo gli URL** (`imageUrl`, `dishImages`), mai il Base64.
+nei blob-locale si salvano **solo gli URL** (`imageUrl`, `dishImages`), mai il Base64.
 
 ## Autenticazione
 

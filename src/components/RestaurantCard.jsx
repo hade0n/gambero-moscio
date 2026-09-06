@@ -20,11 +20,11 @@ export default function RestaurantCard({ restaurant, position, onOpen }) {
   const [imgError, setImgError] = useState(false);
 
   return (
-    <article className="group h-full">
+    <article className="h-full">
       <button
         type="button"
         onClick={() => onOpen(restaurant)}
-        className="flex h-full w-full flex-col overflow-hidden rounded-2xl border bg-cream-soft text-left shadow-sm transition-all duration-200 ease-pndr hover:-translate-y-1 hover:shadow-md focus-visible:-translate-y-1 active:translate-y-0 active:scale-[0.985] active:shadow-sm motion-reduce:transform-none motion-reduce:transition-none"
+        className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-brown/10 bg-cream-soft text-left shadow-sm transition-[box-shadow,border-color,background-color] duration-150 ease-pndr hover:border-brown/20 hover:shadow-md active:bg-cream motion-reduce:transition-none"
         aria-label={`Apri la recensione di ${name}, ${town} (${province}). Voto complessivo ${ratings.overall} su 10`}
       >
         <div className="relative aspect-[16/10] w-full overflow-hidden bg-cream">
@@ -34,7 +34,7 @@ export default function RestaurantCard({ restaurant, position, onOpen }) {
               alt={`Ambiente di ${name}`}
               loading="lazy"
               onError={() => setImgError(true)}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              className="h-full w-full object-cover"
             />
           ) : (
             <ImageFallback />

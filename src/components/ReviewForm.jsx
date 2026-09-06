@@ -144,19 +144,14 @@ export default function ReviewForm({ placeName, reviewerLabel, initialReview, on
             <span className="text-sm font-semibold text-brown-soft">Voto complessivo</span>
             <span className="flex items-center gap-2">
               <Icon name="star" size={20} className="text-rating" />
-              <span key={formatRating(overall)} className="reveal-in tabular text-lg font-bold text-brown">
-                {formatRating(overall)}
-              </span>
+              <span className="tabular text-lg font-bold text-brown">{formatRating(overall)}</span>
             </span>
           </div>
           <div className="flex items-center justify-between border-t pt-2">
             <span className="text-xs font-semibold uppercase tracking-wide text-brown-soft">
               Punteggio classifica
             </span>
-            <span
-              key={rankingScore.toFixed(4)}
-              className="reveal-in tabular text-sm font-semibold text-green-deep"
-            >
+            <span className="tabular text-sm font-semibold text-green-deep">
               {rankingScore.toFixed(4)}
             </span>
           </div>

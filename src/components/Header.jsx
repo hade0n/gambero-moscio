@@ -22,13 +22,13 @@ export default function Header({ variant = 'public', onLogout }) {
 
   return (
     <header
-      className={`sticky top-0 z-40 bg-cream/95 backdrop-blur-sm transition-shadow duration-200 ${
+      className={`sticky top-0 z-40 bg-cream/95 backdrop-blur-sm transition-shadow duration-150 ${
         scrolled ? 'shadow-sm' : 'shadow-none'
       }`}
     >
       <div
         className={`relative mx-auto flex max-w-content items-center px-3 md:px-6 ${
-          isAdmin ? 'h-16' : 'h-24 md:h-28'
+          isAdmin ? 'h-16' : 'h-24 md:h-[68px]'
         }`}
       >
         <Link
@@ -36,7 +36,7 @@ export default function Header({ variant = 'public', onLogout }) {
           className={`press flex min-h-[44px] items-center rounded-lg px-2 ${
             isAdmin
               ? '-ml-2'
-              : 'absolute left-1/2 -translate-x-1/2 md:static md:left-auto md:translate-x-0'
+              : 'absolute left-1/2 -translate-x-1/2 md:static md:left-auto md:-ml-2 md:translate-x-0'
           }`}
           aria-label="Gambero Moscio - Recensioni Locali — vai alla homepage"
         >
@@ -45,7 +45,7 @@ export default function Header({ variant = 'public', onLogout }) {
             alt="Gambero Moscio - Recensioni Locali"
             width="785"
             height="288"
-            className={isAdmin ? 'h-10 w-auto sm:h-11' : 'h-16 w-auto sm:h-20 md:h-24'}
+            className={isAdmin ? 'h-10 w-auto sm:h-11' : 'h-16 w-auto sm:h-20 md:h-[52px]'}
           />
         </Link>
 

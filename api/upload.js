@@ -39,11 +39,13 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Immagine vuota o troppo grande.' });
     }
 
-    const name = `${folder}/${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    // Suffisso casuale: ogni upload è un blob nuovo e distinto (nessun rischio di
+    // collisione o di sovrascrittura). Nel JSON dei locali si salva la URL restituita.
+    const name = `${folder}/${Date.now().toString(36)}.${ext}`;
     const result = await put(name, buffer, {
       access: 'public',
       contentType,
-      addRandomSuffix: false,
+      addRandomSuffix: true,
       token,
     });
 

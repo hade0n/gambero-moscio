@@ -104,12 +104,10 @@
     transform: scale(0.97);
   }
 
-  /* Reveal progressivo delle card (montaggio) */
-  .reveal-up {
-    animation: pndr-fade-up 0.42s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  }
+  /* Dissolvenza breve e funzionale (cambio immagine lightbox, miniatura
+     appena aggiunta, scambio recensione). Solo opacity, nessun movimento. */
   .reveal-in {
-    animation: pndr-fade-in 0.3s ease-out both;
+    animation: pndr-fade-in 0.16s ease-out both;
   }
 
   /* ----------------------------------------------------------------------
@@ -146,15 +144,15 @@
     inset: 0;
     background: currentColor;
     opacity: 0;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.3s ease;
     pointer-events: none;
   }
   .btn:active:not(:disabled)::after {
-    opacity: 0.1;
+    opacity: 0.06;
     transition: opacity 0s;
   }
   .btn:active:not(:disabled) {
-    transform: scale(0.97);
+    transform: scale(0.985);
   }
   .btn:disabled {
     cursor: not-allowed;
@@ -250,17 +248,6 @@
   }
   .field-control.is-invalid:focus {
     box-shadow: 0 0 0 4px rgba(178, 59, 46, 0.16);
-  }
-}
-
-@keyframes pndr-fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 

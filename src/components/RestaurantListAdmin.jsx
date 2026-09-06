@@ -60,7 +60,7 @@ export default function RestaurantListAdmin({ restaurants, onEditPlace, onDelete
       {/* Mobile / tablet: card */}
       <ul className="space-y-3 lg:hidden">
         {restaurants.map((r) => (
-          <li key={r.id} className="surface reveal-in p-4">
+          <li key={r.id} className="surface p-4">
             <h3 className="truncate text-base font-semibold">{r.name}</h3>
             <p className="mt-0.5 text-sm text-brown-soft">
               {r.town} ({r.province}) · {r.category}

@@ -26,11 +26,7 @@ export default function RestaurantList({ restaurants, onOpen, isFiltered }) {
   return (
     <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
       {restaurants.map((restaurant, index) => (
-        <li
-          key={restaurant.id}
-          className="reveal-up h-full"
-          style={{ animationDelay: `${Math.min(index, 7) * 45}ms` }}
-        >
+        <li key={restaurant.id} className="h-full">
           <RestaurantCard restaurant={restaurant} position={index + 1} onOpen={onOpen} />
         </li>
       ))}

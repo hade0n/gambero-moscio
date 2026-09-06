@@ -14,7 +14,7 @@ export default function RatingBreakdown({ ratings }) {
             <dt className="text-sm font-semibold text-brown-soft">{label}</dt>
             <div className="h-2.5 overflow-hidden rounded-full bg-brown/10" role="presentation">
               <div
-                className="h-full rounded-full bg-green transition-[width] duration-500 ease-pndr motion-reduce:transition-none"
+                className="h-full rounded-full bg-green transition-[width] duration-150 ease-pndr motion-reduce:transition-none"
                 style={{ width: `${(value / 10) * 100}%` }}
               />
             </div>

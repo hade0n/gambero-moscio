@@ -18,14 +18,17 @@ const POLL_INTERVAL = 12000;
 /**
  * Provider unico della collezione locali — punto di sincronizzazione dell'app.
  *
- * I dati vivono nell'archivio centrale su Vercel Blob e si leggono/scrivono
- * solo tramite `/api/restaurants`. Non c'è più `localStorage` come fonte dati.
+ * I dati vivono nell'archivio centrale su Vercel Blob (un blob per locale) e si
+ * leggono/scrivono solo tramite `/api/restaurants`. Niente `localStorage`.
  *
  * - all'avvio: `GET /api/restaurants` (stato `loading` → `ready` | `error`);
- * - ogni ~12s (solo a scheda visibile) ricontrolla `version`/`updatedAt` e
- *   aggiorna lo stato solo se il documento è cambiato, senza reload;
- * - create / update / delete / recensioni: chiamano l'API e sostituiscono lo
- *   stato con il documento restituito dal server (fonte autorevole).
+ * - create / update / delete / recensioni: chiamano l'API e SOSTITUISCONO lo
+ *   stato con la collezione restituita dal server (fonte autorevole);
+ * - polling ogni ~12s (solo a scheda visibile): confronta `signature` (hash
+ *   dell'elenco lato server, che deriva da `list()` ed è coerente) e applica solo
+ *   se è cambiata. Una risposta di polling che "torna in corso" durante una
+ *   mutazione viene scartata (contatore `mutationSeq`), così una modifica appena
+ *   fatta non può essere sovrascritta da una lettura partita prima.
  */
 export function RestaurantsProvider({ children }) {
   const [restaurants, setRestaurants] = useState([]);
@@ -34,12 +37,13 @@ export function RestaurantsProvider({ children }) {
   const [status, setStatus] = useState('loading'); // 'loading' | 'ready' | 'error'
   const [error, setError] = useState('');
 
-  // Riferimento sempre aggiornato alla versione corrente: il polling lo legge
-  // senza dover ricreare l'intervallo a ogni cambiamento di stato.
-  const versionRef = useRef(0);
+  const signatureRef = useRef('');
+  // Incrementato a ogni mutazione andata a buon fine: identifica una risposta di
+  // polling ormai superata.
+  const mutationSeqRef = useRef(0);
 
   const applyDoc = useCallback((doc) => {
-    versionRef.current = doc.version;
+    signatureRef.current = doc.signature || '';
     setRestaurants(doc.restaurants);
     setVersion(doc.version);
     setUpdatedAt(doc.updatedAt);
@@ -47,7 +51,7 @@ export function RestaurantsProvider({ children }) {
     setError('');
   }, []);
 
-  /** Carica (o ricarica) il documento completo dall'archivio. */
+  /** Carica (o ricarica) l'intera collezione dall'archivio. */
   const fetchCollection = useCallback(
     async ({ silent = false } = {}) => {
       if (!silent) setStatus('loading');
@@ -79,10 +83,14 @@ export function RestaurantsProvider({ children }) {
 
     async function poll() {
       if (document.hidden) return;
+      const seqAtStart = mutationSeqRef.current;
       try {
         const doc = await getCollection();
-        // Aggiorna solo se il documento è davvero cambiato.
-        if (doc.version !== versionRef.current) applyDoc(doc);
+        // Una mutazione è avvenuta mentre questa lettura era in corso: scartala,
+        // lo stato è già più recente.
+        if (seqAtStart !== mutationSeqRef.current) return;
+        // Applica solo se l'elenco lato server è davvero diverso.
+        if (doc.signature && doc.signature !== signatureRef.current) applyDoc(doc);
       } catch {
         /* problema di rete temporaneo: si riprova al giro successivo */
       }
@@ -117,37 +125,44 @@ export function RestaurantsProvider({ children }) {
     };
   }, [applyDoc]);
 
+  /** Applica la collezione autorevole restituita da una mutazione. */
+  const applyMutation = useCallback(
+    (doc) => {
+      applyDoc(doc);
+      mutationSeqRef.current += 1; // invalida eventuali letture di polling in corso
+      return doc;
+    },
+    [applyDoc],
+  );
+
   /** Crea un solo locale condiviso (nessuna recensione automatica). */
-  const createPlace = useCallback(async (data) => {
-    const doc = await sendMutation('POST', { op: 'createPlace', data });
-    applyDoc(doc);
-    return doc;
-  }, [applyDoc]);
+  const createPlace = useCallback(
+    async (data) => applyMutation(await sendMutation('POST', { op: 'createPlace', data })),
+    [applyMutation],
+  );
 
   /** Aggiorna solo i dati condivisi del locale: le recensioni restano intatte. */
-  const updatePlace = useCallback(async (id, data) => {
-    const doc = await sendMutation('PUT', { op: 'updatePlace', id, data });
-    applyDoc(doc);
-    return doc;
-  }, [applyDoc]);
+  const updatePlace = useCallback(
+    async (id, data) => applyMutation(await sendMutation('PUT', { op: 'updatePlace', id, data })),
+    [applyMutation],
+  );
 
   /**
    * Inserisce o sostituisce la propria recensione su un locale esistente.
    * L'utente NON viene passato dal client: il server lo ricava dalla sessione
    * autenticata e tocca solo la recensione di quell'utente.
    */
-  const saveReview = useCallback(async (id, reviewData) => {
-    const doc = await sendMutation('PUT', { op: 'saveReview', id, review: reviewData });
-    applyDoc(doc);
-    return doc;
-  }, [applyDoc]);
+  const saveReview = useCallback(
+    async (id, reviewData) =>
+      applyMutation(await sendMutation('PUT', { op: 'saveReview', id, review: reviewData })),
+    [applyMutation],
+  );
 
   /** Elimina l'intero locale (con entrambe le recensioni). */
-  const deleteRestaurant = useCallback(async (id) => {
-    const doc = await sendMutation('DELETE', { id });
-    applyDoc(doc);
-    return doc;
-  }, [applyDoc]);
+  const deleteRestaurant = useCallback(
+    async (id) => applyMutation(await sendMutation('DELETE', { id })),
+    [applyMutation],
+  );
 
   const getRestaurant = useCallback(
     (id) => restaurants.find((r) => r.id === id) ?? null,

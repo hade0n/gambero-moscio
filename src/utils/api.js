@@ -37,6 +37,7 @@ export async function getCollection() {
   return {
     version: Number.isFinite(data.version) ? data.version : 0,
     updatedAt: data.updatedAt ?? null,
+    signature: typeof data.signature === 'string' ? data.signature : '',
     restaurants: Array.isArray(data.restaurants) ? data.restaurants : [],
   };
 }
@@ -65,6 +66,7 @@ export async function sendMutation(method, body) {
   return {
     version: Number.isFinite(data.version) ? data.version : 0,
     updatedAt: data.updatedAt ?? null,
+    signature: typeof data.signature === 'string' ? data.signature : '',
     restaurants: Array.isArray(data.restaurants) ? data.restaurants : [],
   };
 }

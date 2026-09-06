@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import Modal from './Modal.jsx';
 import Icon from './Icon.jsx';
 import RatingStars from './RatingStars.jsx';
@@ -10,16 +10,29 @@ import { REVIEWER_KEYS, reviewerLabel } from '../config/users.js';
 export default function RestaurantModal({ restaurant, open, onClose }) {
   const [imgError, setImgError] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(null);
+  // null = usa il default (sempre Ilenia quando presente). L'utente può poi
+  // scegliere l'altra recensione con le pill.
   const [selectedReviewer, setSelectedReviewer] = useState(null);
+  const tabId = useId();
+
+  // Cambiando locale (o riaprendo) si riparte SEMPRE dal default: nessuna
+  // memoria dell'ultima pill scelta, nessun reviewer "loggato".
+  useEffect(() => {
+    setSelectedReviewer(null);
+    setImgError(false);
+    setLightboxIndex(null);
+  }, [restaurant?.id, open]);
 
   if (!restaurant) return null;
 
   const { name, category, town, province, imageUrl } = restaurant;
   const dishImages = Array.isArray(restaurant.dishImages) ? restaurant.dishImages : [];
 
+  // Ordine fisso: Ilenia prima, poi Salvatore (REVIEWER_KEYS). Solo le presenti.
   const available = REVIEWER_KEYS.filter((key) => restaurant.reviews?.[key]);
   const activeKey = available.includes(selectedReviewer) ? selectedReviewer : available[0] ?? null;
   const activeReview = activeKey ? restaurant.reviews[activeKey] : null;
+  const hasPills = available.length > 1;
 
   return (
     <>
@@ -52,7 +65,7 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
 
           {activeReview ? (
             <div>
-              {available.length > 1 && (
+              {hasPills && (
                 <div
                   role="tablist"
                   aria-label="Scegli la recensione"
@@ -63,9 +76,12 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
                     return (
                       <button
                         key={key}
+                        id={`${tabId}-tab-${key}`}
                         type="button"
                         role="tab"
                         aria-selected={isActive}
+                        aria-controls={`${tabId}-panel`}
+                        tabIndex={isActive ? 0 : -1}
                         onClick={() => setSelectedReviewer(key)}
                         className={`press inline-flex min-h-[44px] items-center whitespace-nowrap rounded-full border px-4 text-sm ${
                           isActive
@@ -80,20 +96,28 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
                 </div>
               )}
 
-              <h3 className="mb-2 text-base font-semibold">
-                La valutazione di {reviewerLabel(activeKey)}
-              </h3>
-              <div className="mb-4 flex items-center gap-3 rounded-2xl border bg-cream px-4 py-3">
-                <span className="text-sm font-semibold text-brown-soft">Voto complessivo</span>
-                <RatingStars value={activeReview.ratings.overall} size={20} />
-              </div>
-              <RatingBreakdown ratings={activeReview.ratings} />
+              <div
+                key={activeKey}
+                id={`${tabId}-panel`}
+                role={hasPills ? 'tabpanel' : undefined}
+                aria-labelledby={hasPills ? `${tabId}-tab-${activeKey}` : undefined}
+                className="reveal-in"
+              >
+                <h3 className="mb-2 text-base font-semibold">
+                  La valutazione di {reviewerLabel(activeKey)}
+                </h3>
+                <div className="mb-4 flex items-center gap-3 rounded-2xl border bg-cream px-4 py-3">
+                  <span className="text-sm font-semibold text-brown-soft">Voto complessivo</span>
+                  <RatingStars value={activeReview.ratings.overall} size={20} />
+                </div>
+                <RatingBreakdown ratings={activeReview.ratings} />
 
-              {activeReview.review && (
-                <p className="mt-4 text-[1.0625rem] leading-relaxed text-brown">
-                  {activeReview.review}
-                </p>
-              )}
+                {activeReview.review && (
+                  <p className="mt-4 text-[1.0625rem] leading-relaxed text-brown">
+                    {activeReview.review}
+                  </p>
+                )}
+              </div>
             </div>
           ) : (
             <p className="rounded-2xl border border-dashed bg-cream/60 px-4 py-6 text-center text-sm text-brown-soft">
@@ -110,14 +134,14 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
                     <button
                       type="button"
                       onClick={() => setLightboxIndex(index)}
-                      className="press group block w-full overflow-hidden rounded-2xl border bg-cream"
+                      className="press block w-full overflow-hidden rounded-2xl border bg-cream"
                       aria-label={`Apri la foto ${index + 1} di ${dishImages.length} a schermo intero`}
                     >
                       <img
                         src={src}
                         alt={`Piatto servito da ${name} ${index + 1}`}
                         loading="lazy"
-                        className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                        className="aspect-square w-full object-cover"
                       />
                     </button>
                   </li>

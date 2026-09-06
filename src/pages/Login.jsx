@@ -30,7 +30,7 @@ export default function Login({ onSuccess }) {
   return (
     <div className="min-h-dvh bg-cream">
       <header className="bg-cream/95">
-        <div className="mx-auto flex h-24 max-w-content items-center justify-center px-4 md:h-28 md:justify-start md:px-6">
+        <div className="mx-auto flex h-24 max-w-content items-center justify-center px-3 md:h-28 md:justify-start md:px-6">
           <Link
             to="/"
             className="press flex min-h-[44px] items-center"
@@ -47,7 +47,7 @@ export default function Login({ onSuccess }) {
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-md flex-col px-4 py-10 md:py-16">
+      <main className="mx-auto flex max-w-md flex-col px-3 py-10 md:py-16">
         <h1 className="font-display text-2xl font-bold">Area riservata</h1>
         <p className="mt-1 text-sm text-brown-soft">
           Accedi per gestire i locali e le recensioni.

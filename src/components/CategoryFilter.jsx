@@ -3,18 +3,19 @@ import { FILTER_CATEGORIES } from '../config/categories.js';
 /**
  * Filtro categorie a scorrimento orizzontale (swipe su mobile).
  * Categoria attiva: fondo Fresh Green + peso maggiore. Cambio immediato.
+ * Nessuno scroll-snap: la prima pill resta allineata al padding del contenuto.
  */
 export default function CategoryFilter({ active, onChange }) {
   return (
     <nav aria-label="Filtra per categoria" className="border-b bg-cream">
       <ul
-        className="mx-auto flex max-w-content snap-x gap-2.5 overflow-x-auto scroll-smooth px-4 py-3 scrollbar-hide md:px-6"
+        className="mx-auto flex max-w-content gap-2.5 overflow-x-auto scroll-smooth px-3 py-3 scrollbar-hide md:px-6"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
         {FILTER_CATEGORIES.map((category) => {
           const isActive = category === active;
           return (
-            <li key={category} className="snap-start">
+            <li key={category}>
               <button
                 type="button"
                 aria-pressed={isActive}

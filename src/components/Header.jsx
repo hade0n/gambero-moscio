@@ -27,7 +27,7 @@ export default function Header({ variant = 'public', onLogout }) {
       }`}
     >
       <div
-        className={`relative mx-auto flex max-w-content items-center px-4 md:px-6 ${
+        className={`relative mx-auto flex max-w-content items-center px-3 md:px-6 ${
           isAdmin ? 'h-16' : 'h-24 md:h-28'
         }`}
       >

@@ -31,7 +31,7 @@ export default function Home() {
       <Header />
       <CategoryFilter active={activeCategory} onChange={setActiveCategory} />
 
-      <main className="mx-auto max-w-content px-4 py-6 md:px-6 md:py-10">
+      <main className="mx-auto max-w-content px-3 py-6 md:px-6 md:py-10">
         <div className="flex items-baseline justify-between gap-3">
           <h1 className="font-display text-2xl font-bold sm:text-[2rem]">Classifica</h1>
           {count > 0 && (

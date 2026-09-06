@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Icon from './Icon.jsx';
 
 /**
- * Header: fondo panna, nessun divisore, logo ufficiale (public/logo.svg) grande.
+ * Header: fondo panna, nessun divisore, logo ufficiale (public/logo.svg).
  * Interfaccia pubblica: su mobile il logo è centrato, da `md` allineato a sinistra.
  * variant="admin": logo a sinistra + stato "Area riservata" e pulsante Esci a destra.
  * Nessun collegamento al backend in pubblico (l'area riservata si apre solo via /backend).
@@ -38,13 +38,13 @@ export default function Header({ variant = 'public', onLogout }) {
               ? '-ml-2'
               : 'absolute left-1/2 -translate-x-1/2 md:static md:left-auto md:translate-x-0'
           }`}
-          aria-label="Fiat Multipla Recensioni Locali — vai alla homepage"
+          aria-label="Gambero Moscio - Recensioni Locali — vai alla homepage"
         >
           <img
             src="/logo.svg"
-            alt="Fiat Multipla Recensioni Locali"
-            width="800"
-            height="160"
+            alt="Gambero Moscio - Recensioni Locali"
+            width="785"
+            height="288"
             className={isAdmin ? 'h-10 w-auto sm:h-11' : 'h-16 w-auto sm:h-20 md:h-24'}
           />
         </Link>

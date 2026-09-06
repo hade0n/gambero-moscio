@@ -34,13 +34,13 @@ export default function Login({ onSuccess }) {
           <Link
             to="/"
             className="press flex min-h-[44px] items-center"
-            aria-label="Fiat Multipla Recensioni Locali — vai alla homepage"
+            aria-label="Gambero Moscio - Recensioni Locali — vai alla homepage"
           >
             <img
               src="/logo.svg"
-              alt="Fiat Multipla Recensioni Locali"
-              width="800"
-              height="160"
+              alt="Gambero Moscio - Recensioni Locali"
+              width="785"
+              height="288"
               className="h-16 w-auto sm:h-20 md:h-24"
             />
           </Link>
@@ -51,7 +51,7 @@ export default function Login({ onSuccess }) {
         <h1 className="font-display text-2xl font-bold">Area riservata</h1>
         <p className="mt-1 text-sm text-brown-soft">
           Accedi con l’account di Ilenia o di Salvatore per gestire i locali e scrivere le
-          recensioni di Fiat Multipla Recensioni Locali.
+          recensioni di Gambero Moscio - Recensioni Locali.
         </p>
 
         <form

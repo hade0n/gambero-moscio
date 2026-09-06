@@ -1,19 +1,19 @@
 # PNDR Project Guidelines
 
-> Documento di riferimento principale per lo sviluppo di **Fiat Multipla Recensioni Locali**
-> (ex «PNDR — Recensioni per gente non da ristorante»: il resto del documento usa ancora
-> il vecchio nome nei testi descrittivi, ma il nome visibile all'utente è quello nuovo).
+> Documento di riferimento principale per lo sviluppo di **Gambero Moscio - Recensioni Locali**
+> (il nome del progetto è cambiato nel tempo: il resto del documento può ancora citare
+> nomi precedenti nei testi descrittivi, ma il nome visibile all'utente è quello nuovo).
 > Ogni componente, pagina, stile o logica va verificato contro questo file **prima** di essere implementato.
 > Le decisioni di design seguono il brief del prodotto e i principi della skill **UI/UX Pro Max**.
 
 ---
 
-## Aggiornamento — Fiat Multipla Recensioni Locali (override)
+## Aggiornamento — Gambero Moscio - Recensioni Locali (override)
 
 Questa sezione **sostituisce** le parti in conflitto più avanti nel documento.
 
 ### Nome
-- Nome visibile ovunque (header, `<title>`, meta, login, backend, branding): **Fiat Multipla Recensioni Locali**.
+- Nome visibile ovunque (header, `<title>`, meta, login, backend, branding): **Gambero Moscio - Recensioni Locali** (nome ufficiale visualizzato esattamente così).
 - Logo: `public/logo.svg` aggiornato (fornito dal committente), usato come `<img>` in `Header`/`Login` e come favicon.
 
 ### Due account (una coppia che recensisce insieme)

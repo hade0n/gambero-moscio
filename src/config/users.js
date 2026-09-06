@@ -1,5 +1,5 @@
 /**
- * I due recensori di Fiat Multipla Recensioni Locali.
+ * I due recensori di Gambero Moscio - Recensioni Locali.
  * Una coppia che recensisce insieme i locali che visita: ogni locale può
  * contenere al massimo una recensione per ciascuno dei due.
  * Fonte unica: chiavi usate nel modello dati (`restaurant.reviews[key]`),

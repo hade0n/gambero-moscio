@@ -34,9 +34,7 @@ export default function Header({ variant = 'public', onLogout }) {
         <Link
           to="/"
           className={`press flex min-h-[44px] items-center rounded-lg px-2 ${
-            isAdmin
-              ? '-ml-2'
-              : 'absolute left-1/2 -translate-x-1/2 md:static md:left-auto md:-ml-2 md:translate-x-0'
+            isAdmin ? '-ml-2' : 'absolute left-1/2 -translate-x-1/2'
           }`}
           aria-label="Gambero Moscio - Recensioni Locali — vai alla homepage"
         >

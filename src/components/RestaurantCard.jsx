@@ -24,10 +24,10 @@ export default function RestaurantCard({ restaurant, position, onOpen }) {
       <button
         type="button"
         onClick={() => onOpen(restaurant)}
-        className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-brown/10 bg-cream-soft text-left shadow-sm transition-[box-shadow,border-color,background-color] duration-150 ease-pndr hover:border-brown/20 hover:shadow-md active:bg-cream motion-reduce:transition-none"
+        className="flex h-full w-full flex-col overflow-hidden rounded-[18px] border border-brown/10 bg-cream-soft text-left shadow-sm transition-colors duration-150 ease-pndr active:bg-cream motion-reduce:transition-none"
         aria-label={`Apri la recensione di ${name}, ${town} (${province}). Voto complessivo ${ratings.overall} su 10`}
       >
-        <div className="relative aspect-[16/10] w-full overflow-hidden bg-cream">
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-cream">
           {imageUrl && !imgError ? (
             <img
               src={imageUrl}
@@ -44,17 +44,17 @@ export default function RestaurantCard({ restaurant, position, onOpen }) {
           </span>
         </div>
 
-        <div className="flex flex-1 flex-col gap-2 p-4 sm:p-5">
+        <div className="flex flex-1 flex-col gap-2.5 p-5 sm:p-6">
           <span className="inline-flex w-fit items-center rounded-full border border-green/30 bg-green/10 px-2.5 py-0.5 text-[0.7rem] font-semibold uppercase tracking-wide text-green-deep">
             {category}
           </span>
-          <h3 className="text-lg font-semibold leading-snug">{name}</h3>
+          <h3 className="font-display text-xl font-semibold leading-snug">{name}</h3>
           <p className="flex items-center gap-1 text-sm font-medium text-brown-soft">
             <Icon name="pin" size={15} />
             {town} ({province})
           </p>
-          <div className="mt-auto pt-2">
-            <RatingStars value={ratings.overall} size={17} />
+          <div className="mt-auto pt-2.5">
+            <RatingStars value={ratings.overall} size={20} valueClassName="text-lg" />
           </div>
         </div>
       </button>

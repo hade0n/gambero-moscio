@@ -29,11 +29,11 @@ function toneFor(i, n) {
 }
 
 function labelSpec(n) {
-  if (n <= 4) return { max: 20, size: 8.6 };
-  if (n <= 6) return { max: 17, size: 8 };
-  if (n <= 9) return { max: 13, size: 7 };
-  if (n <= 14) return { max: 10, size: 6.2 };
-  return { max: 8, size: 5.6 };
+  if (n <= 4) return { max: 18, size: 11.5 };
+  if (n <= 6) return { max: 15, size: 10.5 };
+  if (n <= 9) return { max: 12, size: 9 };
+  if (n <= 14) return { max: 10, size: 7.6 };
+  return { max: 8, size: 6.6 };
 }
 
 function shortLabel(text, max) {
@@ -109,7 +109,7 @@ export default function GamberoWheel({
           items.map((it, i) => {
             const a = (i + 0.5) * seg;
             const flip = a > 90 && a < 270;
-            const ly = C - R * 0.66;
+            const ly = C - R * 0.64;
             return (
               <g key={`${it.id}-label`} transform={`rotate(${a} ${C} ${C})`} aria-hidden="true">
                 <text
@@ -153,9 +153,6 @@ export default function GamberoWheel({
           className="h-full w-full select-none [filter:drop-shadow(0_4px_7px_rgba(58,42,34,0.28))]"
         />
       </div>
-
-      {/* perno */}
-      <span className="pointer-events-none absolute left-1/2 top-1/2 z-20 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-terracotta-deep ring-2 ring-cream-soft" />
     </div>
   );
 }

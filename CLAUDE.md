@@ -230,10 +230,16 @@ sempre riferito all'indecisione, mai a persone o attività.
   Campania per tipologia (region come campo, struttura estensibile ad altre regioni).
   Il Gambero può quindi proporre locali **non presenti** nel database delle recensioni.
 - Campi: `id`, `name`, `category` (una delle `CATEGORIES`), `region`, `province`, `city`,
-  `rating` (0–10 indicativo, `null` se non verificabile), `rank`, `description`,
-  `mapsUrl` / `directionsUrl` (deep-link di ricerca Google Maps generati da nome+città),
-  e `lat/lng/phone/photoUrl/website/address/reviewCount` **predisposti a `null`** (da
-  popolare da una sorgente ufficiale — Places API o inserimento manuale — **mai inventati**).
+  `rating` (0–10 indicativo, `null` se non verificabile), `rank`, `description`, `phone`
+  (numero reale da fonti ufficiali dove reperito, `null` altrimenti),
+  `mapsUrl` / `directionsUrl` (deep-link Google Maps: per coordinata se `lat`/`lng` presenti,
+  altrimenti ricerca per nome+città), `lat/lng/photoUrl/website/address/reviewCount`
+  **predisposti a `null`** (da popolare da una sorgente ufficiale, **mai inventati**).
+- **Foto reali**: `api/place-photo.js` (proxy OPZIONALE a Google Places) restituisce la
+  prima foto ufficiale del locale se `GOOGLE_MAPS_API_KEY` è configurata; senza chiave →
+  `204` e la card usa un placeholder editoriale (mai il Gambero come foto del locale).
+  Nel client la priorità immagine è: `pndrMatch.imageUrl` → `place.photoUrl` →
+  `/api/place-photo` → placeholder.
 - `getDiscoveryTypes()`, `getTopPlaces(cat)` (max 25, ordinati per rank), `drawCandidates(cat, 6)`.
 
 ### Il Gambero — selettore rotante centrale
@@ -265,8 +271,9 @@ disponibile). Nessun suono, nessun coriandolo, nessuna estetica da casinò.
 ### File
 `src/hooks/useGamberoWheel.js`, `src/components/GamberoWheel.jsx` / `GamberoResult.jsx` /
 `GamberoModal.jsx`, `src/utils/discovery.js` + `random.js`, `src/data/gamberoDiscovery.json`,
-copy in `src/config/wheelMessages.js`. Pulsante e modal in `Header.jsx`. Keyframe
-`wheel-result-in` in `src/index.css`.
+`api/place-photo.js`, copy in `src/config/wheelMessages.js`. Pulsante (icona `wheel`) e modal
+in `Header.jsx`. Keyframe `wheel-result-in` in `src/index.css`. Env opzionale:
+`GOOGLE_MAPS_API_KEY` (in `.env.example` e nei prefissi `loadEnv` di `vite.config.js`).
 
 ---
 

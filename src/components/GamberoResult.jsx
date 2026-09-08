@@ -1,23 +1,22 @@
+import { useMemo, useState } from 'react';
 import Icon from './Icon.jsx';
 import ShrimpRating from './ShrimpRating.jsx';
 import { telHref } from '../utils/discovery.js';
 import { reviewerLabel, REVIEWER_KEYS } from '../config/users.js';
-import {
-  ACTION_LOCATION,
-  ACTION_RESPIN,
-  BADGE_ALREADY_REVIEWED,
-} from '../config/wheelMessages.js';
+import { ACTION_LOCATION, ACTION_RESPIN, BADGE_ALREADY_REVIEWED } from '../config/wheelMessages.js';
 
 /**
  * Card del risultato della Ruota del Gambero.
  *
- * - La FOTO è quella reale del locale: dal database recensioni PNDR
- *   (`pndrMatch.imageUrl`) se il locale è già recensito, altrimenti dal
- *   database discovery (`place.photoUrl`). Il Gambero NON viene mai usato come
- *   immagine del locale: se non c'è foto, la sezione immagine è omessa.
- * - Se il locale è già nel database recensioni PNDR (match robusto in
- *   `discovery.js`) la card lo dichiara con un badge e mostra i voti di
- *   Salvatore, Ilenia e del pubblico presi da quel database.
+ * FOTO: sempre quella reale del locale, con questa priorità —
+ *   1. `pndrMatch.imageUrl` (dal database recensioni PNDR, se il locale è già recensito)
+ *   2. `place.photoUrl` (dal database discovery, se popolato)
+ *   3. `/api/place-photo` (Google Places, solo se `GOOGLE_MAPS_API_KEY` è configurata)
+ * Se nessuna è disponibile si mostra un placeholder editoriale — MAI il Gambero come
+ * se fosse la foto del locale.
+ *
+ * Se il locale è già nel database recensioni PNDR (match robusto in `discovery.js`) la
+ * card lo dichiara con un badge e mostra i voti di Ilenia, Salvatore e del pubblico.
  */
 export default function GamberoResult({ result, pndrMatch, onRespin, className = '' }) {
   const p = result.place;
@@ -27,19 +26,40 @@ export default function GamberoResult({ result, pndrMatch, onRespin, className =
   const category = reviewed ? pndrMatch.category : p.category;
   const city = reviewed ? pndrMatch.town : p.city;
   const province = reviewed ? pndrMatch.province : p.province;
-  const photo = (reviewed && pndrMatch.imageUrl) || p.photoUrl || null;
   const phone = p.phone || null;
   const tel = telHref(phone);
 
+  const photoCandidates = useMemo(() => {
+    const list = [];
+    if (reviewed && pndrMatch.imageUrl) list.push(pndrMatch.imageUrl);
+    if (p.photoUrl) list.push(p.photoUrl);
+    list.push(
+      `/api/place-photo?name=${encodeURIComponent(p.name)}&city=${encodeURIComponent(p.city || '')}`,
+    );
+    return list;
+  }, [reviewed, pndrMatch, p.photoUrl, p.name, p.city]);
+
+  const [imgIdx, setImgIdx] = useState(0);
+  const photoSrc = photoCandidates[imgIdx] || null;
+
   return (
     <div className={`wheel-result-in surface overflow-hidden ${className}`}>
-      {photo && (
+      {photoSrc ? (
         <img
-          src={photo}
+          src={photoSrc}
           alt={`Il locale ${name}`}
           loading="lazy"
-          className="aspect-[16/9] w-full object-cover"
+          onError={() => setImgIdx((i) => i + 1)}
+          className="aspect-[16/9] w-full bg-cream object-cover"
         />
+      ) : (
+        <div className="flex aspect-[16/9] w-full flex-col items-center justify-center gap-1 bg-cream-soft text-brown-soft">
+          <Icon name="pin" size={24} />
+          <span className="text-sm font-semibold">{category}</span>
+          <span className="text-xs">
+            {city ? `${city}${province ? ` (${province})` : ''}` : 'Campania'}
+          </span>
+        </div>
       )}
 
       <div className="p-5 sm:p-6">
@@ -118,27 +138,21 @@ export default function GamberoResult({ result, pndrMatch, onRespin, className =
         <p className="mt-4 text-sm font-semibold text-brown-soft">{result.message}</p>
 
         <div className="mt-5 flex flex-col gap-3">
-          <div className="flex flex-col gap-3 sm:flex-row">
-            {tel && (
-              <a href={tel} className="btn btn-primary sm:flex-1">
-                Chiama {phone}
-              </a>
-            )}
-            <a
-              href={p.mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`btn ${tel ? 'btn-secondary' : 'btn-primary'} sm:flex-1`}
-            >
-              <Icon name="pin" size={16} />
-              {ACTION_LOCATION}
+          {tel && (
+            <a href={tel} className="btn btn-primary w-full">
+              Chiama {phone}
             </a>
-          </div>
-          <button
-            type="button"
-            onClick={onRespin}
-            className="btn btn-secondary btn-sm self-start sm:self-auto sm:px-5"
+          )}
+          <a
+            href={p.mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`btn w-full ${tel ? 'btn-secondary' : 'btn-primary'}`}
           >
+            <Icon name="pin" size={16} />
+            {ACTION_LOCATION}
+          </a>
+          <button type="button" onClick={onRespin} className="btn btn-secondary w-full">
             {ACTION_RESPIN}
           </button>
         </div>

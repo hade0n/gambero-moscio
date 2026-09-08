@@ -38,6 +38,9 @@ function normalizePlace(entry) {
   const province = String(entry.province || '').trim().toUpperCase().slice(0, 2) || null;
   const ratingNum = Number(entry.rating);
   const rating = Number.isFinite(ratingNum) ? Math.min(10, Math.max(0, ratingNum)) : null;
+  const lat = Number.isFinite(Number(entry.lat)) ? Number(entry.lat) : null;
+  const lng = Number.isFinite(Number(entry.lng)) ? Number(entry.lng) : null;
+  const hasCoords = lat != null && lng != null;
 
   return {
     id: String(entry.id || '').trim() || `disc-${name.toLowerCase().replace(/\s+/g, '-')}`,
@@ -51,14 +54,23 @@ function normalizePlace(entry) {
     description: String(entry.description || '').trim() || null,
     // predisposti — nessun dato inventato
     address: entry.address ?? null,
-    lat: Number.isFinite(Number(entry.lat)) ? Number(entry.lat) : null,
-    lng: Number.isFinite(Number(entry.lng)) ? Number(entry.lng) : null,
+    lat,
+    lng,
     reviewCount: Number.isFinite(Number(entry.reviewCount)) ? Number(entry.reviewCount) : null,
     phone: entry.phone ?? null,
     website: entry.website ?? null,
     photoUrl: entry.photoUrl ?? null,
-    mapsUrl: entry.mapsUrl ?? mapsSearchUrl(name, city),
-    directionsUrl: entry.directionsUrl ?? mapsDirectionsUrl(name, city, province),
+    // con coordinate precise le usiamo; altrimenti ricerca per nome+città
+    mapsUrl:
+      entry.mapsUrl ??
+      (hasCoords
+        ? `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
+        : mapsSearchUrl(name, city)),
+    directionsUrl:
+      entry.directionsUrl ??
+      (hasCoords
+        ? `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+        : mapsDirectionsUrl(name, city, province)),
     source: 'gambero-discovery',
   };
 }

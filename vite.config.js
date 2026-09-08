@@ -72,7 +72,7 @@ export default defineConfig(({ mode }) => {
   // Carica solo i segreti server-side da .env / .env.local (password account, AUTH_*)
   // e li mette in process.env per le funzioni /api eseguite in dev.
   // NON entrano nel bundle client: nessun `define`, nessun prefisso VITE_.
-  const env = loadEnv(mode, process.cwd(), ['ILENIA_', 'SALVATORE_', 'AUTH_', 'BLOB_']);
+  const env = loadEnv(mode, process.cwd(), ['ILENIA_', 'SALVATORE_', 'AUTH_', 'BLOB_', 'GOOGLE_']);
   for (const [key, value] of Object.entries(env)) {
     if (process.env[key] === undefined) process.env[key] = value;
   }

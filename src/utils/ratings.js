@@ -4,9 +4,9 @@
  * Tutta la logica matematica del rating vive in questo file.
  * I componenti UI non contengono formule: chiamano queste utility.
  *
- * Internamente complesso, esternamente semplice:
- * l'utente vede solo `overall` (★ 8.7), il sistema mantiene `rankingScore`
- * ad alta precisione per ordinare la classifica.
+ * Internamente complesso, esternamente semplice: l'utente vede solo `overall`
+ * (reso a schermo in Gamberi Mosci, vedi `ratingUtils.js` / `ShrimpRating`),
+ * il sistema mantiene `rankingScore` ad alta precisione per la classifica.
  */
 
 /** Le 8 categorie indipendenti, nell'ordine di visualizzazione. */

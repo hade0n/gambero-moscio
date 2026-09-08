@@ -1,12 +1,11 @@
 import { useRef, useState } from 'react';
 import Field, { controlClasses } from './Field.jsx';
-import Icon from './Icon.jsx';
+import ShrimpRating from './ShrimpRating.jsx';
 import {
   RATING_CATEGORIES,
   RATING_KEYS,
   calculateOverall,
   calculateRankingScore,
-  formatRating,
 } from '../utils/ratings.js';
 
 const EMPTY = {
@@ -140,12 +139,9 @@ export default function ReviewForm({ placeName, reviewerLabel, initialReview, on
         </div>
 
         <div className="mt-4 space-y-2 rounded-xl border bg-white px-4 py-3 shadow-xs">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-sm font-semibold text-brown-soft">Voto complessivo</span>
-            <span className="flex items-center gap-2">
-              <Icon name="star" size={20} className="text-rating" />
-              <span className="tabular text-lg font-bold text-brown">{formatRating(overall)}</span>
-            </span>
+            <ShrimpRating rating={overall} size="sm" valueClassName="text-lg" />
           </div>
           <div className="flex items-center justify-between border-t pt-2">
             <span className="text-xs font-semibold uppercase tracking-wide text-brown-soft">

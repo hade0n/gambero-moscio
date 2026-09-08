@@ -113,7 +113,8 @@ src/
 ├── context/           RestaurantsContext (fonte dati unica, sync con l'archivio), ToastContext
 ├── hooks/             useRestaurants (re-export del context)
 ├── utils/             api.js (client archivio + upload), model.js (modello dati puro),
-│                      ratings.js, auth.js (client HTTP), image.js
+│                      ratings.js (math del punteggio), ratingUtils.js (voto → Gamberi Mosci),
+│                      auth.js (client HTTP), image.js
 ├── config/            categories.js, users.js (i due recensori)
 ├── data/              restaurants.json (seed: usato solo se il blob non esiste ancora)
 ├── App.jsx            Routing
@@ -222,13 +223,20 @@ Tutta la matematica è in [`src/utils/ratings.js`](src/utils/ratings.js):
 - **`rankingScore`** (valore tecnico, ≥ 4 decimali) = media ponderata delle 8 categorie
   (`RATING_WEIGHTS`) + correttivo di coerenza + bonus di qualità gastronomica + bonus di
   eccellenza − penalità per i punti deboli, limitato a 0–10.
-- **`overall`** (voto pubblico) = `rankingScore` arrotondato a una cifra decimale. È l'unico
-  numero mostrato in homepage (`★ 8.7`).
+- **`overall`** (voto pubblico) = `rankingScore` arrotondato a una cifra decimale. È il
+  numero mostrato in homepage (es. `8.7`).
 - La **classifica** è ordinata sul `rankingScore` ad alta precisione (con catena di tie-break
-  deterministica), non sull'`overall` arrotondato: due locali con lo stesso `★ 8.7` possono
+  deterministica), non sull'`overall` arrotondato: due locali con lo stesso `8.7` possono
   quindi avere posizioni diverse.
 - `overall` e `rankingScore` non si inseriscono a mano: sono ricalcolati in tempo reale nel
   form a ogni modifica di uno degli 8 voti.
+
+**Rappresentazione visiva — i Gamberi Mosci.** Su PNDR il voto non si mostra con le stelle
+ma con i **Gamberi Mosci**: 5 gamberi, ognuno vale 2.0 punti su 10, e il gambero parziale si
+riempie in proporzione esatta al voto (8.1 → 5% del quinto, 8.5 → 25%, 9.0 → 50%…). Il numero
+resta sempre visibile accanto. Componente unico `src/components/ShrimpRating.jsx`; math in
+`src/utils/ratingUtils.js` (`getShrimpRatingState`); asset `public/shrimp.svg`. Il calcolo del
+punteggio non cambia — cambia solo il disegno.
 - I dati salvati nel vecchio formato (`food`/`service`/`price`) vengono migrati alle 8
   categorie in modo deterministico al caricamento e ri-salvati nel nuovo formato.
 

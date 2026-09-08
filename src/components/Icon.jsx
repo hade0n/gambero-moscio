@@ -6,7 +6,6 @@
  */
 
 const PATHS = {
-  star: <path d="M12 3.5l2.6 5.27 5.82.85-4.21 4.1.99 5.8L12 16.9l-5.2 2.72.99-5.8-4.21-4.1 5.82-.85L12 3.5z" />,
   close: (
     <>
       <path d="M6 6l12 12" />
@@ -97,7 +96,6 @@ export default function Icon({ name, size = 20, className = '', title, strokeWid
   const path = PATHS[name];
   if (!path) return null;
 
-  const isFilled = name === 'star';
   const labelled = Boolean(title);
 
   return (
@@ -106,8 +104,8 @@ export default function Icon({ name, size = 20, className = '', title, strokeWid
       height={size}
       viewBox="0 0 24 24"
       className={className}
-      fill={isFilled ? 'currentColor' : 'none'}
-      stroke={isFilled ? 'none' : 'currentColor'}
+      fill="none"
+      stroke="currentColor"
       strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"

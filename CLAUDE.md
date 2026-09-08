@@ -168,6 +168,46 @@ nome, logo, palette, layout, componenti, animazioni, responsive, routing, tono d
 
 ---
 
+## Aggiornamento — Rating in Gamberi Mosci (override)
+
+Questa sezione **sostituisce** ogni riferimento più avanti a «stelle» / `RatingStars` /
+`★ overall` come rappresentazione del voto.
+
+**Su PNDR non si danno stelle: si danno Gamberi Mosci.** È il sistema di valutazione
+proprietario dell'app. Il calcolo del punteggio (`ratings.js`) **non cambia**: cambia solo
+come il voto finale viene disegnato.
+
+- **Scala**: 5 gamberi, ognuno vale **2.0 punti** su 10 (1 gambero = 2.0, non 1.0). La
+  scala numerica resta `0.0–10.0`, precisione al decimo e oltre. Il numero è sempre visibile
+  accanto ai gamberi e ha gerarchia leggermente superiore (è la fonte precisa).
+- **Riempimento continuo**: il gambero parziale si riempie in proporzione esatta al voto,
+  non a scatti di 0.5. `8.0` → quinto gambero vuoto; `8.1` → 5% del quinto; `8.5` → 25%;
+  `9.0` → 50%; `8.37` → 18.5%; `10.0` → 5 gamberi pieni (mai un sesto).
+- **Asset unico**: `public/shrimp.svg` (il "gambero moscio" ufficiale, PNG in wrapper SVG).
+  Nessuna emoji, nessun gambero ricostruito in CSS, nessuna icona generica. Lo stato "vuoto"
+  è lo stesso asset attenuato (`opacity` + `saturate` ridotta); il parziale è l'asset pieno
+  ritagliato con `clip-path: inset(0 <100−pct>% 0 0)` sopra quello vuoto.
+- **Architettura centralizzata**:
+  - `src/utils/ratingUtils.js` → `getShrimpRatingState(rating)` = tutta la matematica
+    voto→gamberi (`SHRIMP_COUNT`, `POINTS_PER_SHRIMP`, normalizzazione floating point).
+    Nessun componente duplica questa logica.
+  - `src/components/ShrimpRating.jsx` → unico componente visivo. Props: `rating`,
+    `size` (`'sm'|'md'|'lg'` o numero px), `showValue`, `className`, `valueClassName`,
+    `ariaLabel`, `decorative` (blocco `aria-hidden` quando il contenitore già annuncia il voto).
+  - Usato ovunque compaia il voto: card classifica, dettaglio (`RestaurantModal`), lista
+    admin (`RestaurantListAdmin`), anteprima "Voto complessivo" del `ReviewForm`.
+- **Accessibilità**: `role="img"` + `aria-label="Valutazione 8.5 su 10"`; le singole immagini
+  sono `alt=""` `aria-hidden` (nessun testo duplicato).
+- **Input**: gli 8 voti nel `ReviewForm` restano **input numerici** `0.0–10.0` step `0.1`.
+  Il modello dati non cambia: `reviews.<utente>.ratings` resta numerico. Le recensioni
+  esistenti mostrano automaticamente i Gamberi Mosci.
+- `RatingStars.jsx` **rimosso**; l'icona `star` **rimossa** da `Icon.jsx`. `RatingBreakdown`
+  (dettaglio per-categoria a barre) resta invariato: non usava stelle.
+- Colore del riempimento: l'asset mantiene il proprio arancione (coerente col logo). Nessun
+  gradiente/glow/3D. Il token `--pndr-rating` resta per eventuali indicatori numerici.
+
+---
+
 ## Project Overview
 
 PNDR è una piattaforma web per consultare recensioni di locali e ristoranti.
@@ -477,7 +517,7 @@ Struttura in `src/components/` (un file per componente, presentazionali dove pos
 | `CategoryFilter.jsx` | Chip categorie scroll-x; `aria-pressed`; categoria attiva in verde; transizioni di stato + `.press` |
 | `RestaurantCard.jsx` | Posizione, foto (lazy, aspect-ratio), nome, città (prov), badge categoria, rating overall; intera card cliccabile (`<button>` wrapper o `role=button` + key handler) |
 | `RestaurantList.jsx` | Griglia responsive di card; gestisce empty/no-results |
-| `RatingStars.jsx` | Stelle 0–10 con supporto decimale (clip parziale); `--pndr-rating`; `aria-label="Valutazione X su 10"` |
+| `ShrimpRating.jsx` | Rating in **Gamberi Mosci** (0–10, 5 gamberi × 2 pt): riempimento continuo via `clip-path` su `public/shrimp.svg`; `role="img"` + `aria-label`. Math in `src/utils/ratingUtils.js`. (Ex `RatingStars.jsx`, rimosso.) |
 | `RatingBreakdown.jsx` | Le 8 categorie (`RATING_CATEGORIES`) con valore numerico + barra proporzionale; usato nel dettaglio, non nella card |
 | `RestaurantModal.jsx` | Dettaglio completo in modale responsive; sezione "Foto dei piatti" (solo se presenti) che apre il `Lightbox` |
 | `Lightbox.jsx` | Visualizzazione ingrandita foto piatto: X / click esterno / ESC, prev-next + frecce, contatore, focus gestito |
@@ -490,7 +530,7 @@ Struttura in `src/components/` (un file per componente, presentazionali dove pos
 | `ConfirmDeleteModal.jsx` | Conferma eliminazione (Annulla / Elimina) |
 | `ProtectedRoute.jsx` | Verifica la sessione lato server (`checkSession()`); `checking` → `guest` (login) \| `authed` (dashboard) |
 | `Field.jsx` (helper) | Wrapper label + input + error, per DRY nei form |
-| `Icon.jsx` | Set icone SVG inline unico (star, close, edit, trash, plus, chevron, upload, check, alert, logout, search) |
+| `Icon.jsx` | Set icone SVG inline unico (close, edit, trash, plus, chevron, upload, check, alert, logout, search — nessuna `star`: il rating usa `ShrimpRating`) |
 
 Nessuna logica di business dentro `App.jsx`.
 

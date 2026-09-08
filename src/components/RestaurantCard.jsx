@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Icon from './Icon.jsx';
-import RatingStars from './RatingStars.jsx';
+import ShrimpRating from './ShrimpRating.jsx';
 
 /** Segnaposto grafico quando manca l'immagine o non è caricabile. */
 function ImageFallback() {
@@ -54,7 +54,7 @@ export default function RestaurantCard({ restaurant, position, onOpen }) {
             {town} ({province})
           </p>
           <div className="mt-auto pt-2.5">
-            <RatingStars value={ratings.overall} size={20} valueClassName="text-lg" />
+            <ShrimpRating rating={ratings.overall} size="md" valueClassName="text-lg" decorative />
           </div>
         </div>
       </button>

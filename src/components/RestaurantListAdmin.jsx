@@ -1,6 +1,7 @@
 import Icon from './Icon.jsx';
 import ReviewStatus from './ReviewStatus.jsx';
-import { calculateRankingScore, formatRating } from '../utils/ratings.js';
+import ShrimpRating from './ShrimpRating.jsx';
+import { calculateRankingScore } from '../utils/ratings.js';
 
 function rankScore(r) {
   return typeof r.rankingScore === 'number' ? r.rankingScore : calculateRankingScore(r.ratings);
@@ -12,11 +13,8 @@ function AggregateRating({ restaurant }) {
     return <span className="text-sm font-medium text-brown-soft">Nessuna recensione</span>;
   }
   return (
-    <span className="inline-flex items-baseline gap-2 font-semibold">
-      <span className="inline-flex items-center gap-1.5">
-        <Icon name="star" size={15} className="text-rating" />
-        <span className="tabular">{formatRating(restaurant.ratings.overall)}</span>
-      </span>
+    <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold">
+      <ShrimpRating rating={restaurant.ratings.overall} size="sm" />
       <span className="tabular text-xs font-medium text-brown-soft">
         classifica {rankScore(restaurant).toFixed(4)}
       </span>

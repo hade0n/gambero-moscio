@@ -1,7 +1,7 @@
 import { useEffect, useId, useState } from 'react';
 import Modal from './Modal.jsx';
 import Icon from './Icon.jsx';
-import RatingStars from './RatingStars.jsx';
+import ShrimpRating from './ShrimpRating.jsx';
 import RatingBreakdown from './RatingBreakdown.jsx';
 import Lightbox from './Lightbox.jsx';
 import { REVIEWER_KEYS, reviewerLabel } from '../config/users.js';
@@ -106,9 +106,13 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
                 <h3 className="mb-2 text-base font-semibold">
                   La valutazione di {reviewerLabel(activeKey)}
                 </h3>
-                <div className="mb-4 flex items-center gap-3 rounded-2xl border bg-cream px-4 py-3">
+                <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border bg-cream px-4 py-3">
                   <span className="text-sm font-semibold text-brown-soft">Voto complessivo</span>
-                  <RatingStars value={activeReview.ratings.overall} size={20} />
+                  <ShrimpRating
+                    rating={activeReview.ratings.overall}
+                    size="md"
+                    valueClassName="text-lg"
+                  />
                 </div>
                 <RatingBreakdown ratings={activeReview.ratings} />
 

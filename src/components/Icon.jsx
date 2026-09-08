@@ -6,6 +6,15 @@
  */
 
 const PATHS = {
+  // Ruota della fortuna: cerchio, quattro raggi, mozzo, piccola lancetta in alto.
+  wheel: (
+    <>
+      <circle cx="12" cy="13" r="7.5" />
+      <path d="M12 5.5v15M4.5 13h15M6.7 7.7l10.6 10.6M17.3 7.7L6.7 18.3" />
+      <circle cx="12" cy="13" r="1.5" fill="currentColor" stroke="none" />
+      <path d="M12 2.6l1.7 2.9h-3.4z" fill="currentColor" stroke="none" />
+    </>
+  ),
   close: (
     <>
       <path d="M6 6l12 12" />

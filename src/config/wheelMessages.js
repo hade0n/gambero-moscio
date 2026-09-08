@@ -1,35 +1,59 @@
 /**
- * Copy della **Ruota del Gambero Moscio**.
+ * Copy della **Ruota del Gambero Moscio** (Gambero Moscio Food Picker).
  *
  * Eccezione intenzionale al tono generale di PNDR: qui il linguaggio è ironico,
- * colloquiale e con qualche parolaccia leggera. Il resto dell'app resta pulito.
- * L'ironia è sempre riferita all'indecisione, mai a persone o attività.
+ * colloquiale e con qualche parolaccia leggera — sempre riferito all'indecisione,
+ * mai a persone o attività. Il resto dell'app resta pulito.
  */
 
-export const WHEEL_KICKER = 'La Ruota del Gambero Moscio';
-export const WHEEL_HEADLINE = 'Non sai dove cazzo andare?';
-export const WHEEL_SUBHEAD = 'Lascia decidere al Gambero.';
+export const WHEEL_KICKER = 'Il Gambero Moscio decide';
+export const NAV_BUTTON_LABEL = 'Il Gambero';
+export const NAV_BUTTON_ARIA = 'Apri la Ruota del Gambero Moscio';
 
-export const WHEEL_CTA = 'Fai girare il Gambero';
-export const WHEEL_CTA_SPINNING = 'Il Gambero sta decidendo…';
-export const WHEEL_CTA_LOADING = 'Un attimo…';
+/** Titoli per fase (una frase forte, non un muro di battute). */
+export const HEADLINE_IDLE = 'Non sai dove cazzo andare?';
+export const SUBHEAD_IDLE = 'Il Gambero sceglie prima cosa mangi, poi dove.';
+export const HEADLINE_TYPE_SPIN = 'Vediamo che cazzo mangi.';
+export const HEADLINE_TYPE_REVEAL = 'Ok. Ora troviamo DOVE.';
+export const HEADLINE_PLACE_SPIN = 'Sei locali. Una sola scelta.';
+export const HEADLINE_RESULT = 'Il Gambero ha parlato.';
+export const HEADLINE_EMPTY = 'Il Gambero è senza opzioni.';
+export const SUBHEAD_EMPTY = 'Il database del Gambero è vuoto. Torna più tardi.';
 
-export const WHEEL_VIEW = 'Vedi il locale';
-export const WHEEL_RESPIN = 'Fallo girare di nuovo';
+export const CTA_START = 'Fai girare il Gambero';
+export const CTA_SPINNING = 'Il Gambero sta decidendo…';
+export const CTA_CLOSE = 'Chiudi';
 
-export const WHEEL_RESULT_EYEBROW = 'Il Gambero ha parlato.';
-export const WHEEL_SINGLE_EYEBROW = 'Il Gambero non ha avuto molta scelta.';
+export const RESULT_EYEBROW = 'Il Gambero ha parlato.';
+export const RESULT_SINGLE_EYEBROW = 'Il Gambero non ha avuto molta scelta.';
 
-export const EMPTY_HEADLINE = 'Il Gambero è senza opzioni.';
-export const EMPTY_SUBHEAD = 'Non può scegliere un locale se non c’è nessuno da scegliere.';
+export const ACTION_LOCATION = 'Vedi dove si trova';
+export const ACTION_RESPIN = 'Fallo girare di nuovo';
 
-/** Mostrato (una sola frase, scelta per spin) mentre la ruota gira. */
-export const SPINNING_MESSAGES = [
-  'Il Gambero sta decidendo…',
-  'Il Gambero ci sta pensando…',
-  'Non rompere il cazzo, sta scegliendo…',
-  'Un attimo: il Gambero valuta.',
-  'Sta consultando il destino…',
+/** Badge sui locali già presenti nel database delle recensioni PNDR. */
+export const BADGE_ALREADY_REVIEWED = 'Ci siete già stati 👀';
+
+/** Frase mentre gira la ruota delle tipologie. */
+export const TYPE_SPIN_MESSAGES = [
+  'Il Gambero sta scegliendo la categoria…',
+  'Prima decidiamo COSA mangiare.',
+  'Un attimo: il Gambero valuta il menù del destino.',
+  'Vediamo che cazzo ti va stasera.',
+];
+
+/** Frase nell'interstiziale tra le due ruote (dopo la categoria). */
+export const REVEAL_MESSAGES = [
+  'Categoria decisa. Adesso non hai più scuse.',
+  'Il Gambero ha scelto la tipologia. Ora si fa sul serio.',
+  'Ok. Sei locali entrano nella sfida.',
+];
+
+/** Frase mentre gira la ruota dei locali. */
+export const PLACE_SPIN_MESSAGES = [
+  'Il Gambero sta cercando il tuo destino…',
+  'Sei locali. Sta scegliendo.',
+  'Non rompere il cazzo, sto decidendo.',
+  'Il Gambero consulta il pescato del fato…',
 ];
 
 /** Frase ironica sotto il risultato (scelta a caso a ogni estrazione). */

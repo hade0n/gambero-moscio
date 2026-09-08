@@ -1,16 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from './Icon.jsx';
+import GamberoModal from './GamberoModal.jsx';
+import { NAV_BUTTON_ARIA, NAV_BUTTON_LABEL } from '../config/wheelMessages.js';
 
 /**
  * Header: fondo panna, nessun divisore, logo ufficiale (public/logo.svg).
- * Interfaccia pubblica: su mobile il logo è centrato, da `md` allineato a sinistra.
- * variant="admin": logo a sinistra + stato "Area riservata" e pulsante Esci a destra.
- * Nessun collegamento al backend in pubblico (l'area riservata si apre solo via /backend).
- * Durante lo scroll l'header rinforza in modo molto discreto l'ombra.
+ * Interfaccia pubblica: logo centrato. variant="admin": logo a sinistra + Esci a destra.
+ * A destra c'è il pulsante «Il Gambero» che apre la Ruota (modal full screen).
+ * Nessun collegamento al backend in pubblico.
  */
 export default function Header({ variant = 'public', onLogout }) {
   const [scrolled, setScrolled] = useState(false);
+  const [gamberoOpen, setGamberoOpen] = useState(false);
+  const gamberoBtnRef = useRef(null);
   const isAdmin = variant === 'admin';
 
   useEffect(() => {
@@ -47,11 +50,20 @@ export default function Header({ variant = 'public', onLogout }) {
           />
         </Link>
 
-        {isAdmin && (
-          <div className="ml-auto flex items-center gap-2 sm:gap-3">
-            <span className="hidden items-center gap-1.5 rounded-full border border-green/40 bg-green/10 px-3 py-1 text-xs font-semibold text-green-deep sm:inline-flex">
-              Area riservata
-            </span>
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          <button
+            ref={gamberoBtnRef}
+            type="button"
+            onClick={() => setGamberoOpen(true)}
+            aria-label={NAV_BUTTON_ARIA}
+            aria-haspopup="dialog"
+            className="btn btn-secondary btn-sm gap-2"
+          >
+            <Icon name="wheel" size={18} />
+            <span className="hidden sm:inline">{NAV_BUTTON_LABEL}</span>
+          </button>
+
+          {isAdmin && (
             <button
               type="button"
               onClick={onLogout}
@@ -61,9 +73,15 @@ export default function Header({ variant = 'public', onLogout }) {
               <Icon name="logout" size={18} />
               <span>Esci</span>
             </button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
+
+      <GamberoModal
+        open={gamberoOpen}
+        onClose={() => setGamberoOpen(false)}
+        triggerRef={gamberoBtnRef}
+      />
     </header>
   );
 }

@@ -3,7 +3,6 @@ import Header from '../components/Header.jsx';
 import CategoryFilter from '../components/CategoryFilter.jsx';
 import RestaurantList from '../components/RestaurantList.jsx';
 import RestaurantModal from '../components/RestaurantModal.jsx';
-import ShrimpWheelSection from '../components/ShrimpWheelSection.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import { useRestaurants } from '../hooks/useRestaurants.js';
 import { compareByRanking } from '../utils/ratings.js';
@@ -33,13 +32,6 @@ export default function Home() {
     <div className="min-h-dvh bg-cream">
       <Header />
       <CategoryFilter active={activeCategory} onChange={setActiveCategory} />
-
-      <ShrimpWheelSection
-        restaurants={ranked}
-        contextStatus={status}
-        categoryLabel={activeCategory === ALL ? null : activeCategory}
-        onViewPlace={(place) => setSelected(restaurants.find((r) => r.id === place.id) ?? place)}
-      />
 
       <main className="mx-auto max-w-content px-3 py-6 md:px-6 md:py-10">
         <div className="flex items-baseline justify-between gap-3">

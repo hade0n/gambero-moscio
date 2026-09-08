@@ -208,36 +208,65 @@ come il voto finale viene disegnato.
 
 ---
 
-## Aggiornamento — La Ruota del Gambero Moscio (feature)
+## Aggiornamento — Il Gambero Moscio Food Picker (feature)
 
-Sezione interattiva della **homepage** (tra `CategoryFilter` e la classifica): una ruota
-della fortuna che sceglie un locale a caso. È l'unica parte dell'app con tono **ironico /
-colloquiale / qualche parolaccia leggera** — sempre riferito all'indecisione, mai a persone
-o attività. Il resto dell'app resta pulito.
+Accesso da un **pulsante nella navbar** («Il Gambero», `Header.jsx`) che apre un **modal
+full-screen** (`GamberoModal.jsx`). **Non** c'è nessuna ruota permanente in homepage. È
+l'unica parte dell'app con tono **ironico / colloquiale / qualche parolaccia leggera** —
+sempre riferito all'indecisione, mai a persone o attività.
 
-- **Dati**: usa i locali GIÀ filtrati dalla homepage (`ranked` → categoria + `reviewCount>0`).
-  Nessuna seconda fonte, nessuna logica di filtro duplicata; reagisce a filtro e CRUD.
-- **Il Gambero come lancetta**: l'asset `public/shrimp.svg`, FISSO a ore 12, **non** ruota con
-  la ruota (sta fuori dal gruppo SVG che ruota). Piccola inclinazione all'avvio (`shrimp-nudge`).
-- **Matematica** (`src/hooks/useShrimpWheel.js`): segmenti orari da ore 12, centro del
-  segmento `i` a `(i+0.5)·(360/n)`; per portarlo sotto la lancetta serve
-  `rotation ≡ -(i+0.5)·seg (mod 360)`, più 5–7 giri e uno scarto casuale `< ±0.275·seg`
-  (non può cambiare il vincitore). La rotazione non si azzera mai (nessun salto). Verificato:
-  il segmento fermo sotto il Gambero coincide **sempre** con il risultato mostrato.
-- **Selezione**: `Math.random` uniforme. Il rating **non** influenza (ruota e classifica sono
-  sistemi distinti). Snapshot della lista all'avvio dello spin; se il locale scelto sparisce
-  durante lo spin si torna a `idle` senza crash.
-- **Animazione**: `transform: rotate()` sul `<g>` con `transition` ~4.8s `cubic-bezier`;
-  CTA `disabled` durante lo spin. `prefers-reduced-motion` → la transizione è azzerata dal
-  blocco globale in `index.css` e il risultato compare subito (funzione sempre disponibile).
-- **Risultato**: card che riusa il linguaggio delle card del sito + `ShrimpRating` (niente
-  stelle) + estratto da una recensione reale (mai testo inventato) + frase ironica casuale +
-  «Vedi il locale» (apre il `RestaurantModal` esistente) / «Fallo girare di nuovo».
-- **A11y**: `role="img"` sulla ruota, `aria-live="polite"` annuncia stato e scelta, CTA da
-  tastiera, `disabled` reale. Nessun suono, nessun coriandolo, nessuna estetica da casinò.
-- **File**: `src/hooks/useShrimpWheel.js`, `src/components/ShrimpWheel.jsx` /
-  `ShrimpWheelResult.jsx` / `ShrimpWheelSection.jsx`, copy in `src/config/wheelMessages.js`.
-  Keyframe `shrimp-nudge` / `wheel-result-in` in `src/index.css`.
+### Pipeline (due ruote)
+`idle → type-spin → type-reveal → place-spin → result` (`useGamberoWheel.js`)
+1. **Ruota delle tipologie** — segmenti = categorie con almeno un locale nel database
+   discovery. Il Gambero sceglie *cosa* mangiare.
+2. **Interstiziale** — «{tipologia}. Ok, ora troviamo DOVE.» + estrazione dei candidati.
+3. **Ruota dei locali** — dai **top 25** della tipologia si estraggono a caso **fino a 6**
+   candidati (Fisher–Yates, `random.js`), poi la ruota ne sceglie **1**. Uniforme: il `rank`
+   non conta.
+4. **Risultato** — `GamberoResult.jsx`.
+
+### Database discovery — SEPARATO dalle recensioni PNDR
+- `src/data/gamberoDiscovery.json` + `src/utils/discovery.js`. Locali **reali** della
+  Campania per tipologia (region come campo, struttura estensibile ad altre regioni).
+  Il Gambero può quindi proporre locali **non presenti** nel database delle recensioni.
+- Campi: `id`, `name`, `category` (una delle `CATEGORIES`), `region`, `province`, `city`,
+  `rating` (0–10 indicativo, `null` se non verificabile), `rank`, `description`,
+  `mapsUrl` / `directionsUrl` (deep-link di ricerca Google Maps generati da nome+città),
+  e `lat/lng/phone/photoUrl/website/address/reviewCount` **predisposti a `null`** (da
+  popolare da una sorgente ufficiale — Places API o inserimento manuale — **mai inventati**).
+- `getDiscoveryTypes()`, `getTopPlaces(cat)` (max 25, ordinati per rank), `drawCandidates(cat, 6)`.
+
+### Il Gambero — selettore rotante centrale
+`public/shrimp.svg` sta **al centro** della ruota e **ruota** come un ago di bussola: il muso
+punta verso il segmento vincente. Segmenti **fissi**, disegnati in senso orario da ore 12.
+Angolo: `rotation ≡ (i+0.5)·(360/n) (mod 360)` + 4–6 giri + scarto `< ±0.25·seg` (non cambia
+il vincitore). `SHRIMP_NOSE_DEG` orienta solo il disegno dell'asset, non il calcolo. Le
+rotazioni non si azzerano mai (nessun salto). Verificato: 5200/5200 spin (indice = segmento
+sotto il muso) + 400 pipeline complete.
+
+### Modal
+`role="dialog"` + `aria-modal`, ESC, scroll-lock del body, focus iniziale sulla X e
+ripristino sul pulsante navbar (`triggerRef`), pulizia di timer/animazioni alla chiusura
+(anche durante lo spin). `aria-live="polite"` annuncia tipologia e locale scelto.
+
+### Risultato
+`ShrimpRating` (niente stelle) se `rating` presente, altrimenti chip «Selezione del Gambero
+· #rank». Foto reale se `photoUrl`, altrimenti fallback col Gambero. «Vedi la recensione»
+(apre il `RestaurantModal` esistente) **solo** se il locale ha un corrispondente nel
+database PNDR (match per nome+città); altrimenti «Apri su Google Maps» + «Portami lì»
+(navigatore) + eventuale «Chiama». «Fallo girare di nuovo» riavvia dalla tipologia.
+
+### Random / motion
+`crypto.getRandomValues` con rejection sampling (fallback `Math.random`). Spin ~4.6s
+`cubic-bezier`, CTA `disabled` durante lo spin. `prefers-reduced-motion` → animazione
+azzerata dal blocco globale in `index.css`, risultato quasi immediato (funzione sempre
+disponibile). Nessun suono, nessun coriandolo, nessuna estetica da casinò.
+
+### File
+`src/hooks/useGamberoWheel.js`, `src/components/GamberoWheel.jsx` / `GamberoResult.jsx` /
+`GamberoModal.jsx`, `src/utils/discovery.js` + `random.js`, `src/data/gamberoDiscovery.json`,
+copy in `src/config/wheelMessages.js`. Pulsante e modal in `Header.jsx`. Keyframe
+`wheel-result-in` in `src/index.css`.
 
 ---
 

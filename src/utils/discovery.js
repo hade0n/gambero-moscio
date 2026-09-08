@@ -52,13 +52,18 @@ function normalizePlace(entry) {
     rank: Number.isFinite(Number(entry.rank)) ? Number(entry.rank) : null,
     rating,
     description: String(entry.description || '').trim() || null,
-    // predisposti — nessun dato inventato
+    // metadati arricchiti (script scripts/enrich-gambero-db.mjs) — null se non disponibili
+    placeId: entry.placeId ?? null,
     address: entry.address ?? null,
     lat,
     lng,
-    reviewCount: Number.isFinite(Number(entry.reviewCount)) ? Number(entry.reviewCount) : null,
+    reviewCount:
+      Number.isFinite(Number(entry.reviewCount)) ? Number(entry.reviewCount)
+      : Number.isFinite(Number(entry.userRatingsTotal)) ? Number(entry.userRatingsTotal)
+      : null,
     phone: entry.phone ?? null,
     website: entry.website ?? null,
+    photoReference: entry.photoReference ?? null,
     photoUrl: entry.photoUrl ?? null,
     // con coordinate precise le usiamo; altrimenti ricerca per nome+città
     mapsUrl:
@@ -188,6 +193,23 @@ export function findPndrMatch(place, restaurants) {
     return sameCity || sameProv;
   });
   return match || null;
+}
+
+/**
+ * URL centralizzato della foto reale di un locale (mai duplicare questa logica nei
+ * componenti). Ordine: `photoUrl` esplicito → proxy `/api/place-photo?ref=` col
+ * `photoReference` salvato → proxy con ricerca per nome+città. Restituisce `null`
+ * se non c'è nulla da tentare (impossibile: il proxy prova sempre la ricerca).
+ */
+export function getPlacePhotoUrl(place) {
+  if (!place) return null;
+  if (place.photoUrl) return place.photoUrl;
+  if (place.photoReference) {
+    return `/api/place-photo?ref=${encodeURIComponent(place.photoReference)}`;
+  }
+  const name = encodeURIComponent(place.name || '');
+  const city = encodeURIComponent(place.city || '');
+  return name ? `/api/place-photo?name=${name}&city=${city}` : null;
 }
 
 /** Normalizza un numero italiano per `tel:` (prefisso +39, senza spazi). */

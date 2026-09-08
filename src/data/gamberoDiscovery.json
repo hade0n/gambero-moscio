@@ -23,7 +23,8 @@
       "name": "10 Diego Vitagliano",
       "rating": 9.4,
       "rank": 2,
-      "description": "Sul lungomare di Pozzuoli e a Napoli, tra le migliori d'Italia."
+      "description": "Sul lungomare di Pozzuoli e a Napoli, tra le migliori d'Italia.",
+      "phone": "081 18581919"
     },
     {
       "id": "pz-pepe-in-grani-ce",
@@ -66,7 +67,8 @@
       "name": "Cambia-Menti di Ciccio Vitiello",
       "rating": 9,
       "rank": 6,
-      "description": "Pizzaiolo dell'Anno 2025 per 50 Top Pizza."
+      "description": "Pizzaiolo dell'Anno 2025 per 50 Top Pizza.",
+      "phone": "0823 1254705"
     },
     {
       "id": "pz-tre-santi-na",
@@ -187,7 +189,8 @@
       "name": "Quattro Passi",
       "rating": 9.3,
       "rank": 2,
-      "description": "Due stelle Michelin a Nerano, vista sui Faraglioni di Capri."
+      "description": "Due stelle Michelin a Nerano, vista sui Faraglioni di Capri.",
+      "phone": "081 8081271"
     },
     {
       "id": "rp-don-alfonso-na",
@@ -229,7 +232,8 @@
       "name": "La Sponda – Le Sirenuse",
       "rating": 9.1,
       "rank": 6,
-      "description": "Stella Michelin, sala illuminata da centinaia di candele a Positano."
+      "description": "Stella Michelin, sala illuminata da centinaia di candele a Positano.",
+      "phone": "089 875066"
     },
     {
       "id": "rp-lo-scoglio-na",
@@ -271,7 +275,8 @@
       "name": "Rossellinis – Palazzo Avino",
       "rating": 9,
       "rank": 10,
-      "description": "Stella Michelin affacciato sulla Costiera da Ravello."
+      "description": "Stella Michelin affacciato sulla Costiera da Ravello.",
+      "phone": "089 818181"
     },
     {
       "id": "rp-da-gemma-sa",

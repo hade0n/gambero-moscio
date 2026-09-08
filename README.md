@@ -255,9 +255,14 @@ qualche parolaccia leggera; il resto resta pulito.
 - Se il locale è **già recensito su PNDR** (match robusto per nome + città) la card lo
   dichiara con un badge «Ci siete già stati 👀» e mostra i voti di Ilenia, Salvatore e del
   pubblico (`ShrimpRating`), col nome ufficiale e la foto dal database recensioni.
-- Foto: sempre quella **reale del locale** (dal database recensioni o dalla discovery); mai
-  il Gambero come immagine del locale. Azioni: «Chiama {numero}» (se disponibile) e
+- Foto: sempre quella **reale del locale** (dal database recensioni, o da Google Places via
+  `api/place-photo.js` + `getPlacePhotoUrl`); mai il Gambero come immagine del locale, un
+  placeholder editoriale se manca. Azioni: «Chiama {numero}» (se disponibile) e
   «Vedi dove si trova» (mappa dietro le quinte) + «Fallo girare di nuovo».
+- **Arricchimento dati**: `npm run enrich:gambero` (con `GOOGLE_MAPS_API_KEY` in ambiente)
+  completa foto/telefono/coordinate/placeId mancanti da Google Places, senza toccare il
+  ranking e senza sovrascrivere dati validi (`-- --refresh` per forzare). Vedi
+  `scripts/enrich-gambero-db.mjs`.
 - Modal accessibile (`role="dialog"`, ESC, scroll-lock, focus, `aria-live`);
   `prefers-reduced-motion` → risultato quasi immediato. Nessun suono, nessun coriandolo.
 - File: `src/hooks/useGamberoWheel.js`, `src/components/GamberoModal.jsx` /

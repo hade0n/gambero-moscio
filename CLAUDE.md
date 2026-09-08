@@ -235,11 +235,19 @@ sempre riferito all'indecisione, mai a persone o attività.
   `mapsUrl` / `directionsUrl` (deep-link Google Maps: per coordinata se `lat`/`lng` presenti,
   altrimenti ricerca per nome+città), `lat/lng/photoUrl/website/address/reviewCount`
   **predisposti a `null`** (da popolare da una sorgente ufficiale, **mai inventati**).
-- **Foto reali**: `api/place-photo.js` (proxy OPZIONALE a Google Places) restituisce la
-  prima foto ufficiale del locale se `GOOGLE_MAPS_API_KEY` è configurata; senza chiave →
-  `204` e la card usa un placeholder editoriale (mai il Gambero come foto del locale).
-  Nel client la priorità immagine è: `pndrMatch.imageUrl` → `place.photoUrl` →
-  `/api/place-photo` → placeholder.
+- **Foto reali**: `api/place-photo.js` (proxy a Google Places) — `?ref=<photoReference>`
+  (preferito, salvato dallo script) o `?name=&city=` (fallback). Con `GOOGLE_MAPS_API_KEY`
+  restituisce la prima foto ufficiale; senza chiave → `204` e la card usa un placeholder
+  editoriale (mai il Gambero come foto del locale). Helper unico
+  `getPlacePhotoUrl(place)` in `discovery.js`; priorità nel client:
+  `pndrMatch.imageUrl` → `getPlacePhotoUrl(place)` → placeholder.
+- **Arricchimento del database**: `scripts/enrich-gambero-db.mjs` (`npm run enrich:gambero`,
+  `-- --refresh`, `-- --dry`). Per ogni locale interroga Google Places (Text Search →
+  Details), valida il match (nome + città, segnala gli ambigui), riempie SOLO i campi
+  mancanti (`placeId`, `address`, `lat`/`lng`, `phone`, `googleRating`, `userRatingsTotal`,
+  `photoReference`, `website`) senza toccare `rank`/ordine, controlla i duplicati per
+  `placeId`, e stampa un report di copertura. Senza chiave stampa solo il report.
+  Richiede `GOOGLE_MAPS_API_KEY` in ambiente (mai nel frontend).
 - `getDiscoveryTypes()`, `getTopPlaces(cat)` (max 25, ordinati per rank), `drawCandidates(cat, 6)`.
 
 ### Il Gambero — selettore rotante centrale

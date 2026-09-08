@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import Icon from './Icon.jsx';
 import ShrimpRating from './ShrimpRating.jsx';
-import { telHref } from '../utils/discovery.js';
+import { getPlacePhotoUrl, telHref } from '../utils/discovery.js';
 import { reviewerLabel, REVIEWER_KEYS } from '../config/users.js';
 import { ACTION_LOCATION, ACTION_RESPIN, BADGE_ALREADY_REVIEWED } from '../config/wheelMessages.js';
 
@@ -31,13 +31,11 @@ export default function GamberoResult({ result, pndrMatch, onRespin, className =
 
   const photoCandidates = useMemo(() => {
     const list = [];
-    if (reviewed && pndrMatch.imageUrl) list.push(pndrMatch.imageUrl);
-    if (p.photoUrl) list.push(p.photoUrl);
-    list.push(
-      `/api/place-photo?name=${encodeURIComponent(p.name)}&city=${encodeURIComponent(p.city || '')}`,
-    );
+    if (reviewed && pndrMatch.imageUrl) list.push(pndrMatch.imageUrl); // foto reale dal DB recensioni
+    const discPhoto = getPlacePhotoUrl(p); // foto reale del locale (discovery / Google Places proxy)
+    if (discPhoto) list.push(discPhoto);
     return list;
-  }, [reviewed, pndrMatch, p.photoUrl, p.name, p.city]);
+  }, [reviewed, pndrMatch, p]);
 
   const [imgIdx, setImgIdx] = useState(0);
   const photoSrc = photoCandidates[imgIdx] || null;

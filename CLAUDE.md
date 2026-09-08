@@ -208,6 +208,39 @@ come il voto finale viene disegnato.
 
 ---
 
+## Aggiornamento — La Ruota del Gambero Moscio (feature)
+
+Sezione interattiva della **homepage** (tra `CategoryFilter` e la classifica): una ruota
+della fortuna che sceglie un locale a caso. È l'unica parte dell'app con tono **ironico /
+colloquiale / qualche parolaccia leggera** — sempre riferito all'indecisione, mai a persone
+o attività. Il resto dell'app resta pulito.
+
+- **Dati**: usa i locali GIÀ filtrati dalla homepage (`ranked` → categoria + `reviewCount>0`).
+  Nessuna seconda fonte, nessuna logica di filtro duplicata; reagisce a filtro e CRUD.
+- **Il Gambero come lancetta**: l'asset `public/shrimp.svg`, FISSO a ore 12, **non** ruota con
+  la ruota (sta fuori dal gruppo SVG che ruota). Piccola inclinazione all'avvio (`shrimp-nudge`).
+- **Matematica** (`src/hooks/useShrimpWheel.js`): segmenti orari da ore 12, centro del
+  segmento `i` a `(i+0.5)·(360/n)`; per portarlo sotto la lancetta serve
+  `rotation ≡ -(i+0.5)·seg (mod 360)`, più 5–7 giri e uno scarto casuale `< ±0.275·seg`
+  (non può cambiare il vincitore). La rotazione non si azzera mai (nessun salto). Verificato:
+  il segmento fermo sotto il Gambero coincide **sempre** con il risultato mostrato.
+- **Selezione**: `Math.random` uniforme. Il rating **non** influenza (ruota e classifica sono
+  sistemi distinti). Snapshot della lista all'avvio dello spin; se il locale scelto sparisce
+  durante lo spin si torna a `idle` senza crash.
+- **Animazione**: `transform: rotate()` sul `<g>` con `transition` ~4.8s `cubic-bezier`;
+  CTA `disabled` durante lo spin. `prefers-reduced-motion` → la transizione è azzerata dal
+  blocco globale in `index.css` e il risultato compare subito (funzione sempre disponibile).
+- **Risultato**: card che riusa il linguaggio delle card del sito + `ShrimpRating` (niente
+  stelle) + estratto da una recensione reale (mai testo inventato) + frase ironica casuale +
+  «Vedi il locale» (apre il `RestaurantModal` esistente) / «Fallo girare di nuovo».
+- **A11y**: `role="img"` sulla ruota, `aria-live="polite"` annuncia stato e scelta, CTA da
+  tastiera, `disabled` reale. Nessun suono, nessun coriandolo, nessuna estetica da casinò.
+- **File**: `src/hooks/useShrimpWheel.js`, `src/components/ShrimpWheel.jsx` /
+  `ShrimpWheelResult.jsx` / `ShrimpWheelSection.jsx`, copy in `src/config/wheelMessages.js`.
+  Keyframe `shrimp-nudge` / `wheel-result-in` in `src/index.css`.
+
+---
+
 ## Project Overview
 
 PNDR è una piattaforma web per consultare recensioni di locali e ristoranti.

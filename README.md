@@ -240,6 +240,24 @@ punteggio non cambia — cambia solo il disegno.
 - I dati salvati nel vecchio formato (`food`/`service`/`price`) vengono migrati alle 8
   categorie in modo deterministico al caricamento e ri-salvati nel nuovo formato.
 
+## La Ruota del Gambero Moscio
+
+Sezione della homepage (tra il filtro categorie e la classifica): una ruota della fortuna che
+sceglie un locale a caso quando non si sa dove andare a mangiare. È l'unica parte dell'app con
+tono ironico e qualche parolaccia leggera; il resto resta pulito.
+
+- Usa i locali **già filtrati** dalla homepage (stessa fonte dati, rispetta filtro e CRUD).
+- Il **Gambero Moscio** (`public/shrimp.svg`) è la lancetta: fisso a ore 12, non ruota con la
+  ruota.
+- La scelta è **uniformemente casuale** (il rating non conta) e il segmento fermo sotto il
+  Gambero **corrisponde sempre** al risultato mostrato (matematica in
+  `src/hooks/useShrimpWheel.js`).
+- Animazione ~4.8 s con `transform: rotate()`; CTA disabilitata durante lo spin;
+  `prefers-reduced-motion` → risultato immediato. Nessun suono, nessun coriandolo.
+- Il risultato riusa `ShrimpRating` e apre il dettaglio con la modale esistente.
+- File: `src/hooks/useShrimpWheel.js`, `src/components/ShrimpWheel*.jsx`,
+  `src/config/wheelMessages.js`.
+
 ## Foto dei piatti
 
 Ogni ristorante ha un campo `dishImages` (array di URL di immagini su Vercel Blob), gestito

@@ -110,6 +110,16 @@
     animation: pndr-fade-in 0.16s ease-out both;
   }
 
+  /* Ruota del Gambero Moscio: microanimazione del Gambero all'avvio dello spin
+     (una breve inclinazione, poi torna fermo). */
+  .shrimp-pointer.is-spinning {
+    animation: shrimp-nudge 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  /* Comparsa della card risultato: fade + piccolo translateY, discreta. */
+  .wheel-result-in {
+    animation: wheel-result-in 0.26s ease both;
+  }
+
   /* ----------------------------------------------------------------------
    * PNDR Material — pulsanti. Radius morbido (non pillola), padding
    * confortevole, stati default/hover/active/focus/disabled, feedback
@@ -257,6 +267,30 @@
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes shrimp-nudge {
+  0%,
+  100% {
+    rotate: 0deg;
+  }
+  35% {
+    rotate: -9deg;
+  }
+  70% {
+    rotate: 5deg;
+  }
+}
+
+@keyframes wheel-result-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

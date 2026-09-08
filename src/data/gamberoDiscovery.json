@@ -2,7 +2,7 @@
   "version": 1,
   "region": "Campania",
   "updatedAt": "2026-09-08",
-  "note": "Database di discovery del Gambero: locali REALI della Campania, curati per tipologia. È una sorgente separata dal database delle recensioni PNDR. `rating` è una valutazione indicativa (0-10) basata su guide di settore per i locali più documentati; `null` dove non verificabile. `lat`, `lng`, `phone`, `photoUrl`, `website`, `address` sono predisposti a `null` in `src/utils/discovery.js`: vanno popolati da una sorgente ufficiale (Google Places API o inserimento manuale), MAI inventati. `mapsUrl` / `directionsUrl` sono deep-link di ricerca Google Maps generati da nome+città.",
+  "note": "Database di discovery del Gambero: locali REALI della Campania, curati per tipologia. È una sorgente separata dal database delle recensioni PNDR. `rating` è una valutazione indicativa (0-10) basata su guide di settore per i locali più documentati; `null` dove non verificabile. `lat`, `lng`, `phone`, `photoUrl`, `website`, `address` sono predisposti a `null` in `src/utils/discovery.js`: vanno popolati da una sorgente ufficiale (sito ufficiale del locale, elenchi verificati, Google Places API), MAI inventati. Le foto in `public/gambero/` sono scaricate da sorgenti pubbliche (Wikimedia Commons, sito ufficiale del locale) e verificate a vista una per una. `mapsUrl` / `directionsUrl` sono deep-link di ricerca Google Maps generati da nome+città.",
   "places": [
     {
       "id": "pz-masanielli-ce",
@@ -90,7 +90,8 @@
       "rating": 8.9,
       "rank": 8,
       "description": "Via dei Tribunali, l'indirizzo più celebre del centro storico.",
-      "phone": "081 446643"
+      "phone": "081 446643",
+      "photoUrl": "/gambero/pz-sorbillo-na.jpg"
     },
     {
       "id": "pz-lioniello-na",
@@ -111,7 +112,8 @@
       "rating": 8.8,
       "rank": 10,
       "description": "Storica, celebre per la montanara e l'angioletto fritto.",
-      "phone": "081 5441485"
+      "phone": "081 5441485",
+      "photoUrl": "/gambero/pz-starita-na.jpg"
     },
     {
       "id": "pz-gorizia-na",
@@ -146,7 +148,8 @@
       "description": "Marinara e margherita, il tempio della tradizione ai Tribunali.",
       "phone": "081 5539204",
       "lat": 40.849982,
-      "lng": 14.2632526
+      "lng": 14.2632526,
+      "photoUrl": "/gambero/pz-da-michele-na.jpg"
     },
     {
       "id": "pz-carmnella-na",
@@ -179,7 +182,8 @@
       "rating": 9.4,
       "rank": 1,
       "description": "Due stelle Michelin sul mare, cucina di mare della penisola sorrentina.",
-      "phone": "081 8028555"
+      "phone": "081 8028555",
+      "photoUrl": "/gambero/rp-torre-saracino-na.webp"
     },
     {
       "id": "rp-quattro-passi-na",
@@ -211,7 +215,8 @@
       "name": "Il Comandante",
       "rating": 9.2,
       "rank": 4,
-      "description": "Stella Michelin all'ultimo piano dell'Hotel Romeo, vista sul golfo."
+      "description": "Stella Michelin all'ultimo piano dell'Hotel Romeo, vista sul golfo.",
+      "phone": "081 0175001"
     },
     {
       "id": "rp-la-caravella-sa",
@@ -265,7 +270,8 @@
       "name": "President",
       "rating": 9,
       "rank": 9,
-      "description": "Stella Michelin a Pompei, Paolo Gramaglia."
+      "description": "Stella Michelin a Pompei, Paolo Gramaglia.",
+      "phone": "081 8507245"
     },
     {
       "id": "rp-rossellinis-sa",
@@ -297,7 +303,8 @@
       "name": "Ristorante Marina Grande",
       "rating": 8.6,
       "rank": 12,
-      "description": "Sulla spiaggia di Amalfi, pescato locale e Slow Food."
+      "description": "Sulla spiaggia di Amalfi, pescato locale e Slow Food.",
+      "phone": "089 871129"
     },
     {
       "id": "rp-zi-teresa-na",
@@ -307,7 +314,8 @@
       "name": "Zi' Teresa",
       "rating": 8.4,
       "rank": 13,
-      "description": "Sul Borgo Marinari ai piedi del Castel dell'Ovo, un pezzo di storia."
+      "description": "Sul Borgo Marinari ai piedi del Castel dell'Ovo, un pezzo di storia.",
+      "phone": "081 7642565"
     },
     {
       "id": "rp-figlia-marenaro-na",
@@ -317,7 +325,8 @@
       "name": "'A Figlia d'o Marenaro",
       "rating": 8.4,
       "rank": 14,
-      "description": "Alla Sanità/lungomare, la zuppa di cozze è leggendaria."
+      "description": "Alla Sanità/lungomare, la zuppa di cozze è leggendaria.",
+      "phone": "081 440827"
     },
     {
       "id": "tr-nennella-na",
@@ -327,7 +336,8 @@
       "name": "Trattoria da Nennella",
       "rating": 8.3,
       "rank": 1,
-      "description": "Ai Quartieri Spagnoli, cucina popolare, chiassosa e verace."
+      "description": "Ai Quartieri Spagnoli, cucina popolare, chiassosa e verace.",
+      "phone": "081 414338"
     },
     {
       "id": "tr-da-carmela-na",
@@ -337,7 +347,8 @@
       "name": "Osteria Da Carmela",
       "rating": 8.5,
       "rank": 2,
-      "description": "Vicino al Museo Archeologico, ragù, pasta e ricotta, pescatora."
+      "description": "Vicino al Museo Archeologico, ragù, pasta e ricotta, pescatora.",
+      "phone": "081 5499738"
     },
     {
       "id": "tr-la-mattonella-na",
@@ -347,7 +358,8 @@
       "name": "Osteria della Mattonella",
       "rating": 8.4,
       "rank": 3,
-      "description": "A Santa Lucia, ambiente d'altri tempi con maioliche alle pareti."
+      "description": "A Santa Lucia, ambiente d'altri tempi con maioliche alle pareti.",
+      "phone": "081 416541"
     },
     {
       "id": "tr-antonio-trippa-na",
@@ -357,7 +369,8 @@
       "name": "Trattoria Antonio la Trippa",
       "rating": 8.2,
       "rank": 4,
-      "description": "Piatti serviti nel tegame, zuppa di verza e panino con ricotta e cicoli."
+      "description": "Piatti serviti nel tegame, zuppa di verza e panino con ricotta e cicoli.",
+      "phone": "081 0482228"
     },
     {
       "id": "tr-nonna-anna-na",
@@ -377,7 +390,8 @@
       "name": "Trattoria Donna Teresa",
       "rating": 8.5,
       "rank": 6,
-      "description": "Piccola perla del Vomero a gestione familiare, poche coperti."
+      "description": "Piccola perla del Vomero a gestione familiare, poche coperti.",
+      "phone": "081 5567070"
     },
     {
       "id": "tr-i-soliti-na",
@@ -397,7 +411,8 @@
       "name": "Antica Trattoria da Carmine",
       "rating": 8.1,
       "rank": 8,
-      "description": "Ai Tribunali dal 1950, ricette della tradizione senza fronzoli."
+      "description": "Ai Tribunali dal 1950, ricette della tradizione senza fronzoli.",
+      "phone": "081 294383"
     },
     {
       "id": "os-tandem-na",
@@ -407,7 +422,8 @@
       "name": "Tandem Ragù",
       "rating": 8.4,
       "rank": 1,
-      "description": "Monotematica sul ragù napoletano, nel centro antico."
+      "description": "Monotematica sul ragù napoletano, nel centro antico.",
+      "phone": "081 19002468"
     },
     {
       "id": "os-cammarota-na",
@@ -417,7 +433,8 @@
       "name": "Cammarota Spritz / Osteria",
       "rating": 8,
       "rank": 2,
-      "description": "Ai Quartieri Spagnoli, cucina di casa a prezzi popolari."
+      "description": "Ai Quartieri Spagnoli, cucina di casa a prezzi popolari.",
+      "phone": "320 2775687"
     },
     {
       "id": "os-vecchia-cantina-na",
@@ -457,7 +474,8 @@
       "name": "La Campagnola ai Tribunali",
       "rating": 8.1,
       "rank": 6,
-      "description": "Ai Tribunali, menu del giorno scritto a mano, cucina casalinga."
+      "description": "Ai Tribunali, menu del giorno scritto a mano, cucina casalinga.",
+      "phone": "081 459034"
     },
     {
       "id": "rc-bifulco-na",
@@ -487,7 +505,8 @@
       "name": "Tortora – Macelleria con cucina",
       "rating": 8.3,
       "rank": 3,
-      "description": "Macelleria del Vomero che la sera diventa pub di carne."
+      "description": "Macelleria del Vomero che la sera diventa pub di carne.",
+      "phone": "081 5560866"
     },
     {
       "id": "rc-egidio-portici-na",
@@ -497,7 +516,8 @@
       "name": "Grande Macelleria Egidio",
       "rating": 8.2,
       "rank": 4,
-      "description": "Macelleria con cucina, carne fresca e fritti fatti a mano."
+      "description": "Macelleria con cucina, carne fresca e fritti fatti a mano.",
+      "phone": "081 7754631"
     },
     {
       "id": "rc-blackburger-na",
@@ -507,7 +527,8 @@
       "name": "Blackburger",
       "rating": 8.2,
       "rank": 5,
-      "description": "Hamburgeria con prodotti campani e carni di qualità."
+      "description": "Hamburgeria con prodotti campani e carni di qualità.",
+      "phone": "339 3525163"
     },
     {
       "id": "rc-belfiore-na",
@@ -578,7 +599,8 @@
       "rating": 9,
       "rank": 1,
       "description": "Tempio della mozzarella di bufala biologica, con caseificio e yogurteria.",
-      "phone": "0828 727894"
+      "phone": "0828 727894",
+      "photoUrl": "/gambero/ag-vannulo-sa.jpg"
     },
     {
       "id": "ag-seliano-sa",
@@ -599,7 +621,8 @@
       "name": "Agriturismo I Moresani",
       "rating": 8.7,
       "rank": 3,
-      "description": "Azienda agricola nel Cilento: bufala, carciofo di Paestum, orto."
+      "description": "Azienda agricola nel Cilento: bufala, carciofo di Paestum, orto.",
+      "phone": "0974 902086"
     },
     {
       "id": "ag-le-querce-sa",
@@ -609,7 +632,8 @@
       "name": "Le Querce Farmhouse",
       "rating": 8.6,
       "rank": 4,
-      "description": "Relais nella campagna cilentana, cucina a km 0 e piscina."
+      "description": "Relais nella campagna cilentana, cucina a km 0 e piscina.",
+      "phone": "339 4588607"
     },
     {
       "id": "ag-zio-cristoforo-sa",
@@ -619,7 +643,8 @@
       "name": "Agriturismo Zio Cristoforo",
       "rating": 8.6,
       "rank": 5,
-      "description": "\"Cilento experience\": prodotti bio dell'azienda, corsi di cucina, trekking."
+      "description": "\"Cilento experience\": prodotti bio dell'azienda, corsi di cucina, trekking.",
+      "phone": "0974 907552"
     },
     {
       "id": "ag-porta-sirena-sa",
@@ -629,7 +654,8 @@
       "name": "Agriturismo Porta Sirena",
       "rating": 8.4,
       "rank": 6,
-      "description": "A due passi dall'area archeologica di Paestum, cucina aziendale."
+      "description": "A due passi dall'area archeologica di Paestum, cucina aziendale.",
+      "phone": "0828 721035"
     },
     {
       "id": "ag-fattoria-terranova-na",
@@ -639,7 +665,8 @@
       "name": "Fattoria Terranova",
       "rating": 8.5,
       "rank": 7,
-      "description": "Sulla penisola sorrentina a Sant'Agata, limoni, olio e conserve di casa."
+      "description": "Sulla penisola sorrentina a Sant'Agata, limoni, olio e conserve di casa.",
+      "phone": "081 5330234"
     },
     {
       "id": "ag-barbanera-sa",
@@ -670,7 +697,8 @@
       "name": "Pizzeria Di Matteo",
       "rating": 8.4,
       "rank": 2,
-      "description": "Ai Tribunali, pizza a portafoglio e frittatine da mangiare in strada."
+      "description": "Ai Tribunali, pizza a portafoglio e frittatine da mangiare in strada.",
+      "phone": "081 455262"
     },
     {
       "id": "sf-friggitoria-vomero-na",
@@ -701,7 +729,8 @@
       "name": "Isabella De Cham – 1947 Pizza Fritta",
       "rating": 8.6,
       "rank": 5,
-      "description": "Alla Sanità, pizza fritta rivisitata con ripieni ricercati."
+      "description": "Alla Sanità, pizza fritta rivisitata con ripieni ricercati.",
+      "phone": "081 18639669"
     },
     {
       "id": "sf-fiorenzano-na",
@@ -711,7 +740,8 @@
       "name": "Friggitoria Fiorenzano",
       "rating": 8.2,
       "rank": 6,
-      "description": "Al mercato di Montesanto/Pignasecca, cuoppo storico e panzarotti."
+      "description": "Al mercato di Montesanto/Pignasecca, cuoppo storico e panzarotti.",
+      "phone": "081 5523663"
     },
     {
       "id": "sf-timpani-tempura-na",
@@ -721,7 +751,8 @@
       "name": "Timpani e Tempura",
       "rating": 8.5,
       "rank": 7,
-      "description": "Chiosco gastronomico di Nunzia Cesaro nel centro antico."
+      "description": "Chiosco gastronomico di Nunzia Cesaro nel centro antico.",
+      "phone": "081 5512280"
     },
     {
       "id": "sf-passione-di-sofi-na",

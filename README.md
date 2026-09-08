@@ -255,14 +255,17 @@ qualche parolaccia leggera; il resto resta pulito.
 - Se il locale è **già recensito su PNDR** (match robusto per nome + città) la card lo
   dichiara con un badge «Ci siete già stati 👀» e mostra i voti di Ilenia, Salvatore e del
   pubblico (`ShrimpRating`), col nome ufficiale e la foto dal database recensioni.
-- Foto: sempre quella **reale del locale** (dal database recensioni, o da Google Places via
-  `api/place-photo.js` + `getPlacePhotoUrl`); mai il Gambero come immagine del locale, un
-  placeholder editoriale se manca. Azioni: «Chiama {numero}» (se disponibile) e
+- Foto: sempre quella **reale del locale** — dal database recensioni, oppure scaricata in
+  `public/gambero/<id>.<ext>` da sorgenti pubbliche (`photoUrl` nel DB), oppure da Google
+  Places via `api/place-photo.js`. Mai il Gambero come immagine del locale, un placeholder
+  editoriale se manca. Azioni: «Chiama {numero}» (se disponibile, `tel:+39…`) e
   «Vedi dove si trova» (mappa dietro le quinte) + «Fallo girare di nuovo».
-- **Arricchimento dati**: `npm run enrich:gambero` (con `GOOGLE_MAPS_API_KEY` in ambiente)
-  completa foto/telefono/coordinate/placeId mancanti da Google Places, senza toccare il
-  ranking e senza sovrascrivere dati validi (`-- --refresh` per forzare). Vedi
-  `scripts/enrich-gambero-db.mjs`.
+- **Dati del database** (`scripts/`): `fetch-photos-commons.mjs` + `fetch-photos-sites.mjs`
+  scaricano foto reali senza API key (Wikimedia Commons e og:image dei siti ufficiali) — da
+  verificare a vista una per una, si scartano loghi e foto di altri locali. Telefoni
+  raccolti a mano da siti ufficiali ed elenchi verificati (mai inventati: se non si trova
+  resta `null`). `npm run enrich:gambero` (con `GOOGLE_MAPS_API_KEY`) completa il resto da
+  Google Places senza toccare il ranking. Copertura attuale: foto 5/70, telefoni 53/70.
 - Modal accessibile (`role="dialog"`, ESC, scroll-lock, focus, `aria-live`);
   `prefers-reduced-motion` → risultato quasi immediato. Nessun suono, nessun coriandolo.
 - File: `src/hooks/useGamberoWheel.js`, `src/components/GamberoModal.jsx` /

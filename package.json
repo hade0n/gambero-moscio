@@ -11,7 +11,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "enrich:gambero": "node scripts/enrich-gambero-db.mjs"
+    "enrich:gambero": "node scripts/enrich-gambero-db.mjs",
+    "photos:gambero": "node scripts/fetch-photos-commons.mjs && node scripts/fetch-photos-sites.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.0",

@@ -235,12 +235,19 @@ sempre riferito all'indecisione, mai a persone o attività.
   `mapsUrl` / `directionsUrl` (deep-link Google Maps: per coordinata se `lat`/`lng` presenti,
   altrimenti ricerca per nome+città), `lat/lng/photoUrl/website/address/reviewCount`
   **predisposti a `null`** (da popolare da una sorgente ufficiale, **mai inventati**).
-- **Foto reali**: `api/place-photo.js` (proxy a Google Places) — `?ref=<photoReference>`
-  (preferito, salvato dallo script) o `?name=&city=` (fallback). Con `GOOGLE_MAPS_API_KEY`
-  restituisce la prima foto ufficiale; senza chiave → `204` e la card usa un placeholder
-  editoriale (mai il Gambero come foto del locale). Helper unico
-  `getPlacePhotoUrl(place)` in `discovery.js`; priorità nel client:
-  `pndrMatch.imageUrl` → `getPlacePhotoUrl(place)` → placeholder.
+- **Foto reali**: priorità nel client `pndrMatch.imageUrl` → `getPlacePhotoUrl(place)` →
+  placeholder editoriale (mai il Gambero come foto del locale). `getPlacePhotoUrl(place)`
+  (in `discovery.js`) restituisce: `place.photoUrl` se presente (foto scaricata in
+  `public/gambero/<id>.<ext>` da sorgenti pubbliche) → altrimenti il proxy
+  `api/place-photo.js` verso Google Places (`?ref=<photoReference>` o `?name=&city=`), che
+  senza `GOOGLE_MAPS_API_KEY` risponde `204` e la card cade sul placeholder.
+- **Foto scaricate senza chiave** (`public/gambero/`): `scripts/fetch-photos-commons.mjs`
+  (Wikimedia Commons, match prudente per token del nome/città) e
+  `scripts/fetch-photos-sites.mjs` (og:image dal sito ufficiale, elenco `SITES` curato a
+  mano). Entrambi scrivono `photoUrl` nel DB e vanno **verificati a vista** uno per uno:
+  loghi, banner promozionali e foto di altri locali si scartano (regola: una foto sbagliata
+  è peggio di una mancante). Copertura onesta attuale: 5/70 (da Michele, Sorbillo, Starita,
+  Torre del Saracino, Vannulo); il resto richiede `GOOGLE_MAPS_API_KEY` + `enrich:gambero`.
 - **Arricchimento del database**: `scripts/enrich-gambero-db.mjs` (`npm run enrich:gambero`,
   `-- --refresh`, `-- --dry`). Per ogni locale interroga Google Places (Text Search →
   Details), valida il match (nome + città, segnala gli ambigui), riempie SOLO i campi

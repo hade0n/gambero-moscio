@@ -56,14 +56,26 @@ Branch: `refactor/ui-ux-motion`. Ordine di lavoro: §28 del brief.
 
 | # | Fase | File principali | Stato |
 |---|------|-----------------|-------|
-| 1 | Fondamenta: token motion + `MotionConfig` + `Modal` su Framer Motion + CLAUDE.md | `lib/motion.js`, `lib/cn.js`, `main.jsx`, `Modal.jsx`, `CLAUDE.md` | ✅ fatto |
-| 2 | Shell + Header + Home/Filter/Card | `Header.jsx`, `CategoryFilter.jsx`, `RestaurantCard.jsx`, `RestaurantList.jsx`, `Home.jsx`, `EmptyState.jsx` | ▶ in corso |
-| 3 | Primitive comuni: `Surface`, `SectionHeader`, `IconButton`, `Skeleton`, varianti | `lib/`, `components/` | ⏳ |
-| 4 | RestaurantModal (sheet mobile, review switch `layoutId`, breakdown) | `RestaurantModal.jsx`, `RatingBreakdown.jsx` | ⏳ |
-| 5 | Gallery + Lightbox (touch) | `Lightbox.jsx` | ⏳ |
-| 6 | Backend: layout, list/table, empty/loading, azioni | `BackendLayout.jsx`, `RestaurantListAdmin.jsx`, `ReviewStatus.jsx`, `Backend.jsx`, `Login.jsx` | ⏳ |
-| 7 | Form mobile: `PlaceForm`, `ReviewForm` (8 rating), upload | `PlaceForm.jsx`, `ReviewForm.jsx`, `ReviewPicker.jsx`, `Field.jsx` | ⏳ |
-| 8 | Gambero Picker: modal, ruota, candidati, result | `GamberoModal.jsx`, `GamberoWheel.jsx`, `GamberoResult.jsx` | ⏳ |
-| 9 | Toast / empty / loading / error | `Toast.jsx`, `ToastContainer.jsx`, `ConfirmDeleteModal.jsx` | ⏳ |
-| 10 | Motion polish + rimozione CSS morto | `index.css` | ⏳ |
-| 11 | Responsive QA (360→1920) + funzionale + performance + `npm run build` | — | ⏳ |
+| 1 | Fondamenta: token motion + `MotionConfig` + `Modal` su Framer Motion + CLAUDE.md | `lib/motion.js`, `lib/cn.js`, `main.jsx`, `Modal.jsx`, `CLAUDE.md` | ✅ `3cc28ac` |
+| 2 | Shell + Header + Home/Filter/Card | `Header.jsx`, `CategoryFilter.jsx`, `RestaurantCard.jsx`, `RestaurantList.jsx`, `Home.jsx`, `Skeleton.jsx` | ✅ `e5a54d1` |
+| 3 | Primitive comuni (create-on-need): `IconButton`, `SectionHeader`, `Skeleton` | `components/` | ✅ (in 4/6) |
+| 4 | RestaurantModal (hero full-bleed, close ancorata, review switch `layoutId`, breakdown animato) | `Modal.jsx`, `IconButton.jsx`, `RestaurantModal.jsx`, `RatingBreakdown.jsx` | ✅ `6fea465` |
+| 5 | Lightbox touch-first (AnimatePresence, swipe, safe-area) | `Lightbox.jsx`, `Icon.jsx` | ✅ `a186092` |
+| 6 | Backend: `SectionHeader`, list/table, azioni, badge, skeleton, login | `BackendLayout.jsx`, `RestaurantListAdmin.jsx`, `ReviewStatus.jsx`, `Backend.jsx`, `Login.jsx` | ✅ `0d1cb31` |
+| 7 | Form mobile: `ReviewForm` (righe compatte), `PlaceForm`, `ReviewPicker`, footer sticky | `ReviewForm.jsx`, `PlaceForm.jsx`, `ReviewPicker.jsx` | ✅ `be32d5e` |
+| 8 | Gambero Picker: modal AnimatePresence, headline crossfade, OptionRail, result | `GamberoModal.jsx`, `GamberoResult.jsx` | ✅ `e4f9491` |
+| 9 | Toast su Framer Motion | `Toast.jsx` | ✅ `3275a7a` |
+| 10 | Rimozione CSS motion morto | `index.css` | ✅ `44278d7` |
+| 11 | Responsive QA (360/390/430/768/1440) + build finale + smoke test | — | ✅ (build verde, nessun overflow) |
+
+## Note per l'utente
+
+- Non toccati: `useGamberoWheel`, la rotazione/timing di `GamberoWheel`, Fisher-Yates,
+  winner math; `ratings.js`, `ratingUtils.js`; `discovery.js`; API/Blob/auth/sessioni;
+  contratti dei form (nomi campi, validazione, payload); routing; `src/data/*`;
+  `public/gambero/*`; `AGENTS.md` (lavoro in corso, lasciato invariato).
+- Nuova dipendenza runtime: `framer-motion` (unica). shadcn/Magic/Aceternity usati come
+  pattern portati a mano (nessun pacchetto). Bundle JS: 254→393 KB (gzip 80→124 KB).
+- Verifica ancora da fare a mano: **dashboard backend dietro login** (create/update/delete
+  locale, ReviewPicker, salvataggio recensione Ilenia/Salvatore, upload immagini) — le
+  modifiche sono presentazionali e il build è verde, ma non ho effettuato il login.

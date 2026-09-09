@@ -87,10 +87,11 @@
 }
 
 /* --------------------------------------------------------------------------
- * Motion PNDR — morbido, caldo, editoriale. transform + opacity only.
+ * Motion PNDR — il grosso è su Framer Motion (`src/lib/motion.js`).
+ * Qui resta solo il feedback tattile per elementi cliccabili non-`.btn`.
  * ------------------------------------------------------------------------ */
 @layer components {
-  /* Feedback tattile uniforme su elementi interattivi */
+  /* Feedback tattile uniforme su elementi interattivi (chip, link logo, toggle) */
   .press {
     transition:
       transform 0.12s cubic-bezier(0.2, 0.6, 0.2, 1),
@@ -102,17 +103,6 @@
   }
   .press:active:not(:disabled) {
     transform: scale(0.97);
-  }
-
-  /* Dissolvenza breve e funzionale (cambio immagine lightbox, miniatura
-     appena aggiunta, scambio recensione). Solo opacity, nessun movimento. */
-  .reveal-in {
-    animation: pndr-fade-in 0.16s ease-out both;
-  }
-
-  /* Comparsa della card risultato (Ruota del Gambero): fade + piccolo translateY. */
-  .wheel-result-in {
-    animation: wheel-result-in 0.26s ease both;
   }
 
   /* ----------------------------------------------------------------------
@@ -253,59 +243,6 @@
   }
   .field-control.is-invalid:focus {
     box-shadow: 0 0 0 4px rgba(178, 59, 46, 0.16);
-  }
-}
-
-@keyframes pndr-fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes wheel-result-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes modal-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pndr-toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes pndr-toast-out {
-  from {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(8px) scale(0.98);
   }
 }
 

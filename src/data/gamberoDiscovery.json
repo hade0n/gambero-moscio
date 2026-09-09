@@ -13,7 +13,11 @@
       "rating": 9.6,
       "rank": 1,
       "phone": "0823 741284",
-      "description": "Prima pizzeria d'Italia per 50 Top Pizza 2025."
+      "description": "Prima pizzeria d'Italia per 50 Top Pizza 2025.",
+      "photoUrl": "/gambero/pz-masanielli-ce.jpg",
+      "sources": {
+        "photo": "https://www.agrodolce.it/francesco-martucci-i-masanielli-nuova-pizzeria-a-caserta"
+      }
     },
     {
       "id": "pz-diego-vitagliano-na",
@@ -28,7 +32,9 @@
       "lat": 40.8170586,
       "lng": 14.175748,
       "address": "Via Nuova Agnano, 1 · Napoli · 80125",
+      "photoUrl": "/gambero/pz-diego-vitagliano-na.jpg",
       "sources": {
+        "photo": "https://restaurantguru.com/10-Diego-Vitagliano-Pizzeria-Naples",
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.8170586&mlon=14.175748#map=19/40.8170586/14.175748",
@@ -90,7 +96,11 @@
       "rating": 9,
       "rank": 6,
       "description": "Pizzaiolo dell'Anno 2025 per 50 Top Pizza.",
-      "phone": "0823 1254705"
+      "phone": "0823 1254705",
+      "photoUrl": "/gambero/pz-cambiamenti-ce.jpg",
+      "sources": {
+        "photo": "https://restaurantguru.it/Casa-Vitiello-Caserta-2"
+      }
     },
     {
       "id": "pz-tre-santi-na",
@@ -130,7 +140,9 @@
       "description": "Pizzeria contemporanea di Salvatore Lioniello, riconosciuta dalle guide per ricerca sugli impasti.",
       "phone": "081 18167658",
       "address": "Via Murelle, 1 · Succivo · 81030",
+      "photoUrl": "/gambero/pz-lioniello-ce.jpg",
       "sources": {
+        "photo": "https://thegreat.pizza/pizzerie/caserta/pizzeria-da-lioniello/",
         "location": {
           "provider": "Gambero Rosso — Pizzerie d'Italia",
           "url": "https://www.informazione.it/atc/2024/09/428dea3c-4e51-4e2b-979e-709e47709301/15_Campania_compressed.pdf",
@@ -164,7 +176,11 @@
       "rating": 8.7,
       "rank": 11,
       "description": "Al Vomero, una delle pizzerie storiche di Napoli.",
-      "phone": "081 5782248"
+      "phone": "081 5782248",
+      "photoUrl": "/gambero/pz-gorizia-na.jpg",
+      "sources": {
+        "photo": "https://www.pizzanapoletana.org/en/associati/190-pizzeria_gorizia"
+      }
     },
     {
       "id": "pz-attilio-na",
@@ -175,7 +191,11 @@
       "rating": 8.7,
       "rank": 12,
       "description": "Nel cuore della Pignasecca, gestione familiare dal 1938.",
-      "phone": "081 5520479"
+      "phone": "081 5520479",
+      "photoUrl": "/gambero/pz-attilio-na.jpg",
+      "sources": {
+        "photo": "https://www.napolidavivere.it/2021/06/06/la-migliore-pizzeria-al-mondo-si-trova-a-napoli-alla-pignasecca/"
+      }
     },
     {
       "id": "pz-da-michele-na",
@@ -212,7 +232,9 @@
       "lat": 40.8493916,
       "lng": 14.2785308,
       "address": "Via Cristoforo Marino · Napoli · 80142",
+      "photoUrl": "/gambero/pz-carmnella-na.jpg",
       "sources": {
+        "photo": "https://www.carmnella.net/",
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.8493916&mlon=14.2785308#map=19/40.8493916/14.2785308",
@@ -229,7 +251,11 @@
       "rating": 8.9,
       "rank": 15,
       "description": "Fratelli Salvo, tecnica e materia prima ai massimi livelli.",
-      "phone": "081 275306"
+      "phone": "081 275306",
+      "photoUrl": "/gambero/pz-i-tigli-non.jpg",
+      "sources": {
+        "photo": "https://www.pizzeriasalvo.it/la-nostra-storia/"
+      }
     },
     {
       "id": "rp-torre-saracino-na",
@@ -367,15 +393,15 @@
       "rank": 8,
       "description": "A Palazzo Donn'Anna, sul mare di Posillipo, cucina partenopea creativa.",
       "phone": "081 5757538",
-      "lat": 40.8483264,
-      "lng": 14.2543424,
-      "address": "Piazza San Domenico Maggiore · Napoli · 80130",
+      "address": "Via Posillipo, 16/C · Napoli · 80123",
+      "photoUrl": "/gambero/rp-palazzo-petrucci-na.jpg",
       "sources": {
         "location": {
-          "provider": "OpenStreetMap Nominatim",
-          "url": "https://www.openstreetmap.org/?mlat=40.8483264&mlon=14.2543424#map=19/40.8483264/14.2543424",
+          "provider": "Palazzo Petrucci",
+          "url": "https://palazzopetrucci.it/chi-siamo/",
           "verifiedAt": "2026-09-09"
-        }
+        },
+        "photo": "https://www.viamichelin.fr/cartes-plans/restaurants/poi/napoli-80123-3ev3eyz"
       }
     },
     {
@@ -460,13 +486,15 @@
       "phone": "081 7642565",
       "lat": 40.8296736,
       "lng": 14.2481323,
-      "address": "Via Partenope · Napoli · 80121",
+      "address": "Via Borgo Marinari, 1 · Napoli · 80132",
+      "photoUrl": "/gambero/rp-zi-teresa-na.jpg",
       "sources": {
         "location": {
-          "provider": "OpenStreetMap Nominatim",
-          "url": "https://www.openstreetmap.org/?mlat=40.8296736&mlon=14.2481323#map=19/40.8296736/14.2481323",
+          "provider": "Ristorante Zi Teresa",
+          "url": "https://www.ziteresa.it/contatti/",
           "verifiedAt": "2026-09-09"
-        }
+        },
+        "photo": "https://www.repubblica.it/sapori/2017/03/21/foto/foto_passeggiata_sul_lungomare_napoletano-161007883/1/"
       }
     },
     {
@@ -503,7 +531,9 @@
       "lat": 40.844612,
       "lng": 14.2497722,
       "address": "Piazza Carità, 22 · Napoli · 80134",
+      "photoUrl": "/gambero/tr-nennella-na.jpg",
       "sources": {
+        "photo": "https://amoitalia.com/area/campania/napoli/trattoria-da-nennella/",
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.844612&mlon=14.2497722#map=19/40.844612/14.2497722",
@@ -547,7 +577,9 @@
       "lat": 40.8366061,
       "lng": 14.2440842,
       "address": "Via Giovanni Nicotera, 13 · Napoli · 80132",
+      "photoUrl": "/gambero/tr-la-mattonella-na-clean.jpg",
       "sources": {
+        "photo": "https://www.airial.travel/restaurants/italy/naples/osteria-della-mattonella-0wwT8FQy",
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.8366061&mlon=14.2440842#map=19/40.8366061/14.2440842",
@@ -798,7 +830,11 @@
       "rating": 8.2,
       "rank": 4,
       "description": "Macelleria con cucina, carne fresca e fritti fatti a mano.",
-      "phone": "081 7754631"
+      "phone": "081 7754631",
+      "photoUrl": "/gambero/rc-egidio-portici-na.jpg",
+      "sources": {
+        "photo": "https://restaurantguru.it/Grande-Macelleria-Egidio-Portici"
+      }
     },
     {
       "id": "rc-blackburger-na",
@@ -809,7 +845,11 @@
       "rating": 8.2,
       "rank": 5,
       "description": "Hamburgeria con prodotti campani e carni di qualità.",
-      "phone": "339 3525163"
+      "phone": "339 3525163",
+      "photoUrl": "/gambero/rc-blackburger-na.jpg",
+      "sources": {
+        "photo": "https://restaurantguru.it/Blackburger-Frattamaggiore"
+      }
     },
     {
       "id": "rc-belfiore-na",
@@ -960,7 +1000,9 @@
       "lat": 40.1864702,
       "lng": 15.129431,
       "address": "Via Chiuse · Marina di Casal Velino · 84040",
+      "photoUrl": "/gambero/ag-zio-cristoforo-sa.jpg",
       "sources": {
+        "photo": "https://www.hrs.com/it/hotel/256885",
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.1864702&mlon=15.129431#map=19/40.1864702/15.129431",
@@ -1002,7 +1044,9 @@
       "lat": 40.6073603,
       "lng": 14.3759101,
       "address": "Via Nastro Azzurro · Massa Lubrense · 80064",
+      "photoUrl": "/gambero/ag-fattoria-terranova-na.jpg",
       "sources": {
+        "photo": "https://www.thefork.co.uk/restaurant/agriturismo-fattoria-terranova-r202034",
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.6073603&mlon=14.3759101#map=19/40.6073603/14.3759101",
@@ -1054,7 +1098,9 @@
       "lat": 40.8512861,
       "lng": 14.2580195,
       "address": "Via dei Tribunali, 94 · Napoli · 80138",
+      "photoUrl": "/gambero/sf-di-matteo-na.jpg",
       "sources": {
+        "photo": "https://napoli.repubblica.it/dossier-adv/eccellenze-della-campania/2020/02/10/news/alla_pizzeria_di_matteo_a_via_tribunali_il_garzone_salvatore_guida_la_dinastia-248251438/",
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.8512861&mlon=14.2580195#map=19/40.8512861/14.2580195",
@@ -1096,6 +1142,7 @@
       "lat": 40.8374674,
       "lng": 14.2482552,
       "address": "Piazza Trieste e Trento, 53 · Napoli · 80132",
+      "photoUrl": "/gambero/sf-esterina-sorbillo-na-clean.png",
       "sources": {
         "location": {
           "provider": "OpenStreetMap Nominatim",
@@ -1163,9 +1210,11 @@
       "description": "Sfizi fritti e cuoppo gourmet, materie prime selezionate.",
       "phone": "081 405141",
       "address": "Via Toledo, 206 · Napoli · 80132",
+      "photoUrl": "/gambero/sf-passione-di-sofi-na.jpg",
       "sources": {
         "location": "https://www.touringclub.it/destinazioni/napoli/mangiare/170713-la-passione-di-sofi",
-        "phone": "https://www.touringclub.it/destinazioni/napoli/mangiare/170713-la-passione-di-sofi"
+        "phone": "https://www.touringclub.it/destinazioni/napoli/mangiare/170713-la-passione-di-sofi",
+        "photo": "https://passionedisofi.restaurants-us.com/"
       }
     }
   ]

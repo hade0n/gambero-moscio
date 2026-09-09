@@ -103,3 +103,22 @@ nessun overflow. Nuova dipendenza: nessuna (solo hook di `framer-motion` già pr
 - Verifica ancora da fare a mano: **dashboard backend dietro login** (create/update/delete
   locale, ReviewPicker, salvataggio recensione Ilenia/Salvatore, upload immagini) — le
   modifiche sono presentazionali e il build è verde, ma non ho effettuato il login.
+
+## Revisione finale — controllo di tutta l'app (§20 del brief Wheeler)
+
+| Verifica | Esito |
+|---|---|
+| Animazioni coerenti tra loro | ✅ tutte da `src/lib/motion.js` (DUR/EASE/preset) + Framer Motion; nessun secondo sistema |
+| Il 3D non sembra di un'altra app | ✅ 3D solo nel Wheeler (perspective + tilt ±5°), palette PNDR; spento su touch e reduced-motion |
+| Wheeler = componente premium | ✅ cornice a livelli concentrici, puntatore fisico + tick, spin con easing fisico, micro-blur da velocità, idle vivo |
+| Niente animazioni eccessive | ✅ reveal one-shot, stagger cap 8; solo 2 loop infiniti (idle del Wheeler), transform/opacity |
+| Niente layout shift | ✅ ogni `<img>` ha spazio riservato (aspect-ratio o h fissa); header ad altezza fissa; motion solo transform/opacity |
+| Niente lampeggii | ✅ nessun loop di opacità aggressivo; `animate-pulse` solo negli skeleton, disattivato con motion-reduce |
+| Niente transizioni lente | ✅ 0,14–0,42s ovunque; unica lunga = spin 4,6s (funzionale, con fast-forward in reduced-motion) |
+| Mobile perfettamente utilizzabile | ✅ 360 / 390 / 430 senza overflow; Wheeler 304px; tilt e blur disattivati su pointer coarse |
+| Desktop reso premium | ✅ tilt 3D del Wheeler, hover-elevation delle card, segmented control animato |
+| Performance elevate | ✅ +~48KB gz totali (Framer Motion, unica dipendenza nuova); blur ≤1,6px solo desktop; 1 solo layer rotante con `will-change`; spring solo su `mousemove` |
+
+`npm run build`: 438 moduli, verde. Nessuna modifica a business logic, dati, API, Blob,
+auth, ranking, `ratings.js`/`ratingUtils.js`, `useGamberoWheel`, Fisher-Yates, winner math,
+routing, contratti dei form. `src/data/*` e `public/gambero/*` e `AGENTS.md` non toccati.

@@ -4,6 +4,7 @@ import CategoryFilter from '../components/CategoryFilter.jsx';
 import RestaurantList from '../components/RestaurantList.jsx';
 import RestaurantModal from '../components/RestaurantModal.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import { RestaurantListSkeleton } from '../components/Skeleton.jsx';
 import { useRestaurants } from '../hooks/useRestaurants.js';
 import { compareByRanking } from '../utils/ratings.js';
 import { ALL } from '../config/categories.js';
@@ -33,28 +34,25 @@ export default function Home() {
       <Header />
       <CategoryFilter active={activeCategory} onChange={setActiveCategory} />
 
-      <main className="mx-auto max-w-content px-3 py-6 md:px-6 md:py-10">
-        <div className="flex items-baseline justify-between gap-3">
-          <h1 className="font-display text-2xl font-bold sm:text-[2rem]">Classifica</h1>
+      <main className="mx-auto max-w-content px-4 py-7 md:px-6 md:py-12">
+        <div className="flex items-end justify-between gap-3">
+          <h1 className="font-display text-[1.75rem] font-bold leading-tight sm:text-[2.25rem]">
+            Classifica
+          </h1>
           {showList && count > 0 && (
-            <p className="text-sm font-medium text-brown-soft">
+            <p className="pb-1 text-sm font-medium tabular text-brown-soft">
               {count === 1 ? '1 locale' : `${count} locali`}
             </p>
           )}
         </div>
-        <p className="mt-1 text-sm text-brown-soft">
+        <p className="mt-1.5 max-w-prose text-sm text-brown-soft sm:text-[0.95rem]">
           {activeCategory === ALL
             ? 'Tutti i locali recensiti, ordinati per voto complessivo.'
             : `${activeCategory}, ordinati per voto complessivo.`}
         </p>
 
-        <div className="mt-6">
-          {status === 'loading' && (
-            <EmptyState
-              title="Caricamento dei locali in corso…"
-              description="Stiamo recuperando la classifica dall’archivio."
-            />
-          )}
+        <div className="mt-7">
+          {status === 'loading' && <RestaurantListSkeleton />}
 
           {status === 'error' && (
             <EmptyState

@@ -1,9 +1,12 @@
+import { motion } from 'framer-motion';
 import RestaurantCard from './RestaurantCard.jsx';
 import EmptyState from './EmptyState.jsx';
+import { listItem, inViewOnce } from '../lib/motion.js';
 
 /**
  * Griglia responsive delle schede locale, già ordinate dalla pagina.
- * Gestisce gli stati vuoti con i testi previsti dal brief.
+ * Reveal per elemento su `whileInView`: la coda non cresce col numero di card
+ * (una lista di 30 non fa 30 animazioni ritardate).
  */
 export default function RestaurantList({ restaurants, onOpen, isFiltered }) {
   if (restaurants.length === 0) {
@@ -26,9 +29,16 @@ export default function RestaurantList({ restaurants, onOpen, isFiltered }) {
   return (
     <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
       {restaurants.map((restaurant, index) => (
-        <li key={restaurant.id} className="h-full">
+        <motion.li
+          key={restaurant.id}
+          className="h-full"
+          variants={listItem}
+          initial="hidden"
+          whileInView="visible"
+          viewport={inViewOnce}
+        >
           <RestaurantCard restaurant={restaurant} position={index + 1} onOpen={onOpen} />
-        </li>
+        </motion.li>
       ))}
     </ul>
   );

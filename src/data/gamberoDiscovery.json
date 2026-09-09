@@ -466,7 +466,9 @@
       "description": "Sulla spiaggia di Amalfi, pescato locale e Slow Food.",
       "phone": "089 871129",
       "address": "Viale della Regione, 4 · Amalfi · 84011",
+      "photoUrl": "/gambero/rp-marina-grande-sa.jpg",
       "sources": {
+        "photo": "https://www.viamichelin.com/maps/restaurants/poi/amalfi-84011-3a7bjdr",
         "location": {
           "provider": "Sito ufficiale Ristorante Marina Grande",
           "url": "https://www.ristorantemarinagrande.com/en/book_restaurant.php",
@@ -510,7 +512,9 @@
       "lat": 40.8593641,
       "lng": 14.2622323,
       "address": "Via Foria, 180 · Napoli · 80137",
+      "photoUrl": "/gambero/rp-figlia-marenaro-na-clean.jpg",
       "sources": {
+        "photo": "https://www.napolidavivere.it/2021/03/30/la-zuppa-di-cozze-del-giovedi-santo-questanno-il-delivery-de-a-figlia-do-marenaro/",
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.8593641&mlon=14.2622323#map=19/40.8593641/14.2622323",
@@ -609,9 +613,11 @@
       "description": "Nel mercato rionale della Torretta, cucina napoletana di tradizione e piatti del giorno.",
       "phone": "081 682844",
       "address": "Via Ferdinando Galiani, 30 · Napoli · 80122",
+      "photoUrl": "/gambero/tr-nonna-anna-na.jpg",
       "sources": {
         "location": "https://accademiaitalianadellacucina.it/it/ristoranti/ristorante/1412-cibi-cotti-la-nonna",
-        "phone": "https://accademiaitalianadellacucina.it/it/ristoranti/ristorante/1412-cibi-cotti-la-nonna"
+        "phone": "https://accademiaitalianadellacucina.it/it/ristoranti/ristorante/1412-cibi-cotti-la-nonna",
+        "photo": "https://www.makemytrip.com/tripideas/attractions/cibi-cotti"
       }
     },
     {
@@ -623,7 +629,11 @@
       "rating": 8.5,
       "rank": 6,
       "description": "Piccola perla del Vomero a gestione familiare, poche coperti.",
-      "phone": "081 5567070"
+      "phone": "081 5567070",
+      "photoUrl": "/gambero/tr-donna-teresa-na.jpg",
+      "sources": {
+        "photo": "https://osteriadonnateresa.restaurants-us.com/"
+      }
     },
     {
       "id": "tr-i-soliti-na",
@@ -652,7 +662,9 @@
       "lat": 40.8508372,
       "lng": 14.2570224,
       "address": "Via dei Tribunali, 330 · Napoli · 80130",
+      "photoUrl": "/gambero/tr-carmine-na.png",
       "sources": {
+        "photo": "https://mindtrip.ai/restaurant/naples-campania/antica-trattoria-da-carmine/re-VLYbVN1D",
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.8508372&mlon=14.2570224#map=19/40.8508372/14.2570224",
@@ -751,7 +763,9 @@
       "description": "Cucina partenopea e di mare a Capodimonte, in un ambiente informale.",
       "phone": "081 17783715",
       "address": "Via Miano, 17 · Napoli · 80131",
+      "photoUrl": "/gambero/os-taverna-borboni-na.jpg",
       "sources": {
+        "photo": "https://www.thefork.it/ristorante/taverna-dei-borboni-r855145",
         "location": {
           "provider": "Tripadvisor — struttura rivendicata",
           "url": "https://www.tripadvisor.com/Restaurant_Review-g187785-d34113539-Reviews-Taverna_dei_borboni-Naples_Province_of_Naples_Campania.html",

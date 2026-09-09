@@ -725,7 +725,9 @@
       "description": "Nel centro storico, cucina napoletana e carta dei vini curata.",
       "phone": "379 108 2953",
       "address": "Via Giovanni Paladino, 3 · Napoli · 80138",
+      "photoUrl": "/gambero/os-paladino-na.jpg",
       "sources": {
+        "photo": "https://www.thefork.it/ristorante/osteria-paladino-r853918",
         "location": {
           "provider": "Sito ufficiale Osteria Paladino",
           "url": "https://www.osteriapaladino.com/menu.html",

@@ -120,7 +120,7 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
 
   const countLine =
     phase === 'idle' && wheel.types.length > 0
-      ? `Il Gambero sceglie tra ${wheel.types.length} tipologie e i migliori locali della Campania.`
+      ? `Il Gambero sceglie tra ${wheel.types.length} tipologie e i locali selezionati della Campania.`
       : phase === 'type-reveal' || phase === 'place-spin'
         ? `${wheel.candidates.length} locali sono entrati nella sfida.`
         : null;

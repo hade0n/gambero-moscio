@@ -256,12 +256,14 @@
       "lat": 40.5857134,
       "lng": 14.3535263,
       "address": "Via Amerigo Vespucci · Massa Lubrense · 80061",
+      "photoUrl": "/gambero/rp-quattro-passi-na.jpg",
       "sources": {
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.5857134&mlon=14.3535263#map=19/40.5857134/14.3535263",
           "verifiedAt": "2026-09-09"
-        }
+        },
+        "photo": "https://www.identitagolose.it/sito/it/207/23914/guida-alla-guida/i-ristoranti-dellestate-dalla-penisola-sorrentina-al-cilento.html"
       }
     },
     {
@@ -300,12 +302,14 @@
       "lat": 40.8405418,
       "lng": 14.2557109,
       "address": "Via Cristoforo Colombo · Napoli · 80133",
+      "photoUrl": "/gambero/rp-il-comandante-na.jpg",
       "sources": {
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.8405418&mlon=14.2557109#map=19/40.8405418/14.2557109",
           "verifiedAt": "2026-09-09"
-        }
+        },
+        "photo": "https://www.timeout.com/naples/hotels/romeo-hotel"
       }
     },
     {
@@ -317,7 +321,11 @@
       "rating": 9,
       "rank": 5,
       "description": "Prima stella Michelin della Costiera, cucina di pesce e agrumi.",
-      "phone": "089 871029"
+      "phone": "089 871029",
+      "photoUrl": "/gambero/rp-la-caravella-sa.jpg",
+      "sources": {
+        "photo": "https://www.oraviaggiando.it/ristorante-la-caravella-amalfi/9996674/recensione/"
+      }
     },
     {
       "id": "rp-la-sponda-sa",

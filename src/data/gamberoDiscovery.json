@@ -651,8 +651,12 @@
       "name": "Cammarota Spritz / Osteria",
       "rating": 8,
       "rank": 2,
-      "description": "Ai Quartieri Spagnoli, cucina di casa a prezzi popolari.",
-      "phone": "320 2775687"
+      "description": "Ai Quartieri Spagnoli, storico indirizzo per spritz e aperitivo informale.",
+      "phone": "320 2775687",
+      "photoUrl": "/gambero/os-cammarota-na.jpg",
+      "sources": {
+        "photo": "https://corrieredelmezzogiorno.corriere.it/fotogallery/campania/2012/12/cammarata/cammarata-spritz-quartieri-spagnoli-2113011762891.shtml"
+      }
     },
     {
       "id": "os-vecchia-cantina-na",
@@ -741,6 +745,7 @@
       "phone": "081 8273538",
       "address": "Via Lavinaio 1° Tratto, 200 · Ottaviano · 80044",
       "website": "https://www.bifulco.it/",
+      "photoUrl": "/gambero/rc-bifulco-na.jpg",
       "sources": {
         "location": {
           "provider": "Touring Club Italiano",
@@ -751,7 +756,8 @@
           "provider": "Touring Club Italiano",
           "url": "https://www.touringclub.it/destinazioni/ottaviano/mangiare/232989-braceria-bifulco",
           "verifiedAt": "2026-09-09"
-        }
+        },
+        "photo": "https://www.agrodolce.it/locale/braceria-bifulco-ottaviano-napoli"
       }
     },
     {

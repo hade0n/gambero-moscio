@@ -262,10 +262,12 @@ sempre riferito all'indecisione, mai a persone o attività.
 
 ### Ruota — selettore centrale
 Il Gambero resta nel branding, nel copy e nel sistema di rating; non copre i segmenti della
-ruota. Un ago terracotta centrale ruota e indica il segmento vincente. Segmenti **fissi**,
-disegnati in senso orario da ore 12. Angolo: `rotation ≡ (i+0.5)·(360/n) (mod 360)` + 4–6 giri
-+ scarto `< ±0.25·seg` (non cambia il vincitore). Le rotazioni non si azzerano mai (nessun
-salto). Verificato: 5200/5200 spin (indice = segmento indicato) + 400 pipeline complete.
+ruota. Un ago centrale ruota e indica il segmento vincente. I nomi delle tipologie e dei sei
+candidati restano in una griglia esterna, leggibile e nell'ordine dei segmenti: non sono
+compressi o ruotati nel quadrante. Segmenti **fissi**, disegnati in senso orario da ore 12.
+Angolo: `rotation ≡ (i+0.5)·(360/n) (mod 360)` + 4–6 giri + scarto `< ±0.25·seg` (non cambia
+il vincitore). Le rotazioni non si azzerano mai (nessun salto). Verificato: 5200/5200 spin
+(indice = segmento indicato) + 400 pipeline complete.
 
 ### Modal
 `role="dialog"` + `aria-modal`, ESC, scroll-lock del body, focus iniziale sulla X e

@@ -25,6 +25,39 @@ const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
 const EXIT_MS = 200;
 
+function OptionRail({ items, activeId, label }) {
+  if (!items.length) return null;
+
+  return (
+    <section className="mt-6 w-full text-left" aria-label={label}>
+      <p className="mb-2 text-center text-xs font-bold uppercase tracking-[0.14em] text-brown-soft">
+        {label}
+      </p>
+      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        {items.map((item, index) => {
+          const active = item.id === activeId;
+          return (
+            <li
+              key={item.id}
+              aria-current={active ? 'true' : undefined}
+              className={`min-w-0 rounded-xl border px-3 py-2.5 transition-colors duration-150 ${
+                active
+                  ? 'border-terracotta bg-terracotta-deep text-white shadow-xs'
+                  : 'border-brown/10 bg-cream-soft text-brown'
+              }`}
+            >
+              <span className={`mr-2 text-[0.68rem] font-bold tabular-nums ${active ? 'text-white/75' : 'text-brown-soft'}`}>
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span className="text-sm font-semibold leading-snug">{item.label}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
+
 export default function GamberoModal({ open, onClose, triggerRef }) {
   const dialogRef = useRef(null);
   const fallbackTriggerRef = useRef(null);
@@ -102,6 +135,24 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
   const showTypeWheel = phase === 'idle' || phase === 'type-spin' || phase === 'type-reveal';
   const showPlaceWheel = phase === 'place-spin';
   const showWheel = showTypeWheel || showPlaceWheel;
+  const wheelItems = showPlaceWheel
+    ? wheel.candidates.map((place) => ({ id: place.id, label: place.name }))
+    : wheel.types;
+  const selectedOptionId = phase === 'type-reveal' ? wheel.pickedType : null;
+  const centerTitle =
+    phase === 'type-reveal'
+      ? wheel.pickedType
+      : phase === 'place-spin'
+        ? String(wheel.candidates.length)
+        : 'Il Gambero';
+  const centerDetail =
+    phase === 'type-reveal'
+      ? 'tipologia scelta'
+      : phase === 'place-spin'
+        ? 'locali in sfida'
+        : phase === 'type-spin'
+          ? 'sta scegliendo'
+          : 'decide per voi';
 
   const headline =
     phase === 'empty'
@@ -173,7 +224,18 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
           </button>
         </div>
 
-        <div className="mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center py-6 text-center">
+        <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center py-6 text-center">
+          <ol className="mb-6 flex items-center justify-center gap-3 text-xs font-bold uppercase tracking-[0.1em] text-brown-soft sm:gap-5">
+            <li className="flex items-center gap-2 text-brown">
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-terracotta-deep text-[0.68rem] text-white">1</span>
+              Cosa mangiare
+            </li>
+            <li className="h-px w-6 bg-brown/20 sm:w-10" aria-hidden="true" />
+            <li className={`flex items-center gap-2 ${showPlaceWheel || phase === 'result' ? 'text-brown' : ''}`}>
+              <span className={`flex h-6 w-6 items-center justify-center rounded-full text-[0.68rem] ${showPlaceWheel || phase === 'result' ? 'bg-terracotta-deep text-white' : 'bg-brown/10 text-brown-soft'}`}>2</span>
+              Dove andare
+            </li>
+          </ol>
           <h2
             id={headingId}
             className="font-display text-[1.9rem] font-bold leading-[1.05] sm:text-4xl"
@@ -187,18 +249,24 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
           ) : null}
 
           {showWheel && (
-            <div className="mt-7 w-full">
+            <div className="mt-6 w-full">
               <GamberoWheel
-                items={showPlaceWheel ? wheel.candidates.map((p) => ({ id: p.id, label: p.name })) : wheel.types}
+                items={wheelItems}
                 rotation={showPlaceWheel ? wheel.placeRotation : wheel.typeRotation}
                 spinning={wheel.isSpinning}
                 durationMs={wheel.spinDurationMs}
-                multilineLabels={showTypeWheel}
+                centerTitle={centerTitle}
+                centerDetail={centerDetail}
                 ariaLabel={
                   showPlaceWheel
                     ? `Ruota con ${wheel.candidates.length} locali`
                     : `Ruota con ${wheel.types.length} tipologie`
                 }
+              />
+              <OptionRail
+                items={wheelItems}
+                activeId={selectedOptionId}
+                label={showPlaceWheel ? 'I locali in gara' : 'Le tipologie disponibili'}
               />
             </div>
           )}

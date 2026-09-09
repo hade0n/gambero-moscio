@@ -1,61 +1,15 @@
 /**
- * La ruota (SVG) con un selettore rotante centrale.
+ * Quadrante del Food Picker.
  *
- * - i segmenti sono FISSI, disegnati in senso orario da ore 12;
- * - il selettore parte da ore 12 e ruota fino al segmento selezionato;
- * - la matematica in `useGamberoWheel` calcola l'angolo in modo che l'ago punti
- *   sempre all'interno del segmento vincente.
+ * I segmenti sono fissi e iniziano da ore 12; il selettore ruota fino al
+ * segmento scelto. I nomi non vengono compressi dentro la ruota: restano nella
+ * lista esterna, dove sono leggibili su ogni schermo.
  */
 
 const C = 100;
 const R = 94;
-
-// Tonalità derivate dalla palette PNDR: tutte reggono testo in Warm Brown.
 const TONES = ['#FFF9F1', '#E5EFD8'];
 const ODD_TONE = '#F7E7CE';
-
-const LEAD_WORD =
-  /^(ristorante|trattoria|pizzeria|osteria|hosteria|paninoteca|agriturismo|antica|braceria)\s+/i;
-
-function toneFor(i, n) {
-  if (n % 2 === 1 && i === n - 1) return ODD_TONE;
-  return TONES[i % 2];
-}
-
-function labelSpec(n) {
-  if (n <= 4) return { max: 18, size: 11.5 };
-  if (n <= 6) return { max: 15, size: 10.5 };
-  if (n <= 9) return { max: 18, size: 9 };
-  if (n <= 14) return { max: 10, size: 7.6 };
-  return { max: 8, size: 6.6 };
-}
-
-function shortLabel(text, max) {
-  let s = String(text || '').trim();
-  if (s.length > max) {
-    const stripped = s.replace(LEAD_WORD, '');
-    if (stripped.length >= 2) s = stripped;
-  }
-  if (s.length > max) s = `${s.slice(0, max - 1).trimEnd()}…`;
-  return s;
-}
-
-function labelLines(text, max, multiline) {
-  const label = shortLabel(text, max);
-  if (!multiline || label.length <= 12 || !label.includes(' ')) return [label];
-
-  const words = label.split(/\s+/);
-  let first = '';
-  let second = '';
-  for (const word of words) {
-    if (!first || `${first} ${word}`.length <= Math.ceil(label.length / 2)) {
-      first = `${first} ${word}`.trim();
-    } else {
-      second = `${second} ${word}`.trim();
-    }
-  }
-  return second ? [first, second] : [label];
-}
 
 const rad = (deg) => (deg * Math.PI) / 180;
 const point = (cx, cy, r, angleDeg) => [
@@ -63,98 +17,59 @@ const point = (cx, cy, r, angleDeg) => [
   cy - r * Math.cos(rad(angleDeg)),
 ];
 
+function toneFor(index, count) {
+  if (count % 2 === 1 && index === count - 1) return ODD_TONE;
+  return TONES[index % 2];
+}
+
 export default function GamberoWheel({
   items = [],
   rotation = 0,
   spinning = false,
   durationMs = 4600,
   ariaLabel,
-  multilineLabels = false,
+  centerTitle = 'Il Gambero',
+  centerDetail = 'sceglie',
 }) {
-  const n = items.length;
-  const seg = n > 0 ? 360 / n : 360;
-  const { max, size } = labelSpec(Math.max(n, 1));
+  const count = items.length;
+  const segmentAngle = count > 0 ? 360 / count : 360;
 
   return (
-    <div className="relative mx-auto aspect-square w-[min(86vw,340px)] sm:w-[360px] lg:w-[400px]">
+    <div className="relative mx-auto aspect-square w-[min(82vw,312px)] sm:w-[340px] lg:w-[370px]">
       <svg
         viewBox="0 0 200 200"
-        className="h-full w-full [filter:drop-shadow(0_12px_26px_rgba(58,42,34,0.16))]"
+        className="h-full w-full [filter:drop-shadow(0_10px_24px_rgba(58,42,34,0.12))]"
         role="img"
-        aria-label={ariaLabel || (n > 0 ? `Ruota con ${n} opzioni` : 'Ruota vuota')}
+        aria-label={ariaLabel || (count > 0 ? `Quadrante con ${count} opzioni` : 'Quadrante vuoto')}
       >
-        {/* bordo esterno */}
         <circle cx={C} cy={C} r={R + 4} fill="#385C32" />
 
-        {/* segmenti FISSI */}
-        {n <= 1 ? (
-          <circle
-            cx={C}
-            cy={C}
-            r={R}
-            fill={n === 1 ? TONES[0] : '#F0E6D5'}
-            stroke="#FCF3E6"
-            strokeWidth="1.5"
-          />
+        {count <= 1 ? (
+          <circle cx={C} cy={C} r={R} fill={count === 1 ? TONES[0] : '#F0E6D5'} />
         ) : (
-          items.map((it, i) => {
-            const a0 = i * seg;
-            const a1 = (i + 1) * seg;
-            const [x0, y0] = point(C, C, R, a0);
-            const [x1, y1] = point(C, C, R, a1);
-            const large = a1 - a0 > 180 ? 1 : 0;
+          items.map((item, index) => {
+            const start = index * segmentAngle;
+            const end = (index + 1) * segmentAngle;
+            const [x0, y0] = point(C, C, R, start);
+            const [x1, y1] = point(C, C, R, end);
             return (
               <path
-                key={it.id}
-                d={`M ${C} ${C} L ${x0.toFixed(3)} ${y0.toFixed(3)} A ${R} ${R} 0 ${large} 1 ${x1.toFixed(
-                  3,
-                )} ${y1.toFixed(3)} Z`}
-                fill={toneFor(i, n)}
+                key={item.id}
+                d={`M ${C} ${C} L ${x0.toFixed(3)} ${y0.toFixed(3)} A ${R} ${R} 0 0 1 ${x1.toFixed(3)} ${y1.toFixed(3)} Z`}
+                fill={toneFor(index, count)}
                 stroke="#FCF3E6"
-                strokeWidth="1.1"
+                strokeWidth="1.25"
               >
-                <title>{it.label}</title>
+                <title>{item.label}</title>
               </path>
             );
           })
         )}
 
-        {n > 1 &&
-          items.map((it, i) => {
-            const a = (i + 0.5) * seg;
-            const flip = a > 90 && a < 270;
-            const ly = C - R * 0.64;
-            const lines = labelLines(it.label, max, multilineLabels);
-            const firstLineY = ly - ((lines.length - 1) * size * 0.5);
-            return (
-              <g key={`${it.id}-label`} transform={`rotate(${a} ${C} ${C})`} aria-hidden="true">
-                <text
-                  x={C}
-                  y={firstLineY}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  transform={flip ? `rotate(180 ${C} ${ly})` : undefined}
-                  fontSize={size}
-                  fontWeight="600"
-                  fill="#3A2A22"
-                  style={{ fontFamily: "'Karla', system-ui, -apple-system, sans-serif" }}
-                >
-                  {lines.map((line, lineIndex) => (
-                    <tspan key={`${it.id}-line-${lineIndex}`} x={C} dy={lineIndex === 0 ? 0 : size * 0.95}>
-                      {line}
-                    </tspan>
-                  ))}
-                </text>
-              </g>
-            );
-          })}
-
-        {/* alone del mozzo, per staccare il selettore dai segmenti */}
-        <circle cx={C} cy={C} r="30" fill="#FFF9F1" opacity="0.92" />
-        <circle cx={C} cy={C} r="30" fill="none" stroke="#385C32" strokeOpacity="0.2" strokeWidth="1" />
+        <circle cx={C} cy={C} r="33" fill="#FFF9F1" opacity="0.96" />
+        <circle cx={C} cy={C} r="33" fill="none" stroke="#385C32" strokeOpacity="0.18" strokeWidth="1" />
       </svg>
 
-      {/* Ago leggero: parte da ore 12 e gira senza coprire i nomi dei locali. */}
       <svg
         viewBox="0 0 200 200"
         className="pointer-events-none absolute inset-0 z-10 h-full w-full"
@@ -169,12 +84,22 @@ export default function GamberoWheel({
               : 'none',
           }}
         >
-          <line x1={C} y1={C} x2={C} y2="43" stroke="#BB5A20" strokeWidth="3" strokeLinecap="round" />
-          <circle cx={C} cy="43" r="4.5" fill="#BB5A20" stroke="#FFF9F1" strokeWidth="2" />
+          <line x1={C} y1={C} x2={C} y2="40" stroke="#6B564B" strokeWidth="2.25" strokeLinecap="round" />
+          <circle cx={C} cy="40" r="3.5" fill="#5F8F3A" stroke="#FFF9F1" strokeWidth="1.5" />
         </g>
-        <circle cx={C} cy={C} r="10" fill="#FFF9F1" stroke="#385C32" strokeOpacity="0.4" strokeWidth="1.5" />
-        <circle cx={C} cy={C} r="3" fill="#BB5A20" />
+        <circle cx={C} cy={C} r="8.5" fill="#FFF9F1" stroke="#385C32" strokeOpacity="0.42" strokeWidth="1.5" />
       </svg>
+
+      <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-[24%] text-center" aria-hidden="true">
+        <div>
+          <p className="font-display text-lg font-semibold leading-tight text-brown sm:text-xl">{centerTitle}</p>
+          {centerDetail && (
+            <p className="mt-1 text-[0.68rem] font-bold uppercase tracking-[0.12em] text-brown-soft">
+              {centerDetail}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

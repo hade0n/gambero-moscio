@@ -250,8 +250,9 @@ qualche parolaccia leggera; il resto resta pulito.
 - **Database discovery separato** (`src/data/gamberoDiscovery.json` + `src/utils/discovery.js`):
   locali reali della Campania per tipologia — non solo quelli recensiti dall'app.
 - Un ago centrale discreto ruota sulla ruota; il Gambero resta nel branding e nei rating,
-  senza coprire i segmenti. Selezione uniforme (`crypto.getRandomValues`), il rating non conta.
-  Il segmento indicato **corrisponde sempre** al risultato (verificato: 5200/5200 spin).
+  senza coprire i segmenti. Le opzioni restano in una griglia leggibile, nell'ordine del
+  quadrante. Selezione uniforme (`crypto.getRandomValues`), il rating non conta. Il segmento
+  indicato **corrisponde sempre** al risultato (verificato: 5200/5200 spin).
 - Se il locale è **già recensito su PNDR** (match robusto per nome + città) la card lo
   dichiara con un badge «Ci siete già stati 👀» e mostra i voti di Ilenia, Salvatore e del
   pubblico (`ShrimpRating`), col nome ufficiale e la foto dal database recensioni.

@@ -11,6 +11,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "audit:gambero": "node scripts/audit-gambero-db.mjs",
+    "geocode:gambero": "node scripts/geocode-gambero.mjs",
     "enrich:gambero": "node scripts/enrich-gambero-db.mjs",
     "photos:gambero": "node scripts/fetch-photos-commons.mjs && node scripts/fetch-photos-sites.mjs"
   },

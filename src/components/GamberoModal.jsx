@@ -193,6 +193,7 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
                 rotation={showPlaceWheel ? wheel.placeRotation : wheel.typeRotation}
                 spinning={wheel.isSpinning}
                 durationMs={wheel.spinDurationMs}
+                multilineLabels={showTypeWheel}
                 ariaLabel={
                   showPlaceWheel
                     ? `Ruota con ${wheel.candidates.length} locali`

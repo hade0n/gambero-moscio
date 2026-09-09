@@ -1,7 +1,7 @@
 {
   "version": 1,
   "region": "Campania",
-  "updatedAt": "2026-09-08",
+  "updatedAt": "2026-09-09",
   "note": "Database di discovery del Gambero: locali REALI della Campania, curati per tipologia. È una sorgente separata dal database delle recensioni PNDR. `rating` è una valutazione indicativa (0-10) basata su guide di settore per i locali più documentati; `null` dove non verificabile. `lat`, `lng`, `phone`, `photoUrl`, `website`, `address` sono predisposti a `null` in `src/utils/discovery.js`: vanno popolati da una sorgente ufficiale (sito ufficiale del locale, elenchi verificati, Google Places API), MAI inventati. Le foto in `public/gambero/` sono scaricate da sorgenti pubbliche (Wikimedia Commons, sito ufficiale del locale) e verificate a vista una per una. `mapsUrl` / `directionsUrl` sono deep-link di ricerca Google Maps generati da nome+città.",
   "places": [
     {
@@ -24,7 +24,17 @@
       "rating": 9.4,
       "rank": 2,
       "description": "Sul lungomare di Pozzuoli e a Napoli, tra le migliori d'Italia.",
-      "phone": "081 18581919"
+      "phone": "081 18581919",
+      "lat": 40.8170586,
+      "lng": 14.175748,
+      "address": "Via Nuova Agnano, 1 · Napoli · 80125",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8170586&mlon=14.175748#map=19/40.8170586/14.175748",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "pz-pepe-in-grani-ce",
@@ -147,9 +157,17 @@
       "rank": 13,
       "description": "Marinara e margherita, il tempio della tradizione ai Tribunali.",
       "phone": "081 5539204",
-      "lat": 40.849982,
-      "lng": 14.2632526,
-      "photoUrl": "/gambero/pz-da-michele-na.jpg"
+      "lat": 40.8497493,
+      "lng": 14.263352,
+      "photoUrl": "/gambero/pz-da-michele-na.jpg",
+      "address": "Via Cesare Sersale, 1 · Napoli · 80187",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8497493&mlon=14.263352#map=19/40.8497493/14.263352",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "pz-carmnella-na",
@@ -160,7 +178,17 @@
       "rating": 8.6,
       "rank": 14,
       "description": "A Ponticelli, quartiere popolare, tra le rivelazioni degli ultimi anni.",
-      "phone": "081 5537425"
+      "phone": "081 5537425",
+      "lat": 40.8493916,
+      "lng": 14.2785308,
+      "address": "Via Cristoforo Marino · Napoli · 80142",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8493916&mlon=14.2785308#map=19/40.8493916/14.2785308",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "pz-i-tigli-non",
@@ -194,7 +222,17 @@
       "rating": 9.3,
       "rank": 2,
       "description": "Due stelle Michelin a Nerano, vista sui Faraglioni di Capri.",
-      "phone": "081 8081271"
+      "phone": "081 8081271",
+      "lat": 40.5857134,
+      "lng": 14.3535263,
+      "address": "Via Amerigo Vespucci · Massa Lubrense · 80061",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.5857134&mlon=14.3535263#map=19/40.5857134/14.3535263",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "rp-don-alfonso-na",
@@ -205,7 +243,17 @@
       "rating": 9.3,
       "rank": 3,
       "description": "Storica meta gastronomica della costiera, materie prime dell'orto di Punta Campanella.",
-      "phone": "081 8780026"
+      "phone": "081 8780026",
+      "lat": 40.6080396,
+      "lng": 14.3739151,
+      "address": "Corso Sant'Agata, 11 · Massa Lubrense · 80064",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.6080396&mlon=14.3739151#map=19/40.6080396/14.3739151",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "rp-il-comandante-na",
@@ -216,7 +264,17 @@
       "rating": 9.2,
       "rank": 4,
       "description": "Stella Michelin all'ultimo piano dell'Hotel Romeo, vista sul golfo.",
-      "phone": "081 0175001"
+      "phone": "081 0175001",
+      "lat": 40.8405418,
+      "lng": 14.2557109,
+      "address": "Via Cristoforo Colombo · Napoli · 80133",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8405418&mlon=14.2557109#map=19/40.8405418/14.2557109",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "rp-la-caravella-sa",
@@ -260,7 +318,17 @@
       "rating": 8.9,
       "rank": 8,
       "description": "A Palazzo Donn'Anna, sul mare di Posillipo, cucina partenopea creativa.",
-      "phone": "081 5757538"
+      "phone": "081 5757538",
+      "lat": 40.8483264,
+      "lng": 14.2543424,
+      "address": "Piazza San Domenico Maggiore · Napoli · 80130",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8483264&mlon=14.2543424#map=19/40.8483264/14.2543424",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "rp-president-na",
@@ -293,7 +361,15 @@
       "rating": 8.7,
       "rank": 11,
       "description": "Istituzione di Amalfi dal 1872, pesce del giorno e tradizione.",
-      "phone": "089 871345"
+      "phone": "089 871345",
+      "address": "Via Fra Gerardo Sasso, 11 · Amalfi · 84011",
+      "sources": {
+        "location": {
+          "provider": "Sito ufficiale Da Gemma",
+          "url": "https://www.trattoriadagemma.com/",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "rp-marina-grande-sa",
@@ -304,7 +380,15 @@
       "rating": 8.6,
       "rank": 12,
       "description": "Sulla spiaggia di Amalfi, pescato locale e Slow Food.",
-      "phone": "089 871129"
+      "phone": "089 871129",
+      "address": "Viale della Regione, 4 · Amalfi · 84011",
+      "sources": {
+        "location": {
+          "provider": "Sito ufficiale Ristorante Marina Grande",
+          "url": "https://www.ristorantemarinagrande.com/en/book_restaurant.php",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "rp-zi-teresa-na",
@@ -315,7 +399,17 @@
       "rating": 8.4,
       "rank": 13,
       "description": "Sul Borgo Marinari ai piedi del Castel dell'Ovo, un pezzo di storia.",
-      "phone": "081 7642565"
+      "phone": "081 7642565",
+      "lat": 40.8296736,
+      "lng": 14.2481323,
+      "address": "Via Partenope · Napoli · 80121",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8296736&mlon=14.2481323#map=19/40.8296736/14.2481323",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "rp-figlia-marenaro-na",
@@ -326,7 +420,17 @@
       "rating": 8.4,
       "rank": 14,
       "description": "Alla Sanità/lungomare, la zuppa di cozze è leggendaria.",
-      "phone": "081 440827"
+      "phone": "081 440827",
+      "lat": 40.8593641,
+      "lng": 14.2622323,
+      "address": "Via Foria, 180 · Napoli · 80137",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8593641&mlon=14.2622323#map=19/40.8593641/14.2622323",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "tr-nennella-na",
@@ -337,7 +441,17 @@
       "rating": 8.3,
       "rank": 1,
       "description": "Ai Quartieri Spagnoli, cucina popolare, chiassosa e verace.",
-      "phone": "081 414338"
+      "phone": "081 414338",
+      "lat": 40.844612,
+      "lng": 14.2497722,
+      "address": "Piazza Carità, 22 · Napoli · 80134",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.844612&mlon=14.2497722#map=19/40.844612/14.2497722",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "tr-da-carmela-na",
@@ -348,7 +462,17 @@
       "rating": 8.5,
       "rank": 2,
       "description": "Vicino al Museo Archeologico, ragù, pasta e ricotta, pescatora.",
-      "phone": "081 5499738"
+      "phone": "081 5499738",
+      "lat": 40.8510893,
+      "lng": 14.2511477,
+      "address": "Via Conte di Ruvo, 11/12 · Napoli · 80135",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8510893&mlon=14.2511477#map=19/40.8510893/14.2511477",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "tr-la-mattonella-na",
@@ -359,7 +483,17 @@
       "rating": 8.4,
       "rank": 3,
       "description": "A Santa Lucia, ambiente d'altri tempi con maioliche alle pareti.",
-      "phone": "081 416541"
+      "phone": "081 416541",
+      "lat": 40.8366061,
+      "lng": 14.2440842,
+      "address": "Via Giovanni Nicotera, 13 · Napoli · 80132",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8366061&mlon=14.2440842#map=19/40.8366061/14.2440842",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "tr-antonio-trippa-na",
@@ -412,7 +546,17 @@
       "rating": 8.1,
       "rank": 8,
       "description": "Ai Tribunali dal 1950, ricette della tradizione senza fronzoli.",
-      "phone": "081 294383"
+      "phone": "081 294383",
+      "lat": 40.8508372,
+      "lng": 14.2570224,
+      "address": "Via dei Tribunali, 330 · Napoli · 80130",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8508372&mlon=14.2570224#map=19/40.8508372/14.2570224",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "os-tandem-na",
@@ -423,7 +567,17 @@
       "rating": 8.4,
       "rank": 1,
       "description": "Monotematica sul ragù napoletano, nel centro antico.",
-      "phone": "081 19002468"
+      "phone": "081 19002468",
+      "lat": 40.8482364,
+      "lng": 14.2563281,
+      "address": "Via Giovanni Paladino, 51 · Napoli · 80138",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8482364&mlon=14.2563281#map=19/40.8482364/14.2563281",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "os-cammarota-na",
@@ -454,7 +608,21 @@
       "name": "Osteria Paladino",
       "rating": 8.3,
       "rank": 4,
-      "description": "Nel centro storico, tra le più apprezzate della città."
+      "description": "Nel centro storico, cucina napoletana e carta dei vini curata.",
+      "phone": "379 108 2953",
+      "address": "Via Giovanni Paladino, 3 · Napoli · 80138",
+      "sources": {
+        "location": {
+          "provider": "Sito ufficiale Osteria Paladino",
+          "url": "https://www.osteriapaladino.com/menu.html",
+          "verifiedAt": "2026-09-09"
+        },
+        "phone": {
+          "provider": "Sito ufficiale Osteria Paladino",
+          "url": "https://www.osteriapaladino.com/menu.html",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "os-taverna-borboni-na",
@@ -548,7 +716,17 @@
       "name": "PUOK Burger Store",
       "rating": 8.5,
       "rank": 1,
-      "description": "Sei panini d'autore con carni da allevamento estensivo, al Vomero e a Spaccanapoli."
+      "description": "Sei panini d'autore con carni da allevamento estensivo, al Vomero e a Spaccanapoli.",
+      "lat": 40.848626,
+      "lng": 14.2558417,
+      "address": "Piazzetta del Nilo, 9 · Napoli · 80134",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.848626&mlon=14.2558417#map=19/40.848626/14.2558417",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "pn-fioridizucca-na",
@@ -600,7 +778,17 @@
       "rank": 1,
       "description": "Tempio della mozzarella di bufala biologica, con caseificio e yogurteria.",
       "phone": "0828 727894",
-      "photoUrl": "/gambero/ag-vannulo-sa.jpg"
+      "photoUrl": "/gambero/ag-vannulo-sa.jpg",
+      "lat": 40.4460916,
+      "lng": 15.0221137,
+      "address": "Via Vannulo-Rivabianca · Capaccio Paestum · 84047",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.4460916&mlon=15.0221137#map=19/40.4460916/15.0221137",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "ag-seliano-sa",
@@ -644,7 +832,17 @@
       "rating": 8.6,
       "rank": 5,
       "description": "\"Cilento experience\": prodotti bio dell'azienda, corsi di cucina, trekking.",
-      "phone": "0974 907552"
+      "phone": "0974 907552",
+      "lat": 40.1864702,
+      "lng": 15.129431,
+      "address": "Via Chiuse · Marina di Casal Velino · 84040",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.1864702&mlon=15.129431#map=19/40.1864702/15.129431",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "ag-porta-sirena-sa",
@@ -655,7 +853,17 @@
       "rating": 8.4,
       "rank": 6,
       "description": "A due passi dall'area archeologica di Paestum, cucina aziendale.",
-      "phone": "0828 721035"
+      "phone": "0828 721035",
+      "lat": 40.4209046,
+      "lng": 15.0200478,
+      "address": "Via Ponte Marmoreo · Capaccio Paestum · 84047",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.4209046&mlon=15.0200478#map=19/40.4209046/15.0200478",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "ag-fattoria-terranova-na",
@@ -666,7 +874,17 @@
       "rating": 8.5,
       "rank": 7,
       "description": "Sulla penisola sorrentina a Sant'Agata, limoni, olio e conserve di casa.",
-      "phone": "081 5330234"
+      "phone": "081 5330234",
+      "lat": 40.6073603,
+      "lng": 14.3759101,
+      "address": "Via Nastro Azzurro · Massa Lubrense · 80064",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.6073603&mlon=14.3759101#map=19/40.6073603/14.3759101",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "ag-barbanera-sa",
@@ -687,7 +905,17 @@
       "rating": 8.7,
       "rank": 1,
       "description": "La pizza fritta napoletana per eccellenza, dal 1945 vicino alla stazione.",
-      "phone": "081 281057"
+      "phone": "081 281057",
+      "lat": 40.8485121,
+      "lng": 14.2734771,
+      "address": "Via Giulio Cesare Capaccio, 27 · Napoli · 80142",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8485121&mlon=14.2734771#map=19/40.8485121/14.2734771",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "sf-di-matteo-na",
@@ -698,7 +926,17 @@
       "rating": 8.4,
       "rank": 2,
       "description": "Ai Tribunali, pizza a portafoglio e frittatine da mangiare in strada.",
-      "phone": "081 455262"
+      "phone": "081 455262",
+      "lat": 40.8512861,
+      "lng": 14.2580195,
+      "address": "Via dei Tribunali, 94 · Napoli · 80138",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8512861&mlon=14.2580195#map=19/40.8512861/14.2580195",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "sf-friggitoria-vomero-na",
@@ -709,7 +947,17 @@
       "rating": 8.5,
       "rank": 3,
       "description": "Dal 1938, regina indiscussa del cuoppo di frittura.",
-      "phone": "081 5783130"
+      "phone": "081 5783130",
+      "lat": 40.8428218,
+      "lng": 14.2328223,
+      "address": "Via Domenico Cimarosa, 44 · Napoli · 80127",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8428218&mlon=14.2328223#map=19/40.8428218/14.2328223",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "sf-esterina-sorbillo-na",
@@ -719,7 +967,17 @@
       "name": "Antica Pizza Fritta da Zia Esterina Sorbillo",
       "rating": 8.4,
       "rank": 4,
-      "description": "Pizza fritta d'asporto in via dei Tribunali, sempre in coda."
+      "description": "Pizza fritta d'asporto in via dei Tribunali, sempre in coda.",
+      "lat": 40.8374674,
+      "lng": 14.2482552,
+      "address": "Piazza Trieste e Trento, 53 · Napoli · 80132",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8374674&mlon=14.2482552#map=19/40.8374674/14.2482552",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "sf-isabella-de-cham-na",
@@ -741,7 +999,17 @@
       "rating": 8.2,
       "rank": 6,
       "description": "Al mercato di Montesanto/Pignasecca, cuoppo storico e panzarotti.",
-      "phone": "081 5523663"
+      "phone": "081 5523663",
+      "lat": 40.8459146,
+      "lng": 14.2480148,
+      "address": "Via Pignasecca, 48 · Napoli · 80134",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8459146&mlon=14.2480148#map=19/40.8459146/14.2480148",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "sf-timpani-tempura-na",
@@ -762,7 +1030,17 @@
       "name": "Passione di Sofì",
       "rating": 8.3,
       "rank": 8,
-      "description": "Sfizi fritti e cuoppo gourmet, materie prime selezionate."
+      "description": "Sfizi fritti e cuoppo gourmet, materie prime selezionate.",
+      "lat": 40.8417554,
+      "lng": 14.2486474,
+      "address": "Via Toledo, 324 · Napoli · 80134",
+      "sources": {
+        "location": {
+          "provider": "OpenStreetMap Nominatim",
+          "url": "https://www.openstreetmap.org/?mlat=40.8417554&mlon=14.2486474#map=19/40.8417554/14.2486474",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     }
   ]
 }

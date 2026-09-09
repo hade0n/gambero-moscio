@@ -198,8 +198,9 @@ export function findPndrMatch(place, restaurants) {
 /**
  * URL centralizzato della foto reale di un locale (mai duplicare questa logica nei
  * componenti). Ordine: `photoUrl` esplicito → proxy `/api/place-photo?ref=` col
- * `photoReference` salvato → proxy con ricerca per nome+città. Restituisce `null`
- * se non c'è nulla da tentare (impossibile: il proxy prova sempre la ricerca).
+ * `photoReference` salvato. Se il database non contiene una foto verificata, restituisce
+ * `null`: la card mostra il suo fallback editoriale, senza fare ricerche implicite e
+ * senza presentare una foto non verificata come appartenente al locale.
  */
 export function getPlacePhotoUrl(place) {
   if (!place) return null;
@@ -207,9 +208,7 @@ export function getPlacePhotoUrl(place) {
   if (place.photoReference) {
     return `/api/place-photo?ref=${encodeURIComponent(place.photoReference)}`;
   }
-  const name = encodeURIComponent(place.name || '');
-  const city = encodeURIComponent(place.city || '');
-  return name ? `/api/place-photo?name=${name}&city=${city}` : null;
+  return null;
 }
 
 /** Normalizza un numero italiano per `tel:` (prefisso +39, senza spazi). */

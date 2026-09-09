@@ -11,7 +11,7 @@ import { ACTION_LOCATION, ACTION_RESPIN, BADGE_ALREADY_REVIEWED } from '../confi
  * FOTO: sempre quella reale del locale, con questa priorità —
  *   1. `pndrMatch.imageUrl` (dal database recensioni PNDR, se il locale è già recensito)
  *   2. `place.photoUrl` (dal database discovery, se popolato)
- *   3. `/api/place-photo` (Google Places, solo se `GOOGLE_MAPS_API_KEY` è configurata)
+ *   3. `/api/place-photo?ref=` (solo con un riferimento foto già verificato nel database)
  * Se nessuna è disponibile si mostra un placeholder editoriale — MAI il Gambero come
  * se fosse la foto del locale.
  *

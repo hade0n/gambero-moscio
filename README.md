@@ -249,23 +249,24 @@ qualche parolaccia leggera; il resto resta pulito.
 
 - **Database discovery separato** (`src/data/gamberoDiscovery.json` + `src/utils/discovery.js`):
   locali reali della Campania per tipologia — non solo quelli recensiti dall'app.
-- **Il Gambero è al centro** della ruota e ruota come un ago di bussola: il muso punta sul
-  vincitore. Selezione uniforme (`crypto.getRandomValues`), il rating non conta. Il segmento
-  sotto il muso **corrisponde sempre** al risultato (verificato: 5200/5200 spin).
+- Un ago centrale discreto ruota sulla ruota; il Gambero resta nel branding e nei rating,
+  senza coprire i segmenti. Selezione uniforme (`crypto.getRandomValues`), il rating non conta.
+  Il segmento indicato **corrisponde sempre** al risultato (verificato: 5200/5200 spin).
 - Se il locale è **già recensito su PNDR** (match robusto per nome + città) la card lo
   dichiara con un badge «Ci siete già stati 👀» e mostra i voti di Ilenia, Salvatore e del
   pubblico (`ShrimpRating`), col nome ufficiale e la foto dal database recensioni.
 - Foto: sempre quella **reale del locale** — dal database recensioni, oppure scaricata in
   `public/gambero/<id>.<ext>` da sorgenti pubbliche (`photoUrl` nel DB), oppure da Google
-  Places via `api/place-photo.js`. Mai il Gambero come immagine del locale, un placeholder
-  editoriale se manca. Azioni: «Chiama {numero}» (se disponibile, `tel:+39…`) e
+  Places via `api/place-photo.js` quando il DB contiene un riferimento foto verificato. Mai il
+  Gambero come immagine del locale, un placeholder editoriale se manca. Azioni: «Chiama {numero}» (se disponibile, `tel:+39…`) e
   «Vedi dove si trova» (mappa dietro le quinte) + «Fallo girare di nuovo».
 - **Dati del database** (`scripts/`): `fetch-photos-commons.mjs` + `fetch-photos-sites.mjs`
   scaricano foto reali senza API key (Wikimedia Commons e og:image dei siti ufficiali) — da
   verificare a vista una per una, si scartano loghi e foto di altri locali. Telefoni
   raccolti a mano da siti ufficiali ed elenchi verificati (mai inventati: se non si trova
   resta `null`). `npm run enrich:gambero` (con `GOOGLE_MAPS_API_KEY`) completa il resto da
-  Google Places senza toccare il ranking. Copertura attuale: foto 5/70, telefoni 53/70.
+  Google Places senza toccare il ranking. `npm run audit:gambero` riporta la copertura reale
+  per categoria; il target è 25 locali verificati per tipologia.
 - Modal accessibile (`role="dialog"`, ESC, scroll-lock, focus, `aria-live`);
   `prefers-reduced-motion` → risultato quasi immediato. Nessun suono, nessun coriandolo.
 - File: `src/hooks/useGamberoWheel.js`, `src/components/GamberoModal.jsx` /

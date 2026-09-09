@@ -255,15 +255,17 @@ sempre riferito all'indecisione, mai a persone o attività.
   `photoReference`, `website`) senza toccare `rank`/ordine, controlla i duplicati per
   `placeId`, e stampa un report di copertura. Senza chiave stampa solo il report.
   Richiede `GOOGLE_MAPS_API_KEY` in ambiente (mai nel frontend).
-- `getDiscoveryTypes()`, `getTopPlaces(cat)` (max 25, ordinati per rank), `drawCandidates(cat, 6)`.
+- `getDiscoveryTypes()`, `getTopPlaces(cat)` (massimo 25, ordinati per rank), `drawCandidates(cat, 6)`.
+  Il target editoriale è 25 locali verificati per tipologia; lo stato effettivo e la
+  copertura dei campi sono controllabili con `npm run audit:gambero`, senza dichiarare
+  completata una categoria prima che il dataset lo confermi.
 
-### Il Gambero — selettore rotante centrale
-`public/shrimp.svg` sta **al centro** della ruota e **ruota** come un ago di bussola: il muso
-punta verso il segmento vincente. Segmenti **fissi**, disegnati in senso orario da ore 12.
-Angolo: `rotation ≡ (i+0.5)·(360/n) (mod 360)` + 4–6 giri + scarto `< ±0.25·seg` (non cambia
-il vincitore). `SHRIMP_NOSE_DEG` orienta solo il disegno dell'asset, non il calcolo. Le
-rotazioni non si azzerano mai (nessun salto). Verificato: 5200/5200 spin (indice = segmento
-sotto il muso) + 400 pipeline complete.
+### Ruota — selettore centrale
+Il Gambero resta nel branding, nel copy e nel sistema di rating; non copre i segmenti della
+ruota. Un ago terracotta centrale ruota e indica il segmento vincente. Segmenti **fissi**,
+disegnati in senso orario da ore 12. Angolo: `rotation ≡ (i+0.5)·(360/n) (mod 360)` + 4–6 giri
++ scarto `< ±0.25·seg` (non cambia il vincitore). Le rotazioni non si azzerano mai (nessun
+salto). Verificato: 5200/5200 spin (indice = segmento indicato) + 400 pipeline complete.
 
 ### Modal
 `role="dialog"` + `aria-modal`, ESC, scroll-lock del body, focus iniziale sulla X e
@@ -272,10 +274,10 @@ ripristino sul pulsante navbar (`triggerRef`), pulizia di timer/animazioni alla 
 
 ### Risultato
 `ShrimpRating` (niente stelle) se `rating` presente, altrimenti chip «Selezione del Gambero
-· #rank». Foto reale se `photoUrl`, altrimenti fallback col Gambero. «Vedi la recensione»
+· #rank». Foto reale se `photoUrl`, altrimenti fallback editoriale. «Vedi la recensione»
 (apre il `RestaurantModal` esistente) **solo** se il locale ha un corrispondente nel
-database PNDR (match per nome+città); altrimenti «Apri su Google Maps» + «Portami lì»
-(navigatore) + eventuale «Chiama». «Fallo girare di nuovo» riavvia dalla tipologia.
+database PNDR (match per nome+città); altrimenti «Vedi dove si trova» + eventuale «Chiama».
+«Fallo girare di nuovo» riavvia dalla tipologia.
 
 ### Random / motion
 `crypto.getRandomValues` con rejection sampling (fallback `Math.random`). Spin ~4.6s
@@ -286,8 +288,8 @@ disponibile). Nessun suono, nessun coriandolo, nessuna estetica da casinò.
 ### File
 `src/hooks/useGamberoWheel.js`, `src/components/GamberoWheel.jsx` / `GamberoResult.jsx` /
 `GamberoModal.jsx`, `src/utils/discovery.js` + `random.js`, `src/data/gamberoDiscovery.json`,
-`api/place-photo.js`, copy in `src/config/wheelMessages.js`. Pulsante (icona `wheel`) e modal
-in `Header.jsx`. Keyframe `wheel-result-in` in `src/index.css`. Env opzionale:
+`api/place-photo.js`, copy in `src/config/wheelMessages.js`. Pulsante editoriale «Decidi per
+noi» e modal in `Header.jsx`. Keyframe `wheel-result-in` in `src/index.css`. Env opzionale:
 `GOOGLE_MAPS_API_KEY` (in `.env.example` e nei prefissi `loadEnv` di `vite.config.js`).
 
 ---

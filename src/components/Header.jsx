@@ -57,10 +57,9 @@ export default function Header({ variant = 'public', onLogout }) {
             onClick={() => setGamberoOpen(true)}
             aria-label={NAV_BUTTON_ARIA}
             aria-haspopup="dialog"
-            className="btn btn-secondary btn-sm w-11 px-0 sm:w-auto sm:px-4"
+            className="btn btn-secondary btn-sm shrink-0 px-3.5 text-sm sm:px-4"
           >
-            <Icon name="wheel" size={20} />
-            <span className="hidden sm:inline">{NAV_BUTTON_LABEL}</span>
+            <span>{NAV_BUTTON_LABEL}</span>
           </button>
 
           {isAdmin && (

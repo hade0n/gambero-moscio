@@ -7,7 +7,7 @@
  */
 
 export const WHEEL_KICKER = 'Il Gambero Moscio decide';
-export const NAV_BUTTON_LABEL = 'Il Gambero';
+export const NAV_BUTTON_LABEL = 'Decidi per noi';
 export const NAV_BUTTON_ARIA = 'Apri la Ruota del Gambero Moscio';
 
 /** Titoli per fase (una frase forte, non un muro di battute). */

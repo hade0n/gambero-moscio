@@ -1,10 +1,10 @@
 /**
- * La ruota (SVG) con il **Gambero Moscio al centro come selettore rotante**.
+ * La ruota (SVG) con un selettore rotante centrale.
  *
  * - i segmenti sono FISSI, disegnati in senso orario da ore 12;
- * - il Gambero sta al centro e RUOTA: il suo "muso" (la faccia) punta verso il
- *   segmento selezionato. La matematica in `useGamberoWheel` calcola l'angolo
- *   così che il muso a ore 12 = segmento vincente.
+ * - il selettore parte da ore 12 e ruota fino al segmento selezionato;
+ * - la matematica in `useGamberoWheel` calcola l'angolo in modo che l'ago punti
+ *   sempre all'interno del segmento vincente.
  */
 
 const C = 100;
@@ -13,12 +13,6 @@ const R = 94;
 // Tonalità derivate dalla palette PNDR: tutte reggono testo in Warm Brown.
 const TONES = ['#FFF9F1', '#E5EFD8'];
 const ODD_TONE = '#F7E7CE';
-
-// Offset che orienta l'asset: con questo valore il "muso" del Gambero punta
-// verso l'alto (ore 12) quando rotation = 0, e verso il segmento vincente
-// quando la matematica lo posiziona lì. Non è un hack sul calcolo: sposta solo
-// il disegno dell'immagine, non l'angolo logico.
-const SHRIMP_NOSE_DEG = 90;
 
 const LEAD_WORD =
   /^(ristorante|trattoria|pizzeria|osteria|hosteria|paninoteca|agriturismo|antica|braceria)\s+/i;
@@ -31,17 +25,36 @@ function toneFor(i, n) {
 function labelSpec(n) {
   if (n <= 4) return { max: 18, size: 11.5 };
   if (n <= 6) return { max: 15, size: 10.5 };
-  if (n <= 9) return { max: 12, size: 9 };
+  if (n <= 9) return { max: 18, size: 9 };
   if (n <= 14) return { max: 10, size: 7.6 };
   return { max: 8, size: 6.6 };
 }
 
 function shortLabel(text, max) {
   let s = String(text || '').trim();
-  const stripped = s.replace(LEAD_WORD, '');
-  if (stripped.length >= 2) s = stripped;
+  if (s.length > max) {
+    const stripped = s.replace(LEAD_WORD, '');
+    if (stripped.length >= 2) s = stripped;
+  }
   if (s.length > max) s = `${s.slice(0, max - 1).trimEnd()}…`;
   return s;
+}
+
+function labelLines(text, max, multiline) {
+  const label = shortLabel(text, max);
+  if (!multiline || label.length <= 12 || !label.includes(' ')) return [label];
+
+  const words = label.split(/\s+/);
+  let first = '';
+  let second = '';
+  for (const word of words) {
+    if (!first || `${first} ${word}`.length <= Math.ceil(label.length / 2)) {
+      first = `${first} ${word}`.trim();
+    } else {
+      second = `${second} ${word}`.trim();
+    }
+  }
+  return second ? [first, second] : [label];
 }
 
 const rad = (deg) => (deg * Math.PI) / 180;
@@ -56,6 +69,7 @@ export default function GamberoWheel({
   spinning = false,
   durationMs = 4600,
   ariaLabel,
+  multilineLabels = false,
 }) {
   const n = items.length;
   const seg = n > 0 ? 360 / n : 360;
@@ -110,11 +124,13 @@ export default function GamberoWheel({
             const a = (i + 0.5) * seg;
             const flip = a > 90 && a < 270;
             const ly = C - R * 0.64;
+            const lines = labelLines(it.label, max, multilineLabels);
+            const firstLineY = ly - ((lines.length - 1) * size * 0.5);
             return (
               <g key={`${it.id}-label`} transform={`rotate(${a} ${C} ${C})`} aria-hidden="true">
                 <text
                   x={C}
-                  y={ly}
+                  y={firstLineY}
                   textAnchor="middle"
                   dominantBaseline="middle"
                   transform={flip ? `rotate(180 ${C} ${ly})` : undefined}
@@ -123,36 +139,42 @@ export default function GamberoWheel({
                   fill="#3A2A22"
                   style={{ fontFamily: "'Karla', system-ui, -apple-system, sans-serif" }}
                 >
-                  {shortLabel(it.label, max)}
+                  {lines.map((line, lineIndex) => (
+                    <tspan key={`${it.id}-line-${lineIndex}`} x={C} dy={lineIndex === 0 ? 0 : size * 0.95}>
+                      {line}
+                    </tspan>
+                  ))}
                 </text>
               </g>
             );
           })}
 
-        {/* alone del mozzo, per staccare il Gambero dai segmenti */}
+        {/* alone del mozzo, per staccare il selettore dai segmenti */}
         <circle cx={C} cy={C} r="30" fill="#FFF9F1" opacity="0.92" />
         <circle cx={C} cy={C} r="30" fill="none" stroke="#385C32" strokeOpacity="0.2" strokeWidth="1" />
       </svg>
 
-      {/* IL GAMBERO: al centro, ruota come un selettore. Il muso indica il vincitore. */}
-      <div
-        className="pointer-events-none absolute left-1/2 top-1/2 z-10 w-[42%]"
-        style={{
-          transform: `translate(-50%, -50%) rotate(${rotation + SHRIMP_NOSE_DEG}deg)`,
-          transformOrigin: 'center',
-          transition: spinning
-            ? `transform ${durationMs}ms cubic-bezier(0.16, 0.86, 0.28, 1)`
-            : 'none',
-        }}
+      {/* Ago leggero: parte da ore 12 e gira senza coprire i nomi dei locali. */}
+      <svg
+        viewBox="0 0 200 200"
+        className="pointer-events-none absolute inset-0 z-10 h-full w-full"
+        aria-hidden="true"
       >
-        <img
-          src="/shrimp.svg"
-          alt=""
-          aria-hidden="true"
-          draggable="false"
-          className="h-full w-full select-none [filter:drop-shadow(0_4px_7px_rgba(58,42,34,0.28))]"
-        />
-      </div>
+        <g
+          style={{
+            transform: `rotate(${rotation}deg)`,
+            transformOrigin: '50% 50%',
+            transition: spinning
+              ? `transform ${durationMs}ms cubic-bezier(0.16, 0.86, 0.28, 1)`
+              : 'none',
+          }}
+        >
+          <line x1={C} y1={C} x2={C} y2="43" stroke="#BB5A20" strokeWidth="3" strokeLinecap="round" />
+          <circle cx={C} cy="43" r="4.5" fill="#BB5A20" stroke="#FFF9F1" strokeWidth="2" />
+        </g>
+        <circle cx={C} cy={C} r="10" fill="#FFF9F1" stroke="#385C32" strokeOpacity="0.4" strokeWidth="1.5" />
+        <circle cx={C} cy={C} r="3" fill="#BB5A20" />
+      </svg>
     </div>
   );
 }

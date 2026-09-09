@@ -877,13 +877,15 @@
       "lng": 14.2558417,
       "address": "Piazzetta del Nilo, 9 · Napoli · 80134",
       "website": "https://www.puokburger.com/it/store-spaccanapoli.php",
+      "photoUrl": "/gambero/pn-puok-na.jpg",
       "sources": {
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.848626&mlon=14.2558417#map=19/40.848626/14.2558417",
           "verifiedAt": "2026-09-09"
         },
-        "phone": "https://www.puokburger.com/it/store-spaccanapoli.php"
+        "phone": "https://www.puokburger.com/it/store-spaccanapoli.php",
+        "photo": "https://www.puokburger.com/storia.php"
       }
     },
     {
@@ -1079,7 +1081,9 @@
       "lat": 40.8485121,
       "lng": 14.2734771,
       "address": "Via Giulio Cesare Capaccio, 27 · Napoli · 80142",
+      "photoUrl": "/gambero/sf-masardona-na.jpg",
       "sources": {
+        "photo": "https://reportergourmet.com/it/news/942-la-ricetta-della-pizza-fritta-di-antica-friggitoria-la-masardona",
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.8485121&mlon=14.2734771#map=19/40.8485121/14.2734771",
@@ -1182,7 +1186,9 @@
       "lat": 40.8459146,
       "lng": 14.2480148,
       "address": "Via Pignasecca, 48 · Napoli · 80134",
+      "photoUrl": "/gambero/sf-fiorenzano-na.jpg",
       "sources": {
+        "photo": "https://fiorenzano.menufyy.com/",
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.8459146&mlon=14.2480148#map=19/40.8459146/14.2480148",

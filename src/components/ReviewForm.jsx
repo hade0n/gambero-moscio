@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react';
-import Field, { controlClasses } from './Field.jsx';
+import { useId, useRef, useState } from 'react';
+import { controlClasses } from './Field.jsx';
 import ShrimpRating from './ShrimpRating.jsx';
+import { cn } from '../lib/cn.js';
 import {
   RATING_CATEGORIES,
   RATING_KEYS,
@@ -46,10 +47,58 @@ function validate(values) {
   return errors;
 }
 
+/** Riga compatta per un singolo voto: label + descrizione a sinistra, campo a destra. */
+function RatingRow({ field, value, error, onChange, onBlur }) {
+  const id = useId();
+  const hintId = `${id}-hint`;
+  const errorId = `${id}-error`;
+  return (
+    <div className="py-3">
+      <div className="flex items-start gap-3">
+        <label htmlFor={id} className="min-w-0 flex-1">
+          <span className="text-sm font-semibold text-brown">
+            {field.label}
+            <span className="text-danger" aria-hidden="true">
+              {' '}
+              *
+            </span>
+          </span>
+          {field.description && (
+            <span id={hintId} className="mt-0.5 block text-xs leading-snug text-brown-soft">
+              {field.description}
+            </span>
+          )}
+        </label>
+        <input
+          id={id}
+          name={field.key}
+          type="number"
+          min="0"
+          max="10"
+          step="0.1"
+          inputMode="decimal"
+          value={value}
+          onChange={(e) => onChange(field.key, e.target.value)}
+          onBlur={() => onBlur(field.key)}
+          aria-describedby={cn(field.description && hintId, error && errorId) || undefined}
+          aria-invalid={Boolean(error)}
+          aria-required="true"
+          className={cn(controlClasses(Boolean(error)), 'tabular w-[4.75rem] shrink-0 px-2 text-center')}
+          placeholder="0.0"
+        />
+      </div>
+      {error && (
+        <p id={errorId} role="alert" className="mt-1 text-xs font-semibold text-danger">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
+
 /**
  * Form della singola RECENSIONE (8 voti + testo) di un utente su un locale
  * esistente. Voto complessivo e punteggio classifica ricalcolati in tempo reale.
- * Se `initialReview` è passato, si sta modificando la propria recensione.
  */
 export default function ReviewForm({ placeName, reviewerLabel, initialReview, onSubmit, onCancel }) {
   const [values, setValues] = useState(() => toFormState(initialReview));
@@ -57,6 +106,7 @@ export default function ReviewForm({ placeName, reviewerLabel, initialReview, on
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
   const formRef = useRef(null);
+  const reviewId = useId();
 
   const liveRatings = Object.fromEntries(RATING_KEYS.map((k) => [k, parseRating(values[k]) || 0]));
   const overall = calculateOverall(liveRatings);
@@ -96,54 +146,42 @@ export default function ReviewForm({ placeName, reviewerLabel, initialReview, on
     }
   }
 
+  const reviewInvalid = Boolean(errors.review);
+
   return (
-    <form ref={formRef} onSubmit={handleSubmit} noValidate className="space-y-5">
-      <p className="rounded-xl border bg-cream px-4 py-3 text-sm text-brown-soft">
+    <form ref={formRef} onSubmit={handleSubmit} noValidate className="space-y-6">
+      <p className="text-sm text-brown-soft">
         Recensione di <span className="font-semibold text-brown">{reviewerLabel}</span> su{' '}
         <span className="font-semibold text-brown">{placeName}</span>.
         {initialReview ? ' Stai modificando la tua recensione.' : ''}
       </p>
 
-      <fieldset className="rounded-2xl border bg-cream/60 p-4 sm:p-5">
-        <legend className="px-1 font-display text-base font-semibold text-brown">
-          La tua valutazione
-        </legend>
-        <p className="mb-3 px-1 text-xs text-brown-soft">
-          Otto categorie indipendenti, da 0.0 a 10.0 (passo 0.1). Sono tutte obbligatorie.
+      <fieldset>
+        <legend className="font-display text-base font-semibold text-brown">La tua valutazione</legend>
+        <p className="mt-0.5 text-xs text-brown-soft">
+          Otto categorie indipendenti, da 0.0 a 10.0 (passo 0.1). Tutte obbligatorie.
         </p>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          {RATING_CATEGORIES.map(({ key, label, description }) => (
-            <Field key={key} label={label} required error={errors[key]} hint={description}>
-              {({ id, describedBy, invalid }) => (
-                <input
-                  id={id}
-                  name={key}
-                  type="number"
-                  min="0"
-                  max="10"
-                  step="0.1"
-                  inputMode="decimal"
-                  value={values[key]}
-                  onChange={(e) => setField(key, e.target.value)}
-                  onBlur={() => handleBlur(key)}
-                  aria-describedby={describedBy}
-                  aria-invalid={invalid}
-                  aria-required="true"
-                  className={`${controlClasses(invalid)} tabular`}
-                  placeholder="0.0"
-                />
-              )}
-            </Field>
+        <div className="mt-2 divide-y divide-brown/10 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:divide-y-0">
+          {RATING_CATEGORIES.map((field) => (
+            <div key={field.key} className="sm:border-b sm:border-brown/10">
+              <RatingRow
+                field={field}
+                value={values[field.key]}
+                error={errors[field.key]}
+                onChange={setField}
+                onBlur={handleBlur}
+              />
+            </div>
           ))}
         </div>
 
-        <div className="mt-4 space-y-2 rounded-xl border bg-white px-4 py-3 shadow-xs">
+        <div className="mt-4 rounded-2xl border bg-cream px-4 py-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-sm font-semibold text-brown-soft">Voto complessivo</span>
             <ShrimpRating rating={overall} size="sm" valueClassName="text-lg" />
           </div>
-          <div className="flex items-center justify-between border-t pt-2">
+          <div className="mt-2 flex items-center justify-between border-t border-brown/10 pt-2">
             <span className="text-xs font-semibold uppercase tracking-wide text-brown-soft">
               Punteggio classifica
             </span>
@@ -151,35 +189,43 @@ export default function ReviewForm({ placeName, reviewerLabel, initialReview, on
               {rankingScore.toFixed(4)}
             </span>
           </div>
-          <p className="text-xs text-brown-soft">
-            Il voto pubblico deriva dal punteggio classifica: pesi differenti per categoria, più
-            coerenza, qualità gastronomica, eccellenza e penalità dei punti deboli.
-          </p>
         </div>
       </fieldset>
 
-      <Field
-        label="La tua recensione"
-        required
-        error={errors.review}
-        hint="Racconta l’esperienza in modo semplice e sincero."
-      >
-        {({ id, describedBy, invalid }) => (
-          <textarea
-            id={id}
-            name="review"
-            rows={6}
-            value={values.review}
-            onChange={(e) => setField('review', e.target.value)}
-            onBlur={() => handleBlur('review')}
-            aria-describedby={describedBy}
-            aria-invalid={invalid}
-            aria-required="true"
-            className={`${controlClasses(invalid)} min-h-[8rem] resize-y`}
-            placeholder="La cucina, il servizio, l’ambiente, il rapporto qualità-prezzo…"
-          />
+      <div>
+        <label
+          htmlFor={reviewId}
+          className="mb-1.5 block text-sm font-semibold text-brown"
+        >
+          La tua recensione
+          <span className="text-danger" aria-hidden="true">
+            {' '}
+            *
+          </span>
+        </label>
+        <textarea
+          id={reviewId}
+          name="review"
+          rows={6}
+          value={values.review}
+          onChange={(e) => setField('review', e.target.value)}
+          onBlur={() => handleBlur('review')}
+          aria-describedby={cn(`${reviewId}-hint`, reviewInvalid && `${reviewId}-error`) || undefined}
+          aria-invalid={reviewInvalid}
+          aria-required="true"
+          className={cn(controlClasses(reviewInvalid), 'min-h-[8rem] resize-y')}
+          placeholder="La cucina, il servizio, l’ambiente, il rapporto qualità-prezzo…"
+        />
+        {reviewInvalid ? (
+          <p id={`${reviewId}-error`} role="alert" className="mt-1 text-xs font-semibold text-danger">
+            {errors.review}
+          </p>
+        ) : (
+          <p id={`${reviewId}-hint`} className="mt-1 text-xs text-brown-soft">
+            Racconta l’esperienza in modo semplice e sincero.
+          </p>
         )}
-      </Field>
+      </div>
 
       {formError && (
         <p
@@ -190,7 +236,7 @@ export default function ReviewForm({ placeName, reviewerLabel, initialReview, on
         </p>
       )}
 
-      <div className="flex flex-col-reverse gap-3 border-t pt-4 sm:flex-row sm:justify-end">
+      <div className="sticky bottom-0 -mx-5 flex flex-col-reverse gap-3 border-t bg-cream-soft px-5 pb-1 pt-4 sm:static sm:mx-0 sm:flex-row sm:justify-end sm:bg-transparent sm:px-0">
         <button type="button" onClick={onCancel} className="btn btn-secondary">
           Annulla
         </button>

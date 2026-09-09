@@ -1,5 +1,7 @@
+import { motion } from 'framer-motion';
 import Icon from './Icon.jsx';
 import ReviewStatus from './ReviewStatus.jsx';
+import { listItem } from '../lib/motion.js';
 import { reviewerLabel } from '../config/users.js';
 
 /**
@@ -20,28 +22,37 @@ export default function ReviewPicker({ restaurants, user, onPick }) {
 
   return (
     <ul className="space-y-3">
-      {restaurants.map((r) => {
+      {restaurants.map((r, i) => {
         const alreadyMine = Boolean(r.reviews?.[user]);
         return (
-          <li key={r.id} className="rounded-2xl border bg-cream-soft p-4">
-            <h3 className="text-base font-semibold">{r.name}</h3>
-            <p className="mt-0.5 text-sm text-brown-soft">
-              {r.town} ({r.province}) · {r.category}
-            </p>
-            <ReviewStatus reviews={r.reviews} className="mt-2" />
-            <div className="mt-3 flex justify-end">
+          <motion.li
+            key={r.id}
+            className="surface p-4"
+            variants={listItem}
+            initial="hidden"
+            animate="visible"
+            transition={{ delay: Math.min(i, 6) * 0.03 }}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="truncate font-display text-base font-semibold">{r.name}</h3>
+                <p className="mt-0.5 truncate text-sm text-brown-soft">
+                  {r.town} ({r.province}) · {r.category}
+                </p>
+              </div>
+              <ReviewStatus reviews={r.reviews} />
+            </div>
+            <div className="mt-3 flex justify-end border-t border-brown/8 pt-3">
               <button
                 type="button"
                 onClick={() => onPick(r)}
                 className="btn btn-primary btn-sm"
               >
-                <Icon name={alreadyMine ? 'edit' : 'plus'} size={16} />
-                {alreadyMine
-                  ? `Modifica la recensione di ${label}`
-                  : `Scrivi la recensione di ${label}`}
+                <Icon name={alreadyMine ? 'edit' : 'plus'} size={16} className="shrink-0" />
+                {alreadyMine ? `Modifica la recensione di ${label}` : `Scrivi la recensione di ${label}`}
               </button>
             </div>
-          </li>
+          </motion.li>
         );
       })}
     </ul>

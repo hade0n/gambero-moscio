@@ -1,6 +1,9 @@
 import { useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import Field, { controlClasses } from './Field.jsx';
 import Icon from './Icon.jsx';
+import IconButton from './IconButton.jsx';
+import { fade } from '../lib/motion.js';
 import { CATEGORIES } from '../config/categories.js';
 import { resizeImageFile, resizeImageFiles } from '../utils/image.js';
 import { uploadImage } from '../utils/api.js';
@@ -314,21 +317,28 @@ export default function PlaceForm({ initial, onSubmit, onCancel }) {
         {values.dishImages.length > 0 ? (
           <ul className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
             {values.dishImages.map((src, index) => (
-              <li key={`${index}-${src.slice(-16)}`} className="reveal-in group relative">
+              <motion.li
+                key={`${index}-${src.slice(-16)}`}
+                className="group relative"
+                variants={fade}
+                initial="hidden"
+                animate="visible"
+              >
                 <img
                   src={src}
                   alt={`Foto di un piatto ${index + 1}`}
                   className="aspect-square w-full rounded-xl border object-cover"
                 />
-                <button
-                  type="button"
+                <IconButton
+                  icon="close"
+                  label={`Rimuovi la foto ${index + 1}`}
+                  size="sm"
+                  variant="solid"
+                  iconSize={14}
                   onClick={() => removeDishImage(index)}
-                  aria-label={`Rimuovi la foto ${index + 1}`}
-                  className="press absolute right-1 top-1 flex h-8 w-8 items-center justify-center rounded-full bg-brown/70 text-white hover:bg-danger"
-                >
-                  <Icon name="close" size={15} />
-                </button>
-              </li>
+                  className="absolute right-1 top-1 text-danger hover:bg-danger/10"
+                />
+              </motion.li>
             ))}
           </ul>
         ) : (
@@ -353,7 +363,7 @@ export default function PlaceForm({ initial, onSubmit, onCancel }) {
         </p>
       )}
 
-      <div className="flex flex-col-reverse gap-3 border-t pt-4 sm:flex-row sm:justify-end">
+      <div className="sticky bottom-0 -mx-5 flex flex-col-reverse gap-3 border-t bg-cream-soft px-5 pb-1 pt-4 sm:static sm:mx-0 sm:flex-row sm:justify-end sm:bg-transparent sm:px-0">
         <button type="button" onClick={onCancel} className="btn btn-secondary">
           Annulla
         </button>

@@ -294,6 +294,37 @@ noi» e modal in `Header.jsx`. Keyframe `wheel-result-in` in `src/index.css`. En
 
 ---
 
+## Aggiornamento — Motion su Framer Motion (override)
+
+Questa sezione **sostituisce** *Animation System*, *Motion Guidelines*, *Reduced Motion* e
+ogni riferimento più avanti a «nessuna libreria» / «solo CSS» per il motion, e la riga di
+*Code Quality* sulle dipendenze.
+
+- **Dipendenze runtime consentite**: React, React DOM, React Router DOM, `@vercel/blob`,
+  **`framer-motion`**. Nient'altro senza una ragione esplicita. shadcn/ui, Magic UI e
+  Aceternity UI si usano come **pattern da portare a mano** nella codebase (nessun pacchetto,
+  nessun `npx shadcn init`, nessun MCP).
+- **Motion layer = Framer Motion.** Il vecchio motion system CSS (`.press`, keyframe
+  `pndr-fade-in` / `wheel-result-in` / `modal-in` / `pndr-toast-*`) viene sostituito
+  progressivamente; una regola CSS si rimuove **solo dopo** che il comportamento equivalente
+  è implementato e verificato in Framer Motion.
+- **Fonte unica del linguaggio**: `src/lib/motion.js` — `DUR` (fast 0.14 · base 0.20 ·
+  modal 0.28 · slow 0.42), `EASE` (`out` = `cubic-bezier(0.2,0.7,0.2,1)` come `--ease-pndr`,
+  `in`, `inOut`) e i preset `fade` / `fadeUp` / `scaleIn` / `sheet` / `listItem`. I componenti
+  non ridefiniscono durate/easing ad hoc.
+- **Reduced motion**: `<MotionConfig reducedMotion="user">` in `main.jsx` azzera
+  translate/scale/opacity a monte per tutto Framer Motion. Il blocco globale
+  `@media (prefers-reduced-motion: reduce)` in `index.css` resta per il CSS residuo. Dove
+  serve logica condizionale, `useReducedMotion()`.
+- **Regole invariate**: animare solo `transform`/`opacity`; durate 120–320ms (i reveal
+  narrativi come la Ruota possono essere più lunghi perché funzionali); niente stagger che
+  cresce con la lista (i reveal on-scroll usano `whileInView` con `viewport={{ once: true }}`);
+  ogni animazione ha una funzione; nessun effetto decorativo continuo, nessun parallax,
+  nessun background animato.
+- `cn()` (`src/lib/cn.js`) è l'helper unico per le classi condizionali (nessuna dipendenza).
+
+---
+
 ## Project Overview
 
 PNDR è una piattaforma web per consultare recensioni di locali e ristoranti.

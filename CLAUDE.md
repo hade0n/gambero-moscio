@@ -220,9 +220,9 @@ sempre riferito all'indecisione, mai a persone o attività.
 1. **Ruota delle tipologie** — segmenti = categorie con almeno un locale nel database
    discovery. Il Gambero sceglie *cosa* mangiare.
 2. **Interstiziale** — «{tipologia}. Ok, ora troviamo DOVE.» + estrazione dei candidati.
-3. **Ruota dei locali** — dai **top 25** della tipologia si estraggono a caso **fino a 6**
-   candidati (Fisher–Yates, `random.js`), poi la ruota ne sceglie **1**. Uniforme: il `rank`
-   non conta.
+3. **Ruota dei locali** — dai locali verificati della tipologia (fino a 25 quando il
+   dataset raggiungerà quel target) si estraggono a caso **fino a 6** candidati
+   (Fisher–Yates, `random.js`), poi la ruota ne sceglie **1**. Uniforme: il `rank` non conta.
 4. **Risultato** — `GamberoResult.jsx`.
 
 ### Database discovery — SEPARATO dalle recensioni PNDR
@@ -241,13 +241,11 @@ sempre riferito all'indecisione, mai a persone o attività.
   `public/gambero/<id>.<ext>` da sorgenti pubbliche) → altrimenti il proxy
   `api/place-photo.js` verso Google Places (`?ref=<photoReference>` o `?name=&city=`), che
   senza `GOOGLE_MAPS_API_KEY` risponde `204` e la card cade sul placeholder.
-- **Foto scaricate senza chiave** (`public/gambero/`): `scripts/fetch-photos-commons.mjs`
-  (Wikimedia Commons, match prudente per token del nome/città) e
-  `scripts/fetch-photos-sites.mjs` (og:image dal sito ufficiale, elenco `SITES` curato a
-  mano). Entrambi scrivono `photoUrl` nel DB e vanno **verificati a vista** uno per uno:
-  loghi, banner promozionali e foto di altri locali si scartano (regola: una foto sbagliata
-  è peggio di una mancante). Copertura onesta attuale: 5/70 (da Michele, Sorbillo, Starita,
-  Torre del Saracino, Vannulo); il resto richiede `GOOGLE_MAPS_API_KEY` + `enrich:gambero`.
+- **Foto scaricate senza chiave** (`public/gambero/`): le foto nuove sono associate a una
+  pagina sorgente nel campo `sources.photo` e vengono verificate a vista prima del commit. Gli script
+  di ricerca non accettano più automaticamente un `og:image`, perché può essere un logo o
+  un banner. Copertura verificata al 9 settembre 2026: **20/70** foto, **62/70** telefoni,
+  **34/70** indirizzi e **24/70** coordinate. Una foto errata è peggio di una mancante.
 - **Arricchimento del database**: `scripts/enrich-gambero-db.mjs` (`npm run enrich:gambero`,
   `-- --refresh`, `-- --dry`). Per ogni locale interroga Google Places (Text Search →
   Details), valida il match (nome + città, segnala gli ambigui), riempie SOLO i campi

@@ -242,9 +242,10 @@ punteggio non cambia — cambia solo il disegno.
 
 ## Il Gambero Moscio Food Picker
 
-Pulsante nella navbar («Il Gambero», icona a ruota) → **modal full-screen**. Il Gambero
-sceglie prima **cosa** mangiare (ruota delle tipologie) e poi **dove** (ruota di 6 locali
-estratti a caso dai top 25 di quella tipologia). È l'unica parte dell'app con tono ironico e
+Pulsante nella navbar («Decidi per noi») → **modal full-screen**. Il Gambero sceglie prima
+**cosa** mangiare (ruota delle tipologie) e poi **dove** (ruota di fino a 6 locali estratti
+a caso dal dataset verificato della tipologia, fino a 25 quando quella lista raggiunge il
+target). È l'unica parte dell'app con tono ironico e
 qualche parolaccia leggera; il resto resta pulito.
 
 - **Database discovery separato** (`src/data/gamberoDiscovery.json` + `src/utils/discovery.js`):
@@ -261,9 +262,9 @@ qualche parolaccia leggera; il resto resta pulito.
   Places via `api/place-photo.js` quando il DB contiene un riferimento foto verificato. Mai il
   Gambero come immagine del locale, un placeholder editoriale se manca. Azioni: «Chiama {numero}» (se disponibile, `tel:+39…`) e
   «Vedi dove si trova» (mappa dietro le quinte) + «Fallo girare di nuovo».
-- **Dati del database** (`scripts/`): `fetch-photos-commons.mjs` + `fetch-photos-sites.mjs`
-  scaricano foto reali senza API key (Wikimedia Commons e og:image dei siti ufficiali) — da
-  verificare a vista una per una, si scartano loghi e foto di altri locali. Telefoni
+- **Dati del database** (`scripts/`): ogni nuova immagine scaricata in `public/gambero/` è
+  verificata a vista e conserva `sources.photo`; gli script non accettano più automaticamente
+  gli `og:image`, che spesso sono loghi o banner. Telefoni
   raccolti a mano da siti ufficiali ed elenchi verificati (mai inventati: se non si trova
   resta `null`). `npm run enrich:gambero` (con `GOOGLE_MAPS_API_KEY`) completa il resto da
   Google Places senza toccare il ranking. `npm run audit:gambero` riporta la copertura reale

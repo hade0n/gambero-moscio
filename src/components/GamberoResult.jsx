@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Icon from './Icon.jsx';
 import ShrimpRating from './ShrimpRating.jsx';
 import { getPlacePhotoUrl, telHref } from '../utils/discovery.js';
@@ -38,6 +38,12 @@ export default function GamberoResult({ result, pndrMatch, onRespin, className =
   }, [reviewed, pndrMatch, p]);
 
   const [imgIdx, setImgIdx] = useState(0);
+  // Un risultato nuovo deve sempre ripartire dalla sua prima foto. Senza questo
+  // reset, il fallback usato dal locale precedente poteva nascondere una foto
+  // valida del locale appena estratto.
+  useEffect(() => {
+    setImgIdx(0);
+  }, [p.id, pndrMatch?.id]);
   const photoSrc = photoCandidates[imgIdx] || null;
 
   return (

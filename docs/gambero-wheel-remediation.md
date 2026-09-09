@@ -10,10 +10,10 @@ Lo stato attuale non soddisfa l'obiettivo dichiarato di un food picker basato su
 | Locali nel database discovery | 70 |
 | Tipologie | 8 |
 | Locali per tipologia | 5–15, mai 25 |
-| Foto locali disponibili | 5/70 |
-| Telefoni disponibili | 53/70 |
-| Indirizzi completi | 27/70 |
-| Coordinate | 25/70 |
+| Foto locali disponibili | 20/70 |
+| Telefoni disponibili | 62/70 |
+| Indirizzi completi | 34/70 |
+| Coordinate | 24/70 |
 | Place ID | 0/70 |
 | Duplicati `id` / `placeId` | 0 / non verificabile senza placeId |
 

@@ -45,7 +45,11 @@
       "rating": 9.4,
       "rank": 3,
       "phone": "0823 862718",
-      "description": "Tre Spicchi Gambero Rosso, meta di pellegrinaggio nel Casertano."
+      "description": "Tre Spicchi Gambero Rosso, meta di pellegrinaggio nel Casertano.",
+      "photoUrl": "/gambero/pz-pepe-in-grani-ce.jpg",
+      "sources": {
+        "photo": "https://www.pepeingrani.it/"
+      }
     },
     {
       "id": "pz-50-kalo-na",
@@ -56,7 +60,11 @@
       "rating": 9.2,
       "rank": 4,
       "description": "Impasto iconico in piazza Sannazaro, tra le migliori al mondo.",
-      "phone": "081 19204667"
+      "phone": "081 19204667",
+      "photoUrl": "/gambero/pz-50-kalo-na.jpg",
+      "sources": {
+        "photo": "https://www.tasteatlas.com/50-kalo"
+      }
     },
     {
       "id": "pz-la-notizia-na",
@@ -67,7 +75,11 @@
       "rating": 9.1,
       "rank": 5,
       "description": "Il pioniere della pizza napoletana d'autore, al Vomero.",
-      "phone": "081 7142155"
+      "phone": "081 7142155",
+      "photoUrl": "/gambero/pz-la-notizia-na.jpg",
+      "sources": {
+        "photo": "https://www.mangiaredadio.it/pizzeria-la-notizia-enzo-coccia-napoli/"
+      }
     },
     {
       "id": "pz-cambiamenti-ce",
@@ -89,7 +101,11 @@
       "rating": 9,
       "rank": 7,
       "description": "Alla Sanità, ricerca sugli impasti e sui presidi del territorio.",
-      "phone": "081 290037"
+      "phone": "081 290037",
+      "photoUrl": "/gambero/pz-tre-santi-na.jpg",
+      "sources": {
+        "photo": "https://www.concettinaaitresanti.com/"
+      }
     },
     {
       "id": "pz-sorbillo-na",
@@ -104,14 +120,28 @@
       "photoUrl": "/gambero/pz-sorbillo-na.jpg"
     },
     {
-      "id": "pz-lioniello-na",
+      "id": "pz-lioniello-ce",
       "category": "Pizzeria",
-      "province": "NA",
-      "city": "Somma Vesuviana",
+      "province": "CE",
+      "city": "Succivo",
       "name": "Pizzeria Da Lioniello",
       "rating": 8.9,
       "rank": 9,
-      "description": "Farine del territorio vesuviano, molto amata dalle guide."
+      "description": "Pizzeria contemporanea di Salvatore Lioniello, riconosciuta dalle guide per ricerca sugli impasti.",
+      "phone": "081 18167658",
+      "address": "Via Murelle, 1 · Succivo · 81030",
+      "sources": {
+        "location": {
+          "provider": "Gambero Rosso — Pizzerie d'Italia",
+          "url": "https://www.informazione.it/atc/2024/09/428dea3c-4e51-4e2b-979e-709e47709301/15_Campania_compressed.pdf",
+          "verifiedAt": "2026-09-09"
+        },
+        "phone": {
+          "provider": "Gambero Rosso — Pizzerie d'Italia",
+          "url": "https://www.informazione.it/atc/2024/09/428dea3c-4e51-4e2b-979e-709e47709301/15_Campania_compressed.pdf",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "pz-starita-na",
@@ -252,8 +282,10 @@
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.6080396&mlon=14.3739151#map=19/40.6080396/14.3739151",
           "verifiedAt": "2026-09-09"
-        }
-      }
+        },
+        "photo": "https://cdn.blastness.biz/media/763/top/thumbs/full/DA1890-L-1600-12.jpg"
+      },
+      "photoUrl": "/gambero/rp-don-alfonso-na.jpg"
     },
     {
       "id": "rp-il-comandante-na",
@@ -296,7 +328,11 @@
       "rating": 9.1,
       "rank": 6,
       "description": "Stella Michelin, sala illuminata da centinaia di candele a Positano.",
-      "phone": "089 875066"
+      "phone": "089 875066",
+      "photoUrl": "/gambero/rp-la-sponda-sa.jpg",
+      "sources": {
+        "photo": "https://sirenuse.it/en/la-sponda-restaurant/"
+      }
     },
     {
       "id": "rp-lo-scoglio-na",
@@ -307,7 +343,11 @@
       "rating": 9,
       "rank": 7,
       "description": "A Marina del Cantone, gli spaghetti alla Nerano che hanno fatto storia.",
-      "phone": "081 8081026"
+      "phone": "081 8081026",
+      "photoUrl": "/gambero/rp-lo-scoglio-na.jpg",
+      "sources": {
+        "photo": "https://www.hotelloscoglio.com/en/restaurant"
+      }
     },
     {
       "id": "rp-palazzo-petrucci-na",
@@ -339,7 +379,11 @@
       "rating": 9,
       "rank": 9,
       "description": "Stella Michelin a Pompei, Paolo Gramaglia.",
-      "phone": "081 8507245"
+      "phone": "081 8507245",
+      "photoUrl": "/gambero/rp-president-na.jpg",
+      "sources": {
+        "photo": "https://winenews.it/it/president-pompei-na_506916/"
+      }
     },
     {
       "id": "rp-rossellinis-sa",
@@ -350,7 +394,11 @@
       "rating": 9,
       "rank": 10,
       "description": "Stella Michelin affacciato sulla Costiera da Ravello.",
-      "phone": "089 818181"
+      "phone": "089 818181",
+      "photoUrl": "/gambero/rp-rossellinis-sa.jpg",
+      "sources": {
+        "photo": "https://www.viamichelin.it/mappe-piantine/ristoranti/poi/ravello-84010-3bm3mq1"
+      }
     },
     {
       "id": "rp-da-gemma-sa",
@@ -368,8 +416,10 @@
           "provider": "Sito ufficiale Da Gemma",
           "url": "https://www.trattoriadagemma.com/",
           "verifiedAt": "2026-09-09"
-        }
-      }
+        },
+        "photo": "https://trattoria.trattoriadagemma.com/wp-content/uploads/2021/09/g-5.jpg"
+      },
+      "photoUrl": "/gambero/rp-da-gemma-sa.jpg"
     },
     {
       "id": "rp-marina-grande-sa",
@@ -466,12 +516,14 @@
       "lat": 40.8510893,
       "lng": 14.2511477,
       "address": "Via Conte di Ruvo, 11/12 · Napoli · 80135",
+      "photoUrl": "/gambero/tr-da-carmela-na.avif",
       "sources": {
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.8510893&mlon=14.2511477#map=19/40.8510893/14.2511477",
           "verifiedAt": "2026-09-09"
-        }
+        },
+        "photo": "https://www.thefork.it/ristorante/osteria-da-carmela-r54190"
       }
     },
     {
@@ -511,10 +563,16 @@
       "category": "Trattoria",
       "province": "NA",
       "city": "Napoli",
-      "name": "Trattoria Nonna Anna",
+      "name": "Cibi Cotti (La Nonna)",
       "rating": 8.3,
       "rank": 5,
-      "description": "A Bagnoli, gestione familiare, porzioni generose."
+      "description": "Nel mercato rionale della Torretta, cucina napoletana di tradizione e piatti del giorno.",
+      "phone": "081 682844",
+      "address": "Via Ferdinando Galiani, 30 · Napoli · 80122",
+      "sources": {
+        "location": "https://accademiaitalianadellacucina.it/it/ristoranti/ristorante/1412-cibi-cotti-la-nonna",
+        "phone": "https://accademiaitalianadellacucina.it/it/ristoranti/ristorante/1412-cibi-cotti-la-nonna"
+      }
     },
     {
       "id": "tr-donna-teresa-na",
@@ -535,7 +593,11 @@
       "name": "I Soliti Napoletani alla Sanità",
       "rating": 8.6,
       "rank": 7,
-      "description": "Nel rione Sanità, cucina napoletana verace molto apprezzata."
+      "description": "Nel rione Sanità, cucina napoletana verace molto apprezzata.",
+      "address": "Via Vergini, 17 · Napoli · 80137",
+      "sources": {
+        "location": "https://www.thefork.com/restaurant/i-soliti-napoletani-alla-sanita-r863718"
+      }
     },
     {
       "id": "tr-carmine-na",
@@ -571,12 +633,14 @@
       "lat": 40.8482364,
       "lng": 14.2563281,
       "address": "Via Giovanni Paladino, 51 · Napoli · 80138",
+      "photoUrl": "/gambero/os-tandem-na.jpg",
       "sources": {
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.8482364&mlon=14.2563281#map=19/40.8482364/14.2563281",
           "verifiedAt": "2026-09-09"
-        }
+        },
+        "photo": "https://lospalmasblog.com/paises/italia-italia-italy/campania/357-tandem-napoli.html"
       }
     },
     {
@@ -598,7 +662,13 @@
       "name": "Osteria La Vecchia Cantina",
       "rating": 8.2,
       "rank": 3,
-      "description": "Vicino al mercato della Pignasecca, pesce e piatti del giorno."
+      "description": "Vicino al mercato della Pignasecca, pesce, baccalà e piatti del giorno.",
+      "phone": "081 5520226",
+      "address": "Via San Nicola alla Carità, 13 · Napoli · 80134",
+      "sources": {
+        "location": "https://sites.google.com/site/wikinapoli/to-eat/restaurants/places-to-try",
+        "phone": "https://sites.google.com/site/wikinapoli/to-eat/restaurants/places-to-try"
+      }
     },
     {
       "id": "os-paladino-na",
@@ -632,7 +702,21 @@
       "name": "Taverna dei Borboni",
       "rating": 8.2,
       "rank": 5,
-      "description": "Cucina partenopea in ambiente informale."
+      "description": "Cucina partenopea e di mare a Capodimonte, in un ambiente informale.",
+      "phone": "081 17783715",
+      "address": "Via Miano, 17 · Napoli · 80131",
+      "sources": {
+        "location": {
+          "provider": "Tripadvisor — struttura rivendicata",
+          "url": "https://www.tripadvisor.com/Restaurant_Review-g187785-d34113539-Reviews-Taverna_dei_borboni-Naples_Province_of_Naples_Campania.html",
+          "verifiedAt": "2026-09-09"
+        },
+        "phone": {
+          "provider": "Tripadvisor — struttura rivendicata",
+          "url": "https://www.tripadvisor.com/Restaurant_Review-g187785-d34113539-Reviews-Taverna_dei_borboni-Naples_Province_of_Naples_Campania.html",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "os-campagnola-na",
@@ -649,11 +733,26 @@
       "id": "rc-bifulco-na",
       "category": "Ristorante Carne",
       "province": "NA",
-      "city": "Vico Equense",
+      "city": "Ottaviano",
       "name": "Braceria Bifulco",
       "rating": 8.6,
       "rank": 1,
-      "description": "Carni selezionate e frollature alla brace, sulla penisola sorrentina."
+      "description": "Macelleria con ristorante interno: selezioni di carne, frollature e cucina del territorio vesuviano.",
+      "phone": "081 8273538",
+      "address": "Via Lavinaio 1° Tratto, 200 · Ottaviano · 80044",
+      "website": "https://www.bifulco.it/",
+      "sources": {
+        "location": {
+          "provider": "Touring Club Italiano",
+          "url": "https://www.touringclub.it/destinazioni/ottaviano/mangiare/232989-braceria-bifulco",
+          "verifiedAt": "2026-09-09"
+        },
+        "phone": {
+          "provider": "Touring Club Italiano",
+          "url": "https://www.touringclub.it/destinazioni/ottaviano/mangiare/232989-braceria-bifulco",
+          "verifiedAt": "2026-09-09"
+        }
+      }
     },
     {
       "id": "rc-porzio-na",
@@ -717,15 +816,18 @@
       "rating": 8.5,
       "rank": 1,
       "description": "Sei panini d'autore con carni da allevamento estensivo, al Vomero e a Spaccanapoli.",
+      "phone": "081 1820026",
       "lat": 40.848626,
       "lng": 14.2558417,
       "address": "Piazzetta del Nilo, 9 · Napoli · 80134",
+      "website": "https://www.puokburger.com/it/store-spaccanapoli.php",
       "sources": {
         "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.848626&mlon=14.2558417#map=19/40.848626/14.2558417",
           "verifiedAt": "2026-09-09"
-        }
+        },
+        "phone": "https://www.puokburger.com/it/store-spaccanapoli.php"
       }
     },
     {
@@ -799,7 +901,11 @@
       "rating": 8.8,
       "rank": 2,
       "description": "Masseria storica tra i templi di Paestum, cucina cilentana e bufale.",
-      "phone": "0828 723634"
+      "phone": "0828 723634",
+      "photoUrl": "/gambero/ag-seliano-sa.jpg",
+      "sources": {
+        "photo": "https://www.agriturismoseliano.it/"
+      }
     },
     {
       "id": "ag-i-moresani-sa",
@@ -810,7 +916,11 @@
       "rating": 8.7,
       "rank": 3,
       "description": "Azienda agricola nel Cilento: bufala, carciofo di Paestum, orto.",
-      "phone": "0974 902086"
+      "phone": "0974 902086",
+      "photoUrl": "/gambero/ag-i-moresani-sa.jpg",
+      "sources": {
+        "photo": "https://www.booking.com/hotel/it/agriturismo-i-moresani.html"
+      }
     },
     {
       "id": "ag-le-querce-sa",
@@ -968,6 +1078,7 @@
       "rating": 8.4,
       "rank": 4,
       "description": "Pizza fritta d'asporto in via dei Tribunali, sempre in coda.",
+      "phone": "081 416306",
       "lat": 40.8374674,
       "lng": 14.2482552,
       "address": "Piazza Trieste e Trento, 53 · Napoli · 80132",
@@ -976,7 +1087,8 @@
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.8374674&mlon=14.2482552#map=19/40.8374674/14.2482552",
           "verifiedAt": "2026-09-09"
-        }
+        },
+        "phone": "https://www.informazione.it/atc/2024/09/428dea3c-4e51-4e2b-979e-709e47709301/15_Campania_compressed.pdf"
       }
     },
     {
@@ -988,7 +1100,11 @@
       "rating": 8.6,
       "rank": 5,
       "description": "Alla Sanità, pizza fritta rivisitata con ripieni ricercati.",
-      "phone": "081 18639669"
+      "phone": "081 18639669",
+      "photoUrl": "/gambero/sf-isabella-de-cham-na.webp",
+      "sources": {
+        "photo": "https://www.gamberorosso.it/notizie/rubriche/storie/isabella-de-cham-pizza-fritta-napoli/"
+      }
     },
     {
       "id": "sf-fiorenzano-na",
@@ -1031,15 +1147,11 @@
       "rating": 8.3,
       "rank": 8,
       "description": "Sfizi fritti e cuoppo gourmet, materie prime selezionate.",
-      "lat": 40.8417554,
-      "lng": 14.2486474,
-      "address": "Via Toledo, 324 · Napoli · 80134",
+      "phone": "081 405141",
+      "address": "Via Toledo, 206 · Napoli · 80132",
       "sources": {
-        "location": {
-          "provider": "OpenStreetMap Nominatim",
-          "url": "https://www.openstreetmap.org/?mlat=40.8417554&mlon=14.2486474#map=19/40.8417554/14.2486474",
-          "verifiedAt": "2026-09-09"
-        }
+        "location": "https://www.touringclub.it/destinazioni/napoli/mangiare/170713-la-passione-di-sofi",
+        "phone": "https://www.touringclub.it/destinazioni/napoli/mangiare/170713-la-passione-di-sofi"
       }
     }
   ]

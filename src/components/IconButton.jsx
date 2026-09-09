@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { motion } from 'framer-motion';
 import Icon from './Icon.jsx';
 import { cn } from '../lib/cn.js';
@@ -15,16 +16,13 @@ const VARIANTS = {
  * Pulsante-icona circolare accessibile. `label` è obbligatoria (aria-label + title).
  * Target touch >= 44px anche per size="sm" grazie all'area del cerchio.
  */
-export default function IconButton({
-  icon,
-  label,
-  size = 'md',
-  variant = 'ghost',
-  className = '',
-  ...props
-}) {
+const IconButton = forwardRef(function IconButton(
+  { icon, label, size = 'md', variant = 'ghost', iconSize, className = '', ...props },
+  ref,
+) {
   return (
     <motion.button
+      ref={ref}
       type="button"
       aria-label={label}
       title={label}
@@ -37,7 +35,9 @@ export default function IconButton({
       )}
       {...props}
     >
-      <Icon name={icon} size={ICON_PX[size]} />
+      <Icon name={icon} size={iconSize || ICON_PX[size]} />
     </motion.button>
   );
-}
+});
+
+export default IconButton;

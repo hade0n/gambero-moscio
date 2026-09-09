@@ -21,6 +21,7 @@ const PATHS = {
       <path d="M18 6L6 18" />
     </>
   ),
+  chevronLeft: <path d="M15 6l-6 6 6 6" />,
   edit: (
     <>
       <path d="M4 20h4l10.5-10.5a1.75 1.75 0 000-2.5l-1.5-1.5a1.75 1.75 0 00-2.5 0L4 16v4z" />

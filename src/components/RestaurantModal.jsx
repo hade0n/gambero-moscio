@@ -178,14 +178,13 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
         </div>
       </Modal>
 
-      {lightboxIndex !== null && (
-        <Lightbox
-          images={dishImages}
-          index={lightboxIndex}
-          onNavigate={setLightboxIndex}
-          onClose={() => setLightboxIndex(null)}
-        />
-      )}
+      <Lightbox
+        images={dishImages}
+        index={lightboxIndex ?? 0}
+        open={lightboxIndex !== null}
+        onNavigate={setLightboxIndex}
+        onClose={() => setLightboxIndex(null)}
+      />
     </>
   );
 }

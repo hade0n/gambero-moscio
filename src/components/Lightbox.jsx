@@ -1,15 +1,35 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import Icon from './Icon.jsx';
+import { AnimatePresence, motion } from 'framer-motion';
+import IconButton from './IconButton.jsx';
+import { fade } from '../lib/motion.js';
 
 /**
- * Visualizzazione ingrandita di una foto, con navigazione precedente/successiva.
- * Chiusura con X, click esterno, ESC. Frecce ← → per scorrere. Focus gestito.
+ * Foto a schermo intero con navigazione precedente/successiva.
+ * Chiusura con X / click esterno / ESC. Frecce ← → e swipe orizzontale per
+ * scorrere. Focus gestito, scroll di fondo bloccato. ESC intercettato in
+ * fase di cattura: la lightbox si chiude prima della modale sottostante.
  */
-export default function Lightbox({ images, index, onClose, onNavigate }) {
+export default function Lightbox({ images, index, open, onClose, onNavigate }) {
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <LightboxShell
+          key="lightbox"
+          images={images}
+          index={index}
+          onClose={onClose}
+          onNavigate={onNavigate}
+        />
+      )}
+    </AnimatePresence>,
+    document.body,
+  );
+}
+
+function LightboxShell({ images, index, onClose, onNavigate }) {
   const closeRef = useRef(null);
   const triggerRef = useRef(null);
-  const [shown, setShown] = useState(false);
 
   const count = images.length;
   const canNavigate = count > 1;
@@ -26,10 +46,7 @@ export default function Lightbox({ images, index, onClose, onNavigate }) {
     triggerRef.current = document.activeElement;
     const { overflow } = document.body.style;
     document.body.style.overflow = 'hidden';
-    const raf = requestAnimationFrame(() => {
-      setShown(true);
-      closeRef.current?.focus();
-    });
+    const raf = requestAnimationFrame(() => closeRef.current?.focus());
 
     function onKey(event) {
       if (event.key === 'Escape') {
@@ -42,7 +59,6 @@ export default function Lightbox({ images, index, onClose, onNavigate }) {
         go(-1);
       }
     }
-    // Capture phase: la lightbox gestisce ESC prima della modale sottostante.
     document.addEventListener('keydown', onKey, true);
 
     return () => {
@@ -54,11 +70,16 @@ export default function Lightbox({ images, index, onClose, onNavigate }) {
     };
   }, [go, onClose]);
 
-  return createPortal(
-    <div
-      className={`fixed inset-0 z-[120] flex items-center justify-center bg-brown/85 p-3 transition-opacity duration-200 sm:p-6 ${
-        shown ? 'opacity-100' : 'opacity-0'
-      }`}
+  return (
+    <motion.div
+      className="fixed inset-0 z-[120] flex items-center justify-center bg-brown/85"
+      style={{
+        padding: 'max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left))',
+      }}
+      variants={fade}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
       role="dialog"
       aria-modal="true"
       aria-label={`Foto ${index + 1} di ${count}`}
@@ -71,49 +92,59 @@ export default function Lightbox({ images, index, onClose, onNavigate }) {
         onClick={onClose}
       />
 
-      <img
-        key={index}
-        src={images[index]}
-        alt={`Foto di un piatto ${index + 1}`}
-        className="reveal-in relative max-h-[86dvh] max-w-full rounded-2xl object-contain shadow-lg"
-      />
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.img
+          key={index}
+          src={images[index]}
+          alt={`Foto di un piatto ${index + 1}`}
+          variants={fade}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          drag={canNavigate ? 'x' : false}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.18}
+          onDragEnd={(_, info) => {
+            if (info.offset.x < -64) go(1);
+            else if (info.offset.x > 64) go(-1);
+          }}
+          className="relative max-h-[84dvh] max-w-full touch-pan-y select-none rounded-2xl object-contain shadow-lg"
+        />
+      </AnimatePresence>
 
-      <button
+      <IconButton
         ref={closeRef}
-        type="button"
+        icon="close"
+        label="Chiudi"
+        size="md"
+        variant="solid"
         onClick={onClose}
-        aria-label="Chiudi"
-        className="press absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-cream-soft text-brown hover:bg-cream sm:right-6 sm:top-6"
-      >
-        <Icon name="close" size={22} />
-      </button>
+        className="absolute right-3 top-3 sm:right-5 sm:top-5"
+      />
 
       {canNavigate && (
         <>
-          <button
-            type="button"
+          <IconButton
+            icon="chevronLeft"
+            label="Foto precedente"
+            size="lg"
+            variant="solid"
             onClick={() => go(-1)}
-            aria-label="Foto precedente"
-            className="press absolute left-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-cream-soft text-brown hover:bg-cream sm:left-5"
-          >
-            <span className="rotate-180">
-              <Icon name="chevronRight" size={24} />
-            </span>
-          </button>
-          <button
-            type="button"
+            className="absolute left-2 top-[calc(50%-24px)] sm:left-4"
+          />
+          <IconButton
+            icon="chevronRight"
+            label="Foto successiva"
+            size="lg"
+            variant="solid"
             onClick={() => go(1)}
-            aria-label="Foto successiva"
-            className="press absolute right-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-cream-soft text-brown hover:bg-cream sm:right-5"
-          >
-            <Icon name="chevronRight" size={24} />
-          </button>
-          <span className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-cream-soft px-3 py-1 text-sm font-semibold text-brown tabular">
+            className="absolute right-2 top-[calc(50%-24px)] sm:right-4"
+          />
+          <span className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-cream-soft/92 px-3 py-1 text-sm font-semibold tabular text-brown shadow-sm backdrop-blur-sm">
             {index + 1} / {count}
           </span>
         </>
       )}
-    </div>,
-    document.body,
+    </motion.div>
   );
 }

@@ -67,6 +67,30 @@ Branch: `refactor/ui-ux-motion`. Ordine di lavoro: §28 del brief.
 | 9 | Toast su Framer Motion | `Toast.jsx` | ✅ `3275a7a` |
 | 10 | Rimozione CSS motion morto | `index.css` | ✅ `44278d7` |
 | 11 | Responsive QA (360/390/430/768/1440) + build finale + smoke test | — | ✅ (build verde, nessun overflow) |
+| 12 | **Wheeler — redesign da zero** (3D premium) | `GamberoWheel.jsx`, `GamberoResult.jsx` | ✅ `<hash>` |
+
+## Fase 12 — Wheeler premium (deroga esplicita al "no 3D" per questo componente)
+
+`GamberoWheel.jsx` riscritto da zero. **Matematica del vincitore intatta**: consuma
+`rotation` da `useGamberoWheel` invariato; il disco ruota di un valore SOLO CRESCENTE
+`spin ≡ (360 − rotation mod 360) (mod 360)`, quindi il segmento vincente finisce
+esattamente sotto il puntatore fisso a ore 12 (verificato: candidato #5 "Passione di Sofì"
+→ pointer su segmento 5; disco a 25,5° con seg=60 → `5,5·60 + 25,5 ≡ 355,5°`, dentro
+`[325,5°, 25,5°]` = segmento 5 ✓). Lo swap tipologie→locali resta forward-only.
+
+- Cornice a livelli concentrici (green-deep + cream) con shadow/inset, niente border piatto.
+- Prospettiva 3D: `perspective` + `rotateX/Y` che seguono il mouse (spring, ±5°), **solo
+  desktop**; su touch/reduced-motion tilt fisso a 6° o nullo.
+- Puntatore fisico nuovo (goccia terracotta con drop-shadow + highlight), lean di −7° durante
+  lo spin, micro-"tick" all'arresto.
+- Spin con easing fisicamente credibile (`cubic-bezier(0.33,0,0.15,1)`, non lineare),
+  micro-blur mappato da `useVelocity` (≤1,6px, solo desktop), idle float ±3px + ombra che
+  respira (6s, azzerati da reduced-motion).
+- Segmenti con etichette leggibili (≤8 opzioni; oltre, solo colore + nome nel risultato).
+- `GamberoResult`: overlay gradient leggero sull'immagine + badge categoria in sovrimpressione.
+
+Reduced-motion: pipeline istantanea e funzionale, nessun errore. Mobile 390: wheel 304px,
+nessun overflow. Nuova dipendenza: nessuna (solo hook di `framer-motion` già presente).
 
 ## Note per l'utente
 

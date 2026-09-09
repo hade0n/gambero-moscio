@@ -29,11 +29,11 @@ export default function Login({ onSuccess }) {
 
   return (
     <div className="min-h-dvh bg-cream">
-      <header className="bg-cream/95">
-        <div className="mx-auto flex h-24 max-w-content items-center justify-center px-3 md:h-28 md:justify-start md:px-6">
+      <header className="bg-cream">
+        <div className="mx-auto flex h-16 max-w-content items-center justify-center px-4 md:justify-start md:px-6">
           <Link
             to="/"
-            className="press flex min-h-[44px] items-center"
+            className="press flex min-h-[44px] items-center rounded-lg"
             aria-label="Gambero Moscio - Recensioni Locali — vai alla homepage"
           >
             <img
@@ -41,15 +41,17 @@ export default function Login({ onSuccess }) {
               alt="Gambero Moscio - Recensioni Locali"
               width="785"
               height="288"
-              className="h-16 w-auto sm:h-20 md:h-24"
+              className="h-10 w-auto sm:h-11 md:h-12"
             />
           </Link>
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-md flex-col px-3 py-10 md:py-16">
-        <h1 className="font-display text-2xl font-bold">Area riservata</h1>
-        <p className="mt-1 text-sm text-brown-soft">
+      <main className="mx-auto flex max-w-md flex-col px-4 py-10 md:py-16">
+        <h1 className="font-display text-[1.65rem] font-bold leading-tight sm:text-[2rem]">
+          Area riservata
+        </h1>
+        <p className="mt-1.5 text-sm text-brown-soft">
           Accedi per gestire i locali e le recensioni.
         </p>
 

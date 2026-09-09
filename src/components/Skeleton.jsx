@@ -45,3 +45,21 @@ export function RestaurantListSkeleton({ count = 6 }) {
     </ul>
   );
 }
+
+/** Righe fantasma per l'elenco amministrativo. */
+export function AdminListSkeleton({ count = 4 }) {
+  return (
+    <ul className="space-y-3">
+      {Array.from({ length: count }).map((_, i) => (
+        <li key={i} className="surface flex items-start justify-between gap-3 p-4">
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-5 w-1/2" />
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-5 w-40" />
+          </div>
+          <Skeleton className="h-11 w-24 rounded-full" />
+        </li>
+      ))}
+    </ul>
+  );
+}

@@ -8,6 +8,7 @@ import ReviewForm from '../components/ReviewForm.jsx';
 import ConfirmDeleteModal from '../components/ConfirmDeleteModal.jsx';
 import Modal from '../components/Modal.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import { AdminListSkeleton } from '../components/Skeleton.jsx';
 import Icon from '../components/Icon.jsx';
 import { useRestaurants } from '../hooks/useRestaurants.js';
 import { useToast } from '../context/ToastContext.jsx';
@@ -116,12 +117,7 @@ function Dashboard({ onLogout, user }) {
         </div>
       }
     >
-      {status === 'loading' && (
-        <EmptyState
-          title="Caricamento dei locali in corso…"
-          description="Stiamo recuperando l’archivio condiviso."
-        />
-      )}
+      {status === 'loading' && <AdminListSkeleton />}
 
       {status === 'error' && (
         <EmptyState

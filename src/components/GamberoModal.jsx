@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import Icon from './Icon.jsx';
+import { AnimatePresence, motion } from 'framer-motion';
+import IconButton from './IconButton.jsx';
 import GamberoWheel from './GamberoWheel.jsx';
 import GamberoResult from './GamberoResult.jsx';
+import { cn } from '../lib/cn.js';
+import { fade, fadeUp } from '../lib/motion.js';
 import { useGamberoWheel } from '../hooks/useGamberoWheel.js';
 import { useRestaurants } from '../hooks/useRestaurants.js';
 import { findPndrMatch } from '../utils/discovery.js';
@@ -23,34 +26,42 @@ import {
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-const EXIT_MS = 200;
 
 function OptionRail({ items, activeId, label }) {
   if (!items.length) return null;
 
   return (
     <section className="mt-6 w-full text-left" aria-label={label}>
-      <p className="mb-2 text-center text-xs font-bold uppercase tracking-[0.14em] text-brown-soft">
+      <p className="mb-2.5 text-center text-xs font-bold uppercase tracking-[0.14em] text-brown-soft">
         {label}
       </p>
       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {items.map((item, index) => {
           const active = item.id === activeId;
           return (
-            <li
+            <motion.li
               key={item.id}
               aria-current={active ? 'true' : undefined}
-              className={`min-w-0 rounded-xl border px-3 py-2.5 transition-colors duration-150 ${
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: Math.min(index, 8) * 0.03 }}
+              className={cn(
+                'flex min-w-0 items-baseline gap-2 rounded-xl border px-3 py-2.5 transition-colors',
                 active
-                  ? 'border-terracotta bg-terracotta-deep text-white shadow-xs'
-                  : 'border-brown/10 bg-cream-soft text-brown'
-              }`}
+                  ? 'border-terracotta bg-terracotta-deep text-white shadow-sm'
+                  : 'border-brown/10 bg-cream-soft text-brown',
+              )}
             >
-              <span className={`mr-2 text-[0.68rem] font-bold tabular-nums ${active ? 'text-white/75' : 'text-brown-soft'}`}>
+              <span
+                className={cn(
+                  'text-[0.68rem] font-bold tabular',
+                  active ? 'text-white/75' : 'text-brown-soft',
+                )}
+              >
                 {String(index + 1).padStart(2, '0')}
               </span>
-              <span className="text-sm font-semibold leading-snug">{item.label}</span>
-            </li>
+              <span className="truncate text-sm font-semibold leading-snug">{item.label}</span>
+            </motion.li>
           );
         })}
       </ul>
@@ -64,28 +75,13 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
   const closeRef = useRef(null);
   const headingId = `gambero-modal-${useId()}`;
 
-  const [mounted, setMounted] = useState(open);
-  const [shown, setShown] = useState(false);
-
   const wheel = useGamberoWheel({ active: open });
   const { restaurants } = useRestaurants();
 
-  // montaggio + tick di transizione
+  // scroll lock + focus iniziale / ripristino, mentre la Ruota è aperta
   useEffect(() => {
-    if (open) {
-      fallbackTriggerRef.current = document.activeElement;
-      setMounted(true);
-      const raf = requestAnimationFrame(() => setShown(true));
-      return () => cancelAnimationFrame(raf);
-    }
-    setShown(false);
-    const timer = setTimeout(() => setMounted(false), EXIT_MS);
-    return () => clearTimeout(timer);
-  }, [open]);
-
-  // scroll lock + focus iniziale / ripristino
-  useEffect(() => {
-    if (!open || !mounted) return undefined;
+    if (!open) return undefined;
+    fallbackTriggerRef.current = document.activeElement;
     const { overflow } = document.body.style;
     document.body.style.overflow = 'hidden';
     const raf = requestAnimationFrame(() => closeRef.current?.focus());
@@ -95,7 +91,7 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
       const t = triggerRef?.current || fallbackTriggerRef.current;
       if (t && typeof t.focus === 'function') t.focus();
     };
-  }, [open, mounted, triggerRef]);
+  }, [open, triggerRef]);
 
   const handleKeyDown = useCallback(
     (event) => {
@@ -128,8 +124,6 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
     if (wheel.phase !== 'result' || !wheel.result) return null;
     return findPndrMatch(wheel.result.place, restaurants);
   }, [wheel.phase, wheel.result, restaurants]);
-
-  if (!mounted) return null;
 
   const { phase } = wheel;
   const showTypeWheel = phase === 'idle' || phase === 'type-spin' || phase === 'type-reveal';
@@ -194,34 +188,40 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
             : '';
 
   return createPortal(
-    <div
-      className={`fixed inset-0 z-[110] overflow-y-auto bg-cream transition-opacity duration-200 ${
-        shown ? 'opacity-100' : 'opacity-0'
-      }`}
-      onKeyDown={handleKeyDown}
-    >
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={headingId}
-        className={`mx-auto flex min-h-dvh max-w-content flex-col px-4 pb-12 pt-4 transition-transform duration-200 ease-pndr md:px-6 ${
-          shown ? 'translate-y-0' : 'translate-y-2'
-        }`}
-      >
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="gambero"
+          className="fixed inset-0 z-[110] overflow-y-auto bg-cream"
+          variants={fade}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          onKeyDown={handleKeyDown}
+        >
+          <motion.div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={headingId}
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            className="mx-auto flex min-h-dvh max-w-content flex-col px-4 pb-12 pt-4 md:px-6"
+          >
         <div className="flex items-center justify-between">
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-terracotta">
             {WHEEL_KICKER}
           </p>
-          <button
+          <IconButton
             ref={closeRef}
-            type="button"
+            icon="close"
+            label="Chiudi la Ruota del Gambero"
+            size="md"
+            iconSize={24}
             onClick={onClose}
-            aria-label="Chiudi la Ruota del Gambero"
-            className="press -mr-2 flex h-11 w-11 items-center justify-center rounded-full text-brown-soft hover:bg-brown/5 hover:text-brown"
-          >
-            <Icon name="close" size={24} />
-          </button>
+            className="-mr-2"
+          />
         </div>
 
         <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col items-center justify-center py-6 text-center">
@@ -240,7 +240,18 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
             id={headingId}
             className="font-display text-[1.9rem] font-bold leading-[1.05] sm:text-4xl"
           >
-            {headline}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={phase}
+                variants={fade}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="block"
+              >
+                {headline}
+              </motion.span>
+            </AnimatePresence>
           </h2>
           {subhead && <p className="mt-3 text-base text-brown-soft sm:text-lg">{subhead}</p>}
           {countLine && <p className="mt-3 text-sm font-medium text-brown-soft">{countLine}</p>}
@@ -310,9 +321,11 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
           <p className="sr-only" role="status" aria-live="polite">
             {liveText}
           </p>
-        </div>
-      </div>
-    </div>,
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
     document.body,
   );
 }

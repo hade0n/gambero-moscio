@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 import Icon from './Icon.jsx';
 import ShrimpRating from './ShrimpRating.jsx';
+import { cn } from '../lib/cn.js';
+import { scaleIn } from '../lib/motion.js';
 import { getPlacePhotoUrl, telHref } from '../utils/discovery.js';
 import { reviewerLabel, REVIEWER_KEYS } from '../config/users.js';
 import { ACTION_LOCATION, ACTION_RESPIN, BADGE_ALREADY_REVIEWED } from '../config/wheelMessages.js';
@@ -47,7 +50,12 @@ export default function GamberoResult({ result, pndrMatch, onRespin, className =
   const photoSrc = photoCandidates[imgIdx] || null;
 
   return (
-    <div className={`wheel-result-in surface overflow-hidden ${className}`}>
+    <motion.div
+      variants={scaleIn}
+      initial="hidden"
+      animate="visible"
+      className={cn('surface overflow-hidden', className)}
+    >
       {photoSrc ? (
         <img
           src={photoSrc}
@@ -161,6 +169,6 @@ export default function GamberoResult({ result, pndrMatch, onRespin, className =
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

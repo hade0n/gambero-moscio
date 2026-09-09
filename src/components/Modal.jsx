@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import Icon from './Icon.jsx';
+import IconButton from './IconButton.jsx';
+import { cn } from '../lib/cn.js';
 import { fade, sheet } from '../lib/motion.js';
 
 const FOCUSABLE =
@@ -9,9 +10,14 @@ const FOCUSABLE =
 
 /**
  * Modale base: portal su body, backdrop, focus trap, ESC, click esterno,
- * blocco dello scroll di fondo. Enter/exit gestiti da Framer Motion
- * (`AnimatePresence`): su mobile è uno sheet ancorato in basso, da md è
- * centrata con larghezza massima.
+ * blocco dello scroll di fondo. Enter/exit via `AnimatePresence`.
+ * Su mobile è uno sheet ancorato in basso, da md è centrata.
+ *
+ * - `title`      testo dell'intestazione (obbligatorio per a11y).
+ * - `hero`       se presente, contenuto a tutta larghezza in cima all'area
+ *                scorrevole; l'header testuale diventa sr-only.
+ * - Il pulsante di chiusura è ancorato al pannello (sempre visibile durante
+ *   lo scroll).
  */
 export default function Modal({
   open,
@@ -20,6 +26,7 @@ export default function Modal({
   children,
   labelledBy,
   size = 'md',
+  hero,
   initialFocusRef,
 }) {
   const autoId = useId();
@@ -34,6 +41,7 @@ export default function Modal({
           title={title}
           headingId={headingId}
           size={size}
+          hero={hero}
           initialFocusRef={initialFocusRef}
         >
           {children}
@@ -44,7 +52,7 @@ export default function Modal({
   );
 }
 
-function ModalShell({ onClose, title, headingId, size, initialFocusRef, children }) {
+function ModalShell({ onClose, title, headingId, size, hero, initialFocusRef, children }) {
   const dialogRef = useRef(null);
   const triggerRef = useRef(null);
 
@@ -97,11 +105,7 @@ function ModalShell({ onClose, title, headingId, size, initialFocusRef, children
     };
   }, [initialFocusRef]);
 
-  const width = {
-    sm: 'md:max-w-md',
-    md: 'md:max-w-xl',
-    lg: 'md:max-w-3xl',
-  }[size];
+  const width = { sm: 'md:max-w-md', md: 'md:max-w-xl', lg: 'md:max-w-3xl' }[size];
 
   return (
     <div
@@ -128,22 +132,36 @@ function ModalShell({ onClose, title, headingId, size, initialFocusRef, children
         initial="hidden"
         animate="visible"
         exit="exit"
-        className={`relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-cream-soft shadow-lg md:max-h-[88dvh] md:rounded-3xl ${width}`}
+        className={cn(
+          'relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-cream-soft shadow-lg md:max-h-[88dvh] md:rounded-3xl',
+          width,
+        )}
       >
-        <div className="flex items-start justify-between gap-3 border-b px-5 py-4 md:px-6">
-          <h2 id={headingId} className="text-xl font-semibold">
+        <IconButton
+          icon="close"
+          label="Chiudi"
+          size="md"
+          variant="solid"
+          onClick={onClose}
+          className="absolute right-3 top-3 z-30"
+        />
+
+        {hero ? (
+          <h2 id={headingId} className="sr-only">
             {title}
           </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Chiudi"
-            className="press -m-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-brown-soft hover:bg-brown/5 hover:text-brown"
-          >
-            <Icon name="close" size={22} />
-          </button>
+        ) : (
+          <div className="flex items-start border-b px-5 py-4 pr-16 md:px-6">
+            <h2 id={headingId} className="text-xl font-semibold">
+              {title}
+            </h2>
+          </div>
+        )}
+
+        <div className="overflow-y-auto overscroll-contain">
+          {hero && <div className="w-full">{hero}</div>}
+          <div className="px-5 py-5 md:px-6">{children}</div>
         </div>
-        <div className="overflow-y-auto px-5 py-5 md:px-6">{children}</div>
       </motion.div>
     </div>
   );

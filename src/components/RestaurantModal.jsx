@@ -60,16 +60,16 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
       <Modal open={open} onClose={onClose} title={name} size="lg" hero={hero}>
         <div className="space-y-5">
           <div>
-            <h2 className="font-display text-2xl font-bold leading-tight">{name}</h2>
-            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5">
-              <span className="inline-flex items-center rounded-full bg-green/10 px-2.5 py-0.5 text-[0.7rem] font-semibold uppercase tracking-wide text-green-deep">
+            <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+              <h2 className="font-display text-2xl font-bold leading-tight">{name}</h2>
+              <span className="inline-flex shrink-0 items-center rounded-full bg-green/10 px-2.5 py-0.5 text-[0.68rem] font-bold uppercase tracking-wide text-green-deep">
                 {category}
               </span>
-              <p className="flex items-center gap-1.5 text-sm text-brown-soft">
-                <Icon name="pin" size={15} className="shrink-0" />
-                {town} ({province})
-              </p>
             </div>
+            <p className="mt-1.5 flex items-center gap-1.5 text-sm text-brown-soft">
+              <Icon name="pin" size={15} className="shrink-0" />
+              {town} ({province})
+            </p>
           </div>
 
           {activeReview ? (

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import Header from '../components/Header.jsx';
 import CategoryFilter from '../components/CategoryFilter.jsx';
 import RestaurantList from '../components/RestaurantList.jsx';
@@ -52,27 +53,42 @@ export default function Home() {
         </p>
 
         <div className="mt-7">
-          {status === 'loading' && <RestaurantListSkeleton />}
+          <AnimatePresence mode="wait">
+            {status === 'loading' && (
+              <motion.div key="loading" exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
+                <RestaurantListSkeleton />
+              </motion.div>
+            )}
 
-          {status === 'error' && (
-            <EmptyState
-              title="Non è stato possibile caricare i locali."
-              description={error || 'Controlla la connessione e riprova.'}
-              action={
-                <button type="button" onClick={() => refetch()} className="btn btn-primary">
-                  Riprova
-                </button>
-              }
-            />
-          )}
+            {status === 'error' && (
+              <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <EmptyState
+                  title="Non è stato possibile caricare i locali."
+                  description={error || 'Controlla la connessione e riprova.'}
+                  action={
+                    <button type="button" onClick={() => refetch()} className="btn btn-primary">
+                      Riprova
+                    </button>
+                  }
+                />
+              </motion.div>
+            )}
 
-          {showList && (
-            <RestaurantList
-              restaurants={ranked}
-              onOpen={setSelected}
-              isFiltered={activeCategory !== ALL}
-            />
-          )}
+            {showList && (
+              <motion.div
+                key="list"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.32, ease: [0.2, 0.7, 0.2, 1] }}
+              >
+                <RestaurantList
+                  restaurants={ranked}
+                  onOpen={setSelected}
+                  isFiltered={activeCategory !== ALL}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </main>
 

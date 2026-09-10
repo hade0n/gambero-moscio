@@ -21,9 +21,9 @@ export default function RatingBreakdown({ ratings }) {
             <dt className="text-sm font-medium text-brown-soft">{label}</dt>
             <div className="h-2 overflow-hidden rounded-full bg-brown/10" role="presentation">
               <motion.div
-                className="h-full rounded-full bg-green"
-                initial={{ width: 0 }}
-                animate={{ width: `${(value / 10) * 100}%` }}
+                className="h-full w-full origin-left bg-green"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: value / 10 }}
                 transition={{ duration: FILL_MS, ease: EASE.out, delay }}
               />
             </div>

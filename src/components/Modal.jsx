@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, animate, motion, useMotionValue } from 'framer-motion';
+import { AnimatePresence, animate, motion, useMotionValue, useTransform } from 'framer-motion';
 import IconButton from './IconButton.jsx';
 import { cn } from '../lib/cn.js';
-import { fade, sheet } from '../lib/motion.js';
+import { DUR, EASE } from '../lib/motion.js';
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -13,19 +13,23 @@ const isPhone = () =>
   typeof window.matchMedia === 'function' &&
   window.matchMedia('(max-width: 767px)').matches;
 
+const viewportH = () => (typeof window !== 'undefined' ? window.innerHeight : 800);
+
 /**
  * Modale base: portal su body, backdrop, focus trap, ESC, click esterno,
- * blocco dello scroll di fondo. Enter/exit via `AnimatePresence`.
- * Su mobile è uno sheet ancorato in basso, da md è centrata.
+ * blocco dello scroll di fondo.
  *
- * - `title`      testo dell'intestazione (obbligatorio per a11y).
- * - `hero`       se presente, contenuto a tutta larghezza in cima all'area
- *                scorrevole; l'header testuale diventa sr-only.
- * - Il pulsante di chiusura è ancorato al pannello (sempre visibile durante
- *   lo scroll).
- * - Pull-to-dismiss (solo mobile): quando il contenuto è già in cima e si
- *   trascina il dito verso il basso, lo sheet segue e oltre soglia si chiude —
- *   come uno sheet nativo. Verso l'alto o più in basso resta un normale scroll.
+ * Enter / drag / exit passano tutti da UNA motion value `y` (il pannello si
+ * traduce, niente conflitti né doppi frame). Su mobile è uno sheet ancorato in
+ * basso con:
+ *  - stecchetta di trascinamento in alto (stile iOS), la X resta solo da `md`;
+ *  - pull-to-dismiss: se il contenuto è già in cima e si trascina il dito verso
+ *    il basso, lo sheet segue (con `preventDefault` dal primo pixel, così non
+ *    sbuca il rimbalzo bianco) e oltre soglia scivola via e si chiude.
+ * Verso l'alto o più in basso resta un normale scroll.
+ *
+ * - `title` intestazione (obbligatoria per a11y).
+ * - `hero`  contenuto a tutta larghezza in cima; l'header testuale è sr-only.
  */
 export default function Modal({
   open,
@@ -66,14 +70,29 @@ function ModalShell({ onClose, title, headingId, size, hero, initialFocusRef, ch
   const scrollRef = useRef(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
+  const closingRef = useRef(false);
 
-  const dragY = useMotionValue(0);
+  const travel = useRef(viewportH()).current;
+  const y = useMotionValue(travel);
+  const backdropOpacity = useTransform(y, [0, travel], [1, 0]);
+
+  const dismiss = useCallback(() => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    animate(y, travel, { duration: 0.22, ease: EASE.in }).then(() => onCloseRef.current());
+  }, [y, travel]);
+
+  // Entrata: singolo scivolamento dal basso.
+  useEffect(() => {
+    const controls = animate(y, 0, { duration: DUR.modal, ease: EASE.out });
+    return controls.stop;
+  }, [y]);
 
   const handleKeyDown = useCallback(
     (event) => {
       if (event.key === 'Escape') {
         event.stopPropagation();
-        onClose();
+        dismiss();
         return;
       }
       if (event.key !== 'Tab') return;
@@ -97,7 +116,7 @@ function ModalShell({ onClose, title, headingId, size, hero, initialFocusRef, ch
         first.focus();
       }
     },
-    [onClose],
+    [dismiss],
   );
 
   // Focus trap + blocco scroll + ripristino focus al trigger alla chiusura.
@@ -118,9 +137,7 @@ function ModalShell({ onClose, title, headingId, size, hero, initialFocusRef, ch
     };
   }, [initialFocusRef]);
 
-  // Pull-to-dismiss: gesto touch nativo sull'area scorrevole. Decide alla prima
-  // frazione di movimento se è "pull" (giù, dal top) o "scroll" (tutto il resto)
-  // e non interferisce mai con lo scroll normale.
+  // Pull-to-dismiss: gesto touch nativo sull'area scorrevole.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return undefined;
@@ -133,14 +150,21 @@ function ModalShell({ onClose, title, headingId, size, hero, initialFocusRef, ch
       mode = null;
     };
     const onTouchMove = (e) => {
+      if (mode === 'scroll') return;
       const dy = e.touches[0].clientY - startY;
       if (mode === null) {
-        if (Math.abs(dy) < 8) return;
-        mode = dy > 0 && el.scrollTop <= 0 && isPhone() ? 'pull' : 'scroll';
+        if (dy > 0 && el.scrollTop <= 0 && isPhone()) {
+          mode = 'pull';
+        } else if (Math.abs(dy) > 6) {
+          mode = 'scroll';
+          return;
+        } else {
+          return;
+        }
       }
-      if (mode !== 'pull') return;
+      // pull: blocca il rimbalzo nativo dal primo pixel e trascina lo sheet
       e.preventDefault();
-      dragY.set(Math.min(dy * 0.55, 260));
+      y.set(Math.max(0, dy) * 0.6);
     };
     const onTouchEnd = (e) => {
       if (mode !== 'pull') {
@@ -149,11 +173,8 @@ function ModalShell({ onClose, title, headingId, size, hero, initialFocusRef, ch
       }
       mode = null;
       const dy = (e.changedTouches[0]?.clientY ?? startY) - startY;
-      if (dy > 110) {
-        onCloseRef.current();
-      } else {
-        animate(dragY, 0, { type: 'spring', stiffness: 420, damping: 38 });
-      }
+      if (dy > 90) dismiss();
+      else animate(y, 0, { type: 'spring', stiffness: 500, damping: 40 });
     };
 
     el.addEventListener('touchstart', onTouchStart, { passive: true });
@@ -166,7 +187,7 @@ function ModalShell({ onClose, title, headingId, size, hero, initialFocusRef, ch
       el.removeEventListener('touchend', onTouchEnd);
       el.removeEventListener('touchcancel', onTouchEnd);
     };
-  }, [dragY]);
+  }, [y, dismiss]);
 
   const width = { sm: 'md:max-w-md', md: 'md:max-w-xl', lg: 'md:max-w-3xl' }[size];
 
@@ -179,54 +200,53 @@ function ModalShell({ onClose, title, headingId, size, hero, initialFocusRef, ch
         type="button"
         aria-label="Chiudi"
         tabIndex={-1}
-        variants={fade}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
+        style={{ opacity: backdropOpacity }}
         className="absolute inset-0 h-full w-full cursor-default bg-brown/45"
-        onClick={onClose}
+        onClick={dismiss}
       />
-      <motion.div className="flex w-full justify-center" style={{ y: dragY }}>
-        <motion.div
-          ref={dialogRef}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby={headingId}
-          variants={sheet}
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          className={cn(
-            'relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-cream-soft shadow-lg md:max-h-[88dvh] md:rounded-3xl',
-            width,
-          )}
-        >
-          <IconButton
-            icon="close"
-            label="Chiudi"
-            size="md"
-            variant="solid"
-            onClick={onClose}
-            className="absolute right-3 top-3 z-30"
-          />
+      <motion.div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={headingId}
+        style={{ y, willChange: 'transform' }}
+        className={cn(
+          'relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-cream-soft shadow-lg md:max-h-[88dvh] md:rounded-3xl',
+          width,
+        )}
+      >
+        {/* stecchetta di trascinamento (solo mobile) */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-[7px] z-40 h-1 w-9 -translate-x-1/2 rounded-full bg-white/70 shadow-[0_0_0_1px_rgba(58,42,34,0.10)] md:hidden"
+        />
 
-          {hero ? (
-            <h2 id={headingId} className="sr-only">
+        {/* X: solo da desktop (su mobile si chiude trascinando o toccando fuori) */}
+        <IconButton
+          icon="close"
+          label="Chiudi"
+          size="md"
+          variant="solid"
+          onClick={dismiss}
+          className="absolute right-3 top-3 z-30 hidden md:inline-flex"
+        />
+
+        {hero ? (
+          <h2 id={headingId} className="sr-only">
+            {title}
+          </h2>
+        ) : (
+          <div className="flex items-start border-b px-5 py-4 pr-6 pt-6 md:px-6 md:pr-16 md:pt-4">
+            <h2 id={headingId} className="text-xl font-semibold">
               {title}
             </h2>
-          ) : (
-            <div className="flex items-start border-b px-5 py-4 pr-16 md:px-6">
-              <h2 id={headingId} className="text-xl font-semibold">
-                {title}
-              </h2>
-            </div>
-          )}
-
-          <div ref={scrollRef} className="overflow-y-auto overscroll-contain">
-            {hero && <div className="w-full">{hero}</div>}
-            <div className="px-5 py-5 md:px-6">{children}</div>
           </div>
-        </motion.div>
+        )}
+
+        <div ref={scrollRef} className="overscroll-none overflow-y-auto">
+          {hero && <div className="w-full">{hero}</div>}
+          <div className="px-5 py-5 md:px-6">{children}</div>
+        </div>
       </motion.div>
     </div>
   );

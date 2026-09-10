@@ -1,13 +1,10 @@
-import { motion } from 'framer-motion';
 import RestaurantCard from './RestaurantCard.jsx';
 import EmptyState from './EmptyState.jsx';
-import { DUR, EASE } from '../lib/motion.js';
 
 /**
  * Griglia responsive delle schede locale, già ordinate dalla pagina.
- * Al caricamento le card entrano in cascata (fade + salita), con ritardo
- * incrementale limitato a 8: una lista di 30 non fa 30 animazioni ritardate,
- * ma nessuna card "compare di colpo".
+ * La comparsa della lista è gestita da Home (un unico fade + salita morbida,
+ * in dissolvenza dallo skeleton): le card non "si materializzano" una a una.
  */
 export default function RestaurantList({ restaurants, onOpen, isFiltered }) {
   if (restaurants.length === 0) {
@@ -30,15 +27,9 @@ export default function RestaurantList({ restaurants, onOpen, isFiltered }) {
   return (
     <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
       {restaurants.map((restaurant, index) => (
-        <motion.li
-          key={restaurant.id}
-          className="h-full"
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: DUR.base, ease: EASE.out, delay: Math.min(index, 8) * 0.06 }}
-        >
+        <li key={restaurant.id} className="h-full">
           <RestaurantCard restaurant={restaurant} position={index + 1} onOpen={onOpen} />
-        </motion.li>
+        </li>
       ))}
     </ul>
   );

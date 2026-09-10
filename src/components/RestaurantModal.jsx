@@ -78,7 +78,7 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
                 <div
                   role="tablist"
                   aria-label="Scegli la recensione"
-                  className="mb-4 inline-flex rounded-full border border-brown/12 bg-cream p-1"
+                  className="mb-4 flex w-full rounded-full border border-brown/12 bg-cream p-1"
                 >
                   {available.map((key) => {
                     const isActive = key === activeKey;
@@ -93,7 +93,7 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
                         tabIndex={isActive ? 0 : -1}
                         onClick={() => setSelectedReviewer(key)}
                         className={cn(
-                          'press relative inline-flex min-h-[40px] items-center justify-center rounded-full px-4 text-sm transition-colors',
+                          'press relative flex-1 inline-flex min-h-[40px] items-center justify-center rounded-full px-4 text-sm transition-colors',
                           isActive ? 'text-white' : 'text-brown-soft hover:text-brown',
                         )}
                       >

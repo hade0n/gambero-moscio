@@ -6,13 +6,17 @@
  */
 
 const PATHS = {
-  // Ruota della fortuna: indicatore a triangolo in alto, cerchio diviso in spicchi, mozzo.
+  // Ruota — cerchio + mozzo + raggi (Tabler Icons "wheel", MIT).
   wheel: (
     <>
-      <path d="M12 6.6l3-3.6h-6z" fill="currentColor" stroke="none" />
-      <circle cx="12" cy="13.6" r="7.4" />
-      <path d="M12 6.2v14.8M5.5 9.85l13 7.5M18.5 9.85l-13 7.5" />
-      <circle cx="12" cy="13.6" r="1.35" fill="currentColor" stroke="none" />
+      <path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" />
+      <path d="M9 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+      <path d="M3 12h6" />
+      <path d="M15 12h6" />
+      <path d="M13.6 9.4l3.4 -4.8" />
+      <path d="M10.4 14.6l-3.4 4.8" />
+      <path d="M7 4.6l3.4 4.8" />
+      <path d="M13.6 14.6l3.4 4.8" />
     </>
   ),
   close: (

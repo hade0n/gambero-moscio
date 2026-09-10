@@ -9,7 +9,7 @@ const ICON_PX = { sm: 16, md: 20, lg: 22 };
 const VARIANTS = {
   ghost: 'text-brown-soft hover:bg-brown/5 hover:text-brown',
   solid:
-    'border border-brown/10 bg-cream-soft/92 text-brown shadow-sm backdrop-blur-sm hover:bg-cream-soft',
+    'border border-brown/15 bg-cream-soft text-brown shadow-md ring-1 ring-brown/5 backdrop-blur-sm hover:bg-cream',
 };
 
 /**

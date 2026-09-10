@@ -1,5 +1,6 @@
 import { getShrimpRatingState } from '../utils/ratingUtils.js';
 import { formatRating } from '../utils/ratings.js';
+import AnimatedNumber from './AnimatedNumber.jsx';
 
 /**
  * Sistema di valutazione PNDR: i **Gamberi Mosci**.
@@ -61,6 +62,8 @@ export default function ShrimpRating({
   valueClassName = 'text-sm',
   ariaLabel,
   decorative = false,
+  animateValue = false,
+  valueDelay = 0,
 }) {
   const state = getShrimpRatingState(rating);
   const px = typeof size === 'number' ? size : SIZE_MAP[size] || SIZE_MAP.md;
@@ -78,11 +81,18 @@ export default function ShrimpRating({
           <Shrimp key={i} px={px} fill={fill} />
         ))}
       </span>
-      {showValue && (
-        <span className={`tabular font-bold leading-none text-brown ${valueClassName}`}>
-          {formatRating(state.value)}
-        </span>
-      )}
+      {showValue &&
+        (animateValue ? (
+          <AnimatedNumber
+            value={state.value}
+            delay={valueDelay}
+            className={`tabular font-bold leading-none text-brown ${valueClassName}`}
+          />
+        ) : (
+          <span className={`tabular font-bold leading-none text-brown ${valueClassName}`}>
+            {formatRating(state.value)}
+          </span>
+        ))}
     </span>
   );
 }

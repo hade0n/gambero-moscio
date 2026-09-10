@@ -1,12 +1,13 @@
 import { motion } from 'framer-motion';
 import RestaurantCard from './RestaurantCard.jsx';
 import EmptyState from './EmptyState.jsx';
-import { listItem, inViewOnce } from '../lib/motion.js';
+import { DUR, EASE } from '../lib/motion.js';
 
 /**
  * Griglia responsive delle schede locale, già ordinate dalla pagina.
- * Reveal per elemento su `whileInView`: la coda non cresce col numero di card
- * (una lista di 30 non fa 30 animazioni ritardate).
+ * Al caricamento le card entrano in cascata (fade + salita), con ritardo
+ * incrementale limitato a 8: una lista di 30 non fa 30 animazioni ritardate,
+ * ma nessuna card "compare di colpo".
  */
 export default function RestaurantList({ restaurants, onOpen, isFiltered }) {
   if (restaurants.length === 0) {
@@ -32,10 +33,9 @@ export default function RestaurantList({ restaurants, onOpen, isFiltered }) {
         <motion.li
           key={restaurant.id}
           className="h-full"
-          variants={listItem}
-          initial="hidden"
-          whileInView="visible"
-          viewport={inViewOnce}
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: DUR.base, ease: EASE.out, delay: Math.min(index, 8) * 0.06 }}
         >
           <RestaurantCard restaurant={restaurant} position={index + 1} onOpen={onOpen} />
         </motion.li>

@@ -48,6 +48,8 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
           <Icon name="bowl" size={44} />
         </div>
       )}
+      {/* velo in alto: stacca il pulsante di chiusura dalla foto */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-brown/35 to-transparent" />
       {/* velo in basso per staccare il contenuto dall'immagine */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-cream-soft to-transparent" />
     </div>
@@ -133,6 +135,7 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
                       rating={activeReview.ratings.overall}
                       size="md"
                       valueClassName="text-lg"
+                      animateValue
                     />
                   </div>
                   <RatingBreakdown ratings={activeReview.ratings} />

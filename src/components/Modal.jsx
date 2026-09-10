@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useDragControls } from 'framer-motion';
 import IconButton from './IconButton.jsx';
 import { cn } from '../lib/cn.js';
 import { fade, sheet } from '../lib/motion.js';
@@ -55,6 +55,33 @@ export default function Modal({
 function ModalShell({ onClose, title, headingId, size, hero, initialFocusRef, children }) {
   const dialogRef = useRef(null);
   const triggerRef = useRef(null);
+  const scrollRef = useRef(null);
+  const dragControls = useDragControls();
+  const dragFromY = useRef(null);
+  const dragArmed = useRef(false);
+
+  // Pull-to-dismiss (solo mobile / sheet): se il contenuto è già in cima e il
+  // dito scende, l'intero pannello segue e, oltre soglia, si chiude — come uno
+  // sheet nativo. Verso l'alto resta un normale scroll.
+  const onScrollPointerDown = (event) => {
+    dragArmed.current = false;
+    dragFromY.current = null;
+    if (event.pointerType === 'mouse') return;
+    if (typeof window !== 'undefined' && window.matchMedia?.('(min-width: 768px)').matches) return;
+    dragFromY.current = event.clientY;
+  };
+  const onScrollPointerMove = (event) => {
+    if (dragArmed.current || dragFromY.current == null) return;
+    const sc = scrollRef.current;
+    if (!sc || sc.scrollTop > 0) return;
+    if (event.clientY - dragFromY.current > 12) {
+      dragArmed.current = true;
+      dragControls.start(event);
+    }
+  };
+  const onScrollPointerEnd = () => {
+    dragFromY.current = null;
+  };
 
   const handleKeyDown = useCallback(
     (event) => {
@@ -132,6 +159,16 @@ function ModalShell({ onClose, title, headingId, size, hero, initialFocusRef, ch
         initial="hidden"
         animate="visible"
         exit="exit"
+        drag="y"
+        dragControls={dragControls}
+        dragListener={false}
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={{ top: 0, bottom: 0.6 }}
+        onDragEnd={(_, info) => {
+          dragArmed.current = false;
+          dragFromY.current = null;
+          if (info.offset.y > 110 || info.velocity.y > 700) onClose();
+        }}
         className={cn(
           'relative flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-3xl bg-cream-soft shadow-lg md:max-h-[88dvh] md:rounded-3xl',
           width,
@@ -158,7 +195,14 @@ function ModalShell({ onClose, title, headingId, size, hero, initialFocusRef, ch
           </div>
         )}
 
-        <div className="overflow-y-auto overscroll-contain">
+        <div
+          ref={scrollRef}
+          className="overflow-y-auto overscroll-contain"
+          onPointerDown={onScrollPointerDown}
+          onPointerMove={onScrollPointerMove}
+          onPointerUp={onScrollPointerEnd}
+          onPointerCancel={onScrollPointerEnd}
+        >
           {hero && <div className="w-full">{hero}</div>}
           <div className="px-5 py-5 md:px-6">{children}</div>
         </div>

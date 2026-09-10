@@ -92,6 +92,26 @@ esattamente sotto il puntatore fisso a ore 12 (verificato: candidato #5 "Passion
 Reduced-motion: pipeline istantanea e funzionale, nessun errore. Mobile 390: wheel 304px,
 nessun overflow. Nuova dipendenza: nessuna (solo hook di `framer-motion` già presente).
 
+### Fase 12b — Wheeler: concept dal riferimento, stile dal design system (`902dc28`)
+
+Secondo passaggio dopo un riferimento UX (ruota grande come fulcro, mozzo con la mascotte
+"che decide", puntatore in alto, cornice a livelli, CTA agganciata alla ruota). Tradotto nel
+linguaggio PNDR, **nessun colore/tipografia/ombra presi dall'immagine**:
+
+- Cornice a livelli concentrici caldi (cream-soft) con filo terracotta (brand) + filo verde
+  d'accento — al posto della campitura `green-deep` dominante.
+- Mozzo centrale = pozzetto con la mascotte `/shrimp.svg` (asset esistente) come "decisore";
+  rimossi il testo "Il Gambero / decide" e i prop `centerTitle`/`centerDetail`.
+- Lift 2.5D statico (luce dall'alto) sul disco; puntatore a goccia morbida con leggera coda.
+- `GamberoModal`: CTA subito sotto la ruota, legenda (`OptionRail`) dopo la CTA.
+- `GamberoResult`: rimossa la ridondanza «Il Gambero ha parlato» già presente nel titolo del
+  modal (eyebrow → «Stasera si mangia qui», riscritta `RESULT_MESSAGES[0]`); badge "già
+  recensito" su token `rating` (`bg-rating`) invece dell'hex grezzo `#E58A1F`.
+
+Invariati: `useGamberoWheel`, timing/rotazione, matematica del vincitore, Fisher-Yates,
+pipeline, `GamberoResult` come componente riusato. Pipeline completa verificata in browser
+(type-spin → reveal → place-spin → result), nessun overflow a 473px, build verde (438 moduli).
+
 ## Note per l'utente
 
 - Non toccati: `useGamberoWheel`, la rotazione/timing di `GamberoWheel`, Fisher-Yates,

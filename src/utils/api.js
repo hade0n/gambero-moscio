@@ -1,5 +1,5 @@
 /**
- * Client dell'archivio centrale (`/api/restaurants` → Vercel Blob).
+ * Client dell'archivio centrale (`/api/restaurants` → Supabase).
  * Nessun segreto qui: solo chiamate HTTP. La fonte autorevole è il server.
  */
 
@@ -22,7 +22,7 @@ async function parse(res) {
   return data;
 }
 
-/** GET dell'intero documento: { version, updatedAt, restaurants }. */
+/** GET dell'intera collezione: { version, updatedAt, restaurants }. */
 export async function getCollection() {
   let res;
   try {
@@ -71,7 +71,7 @@ export async function sendMutation(method, body) {
   };
 }
 
-/** Carica un'immagine (data URL) su Vercel Blob; ritorna l'URL pubblico. */
+/** Carica un'immagine (data URL) su Supabase Storage; ritorna l'URL pubblico. */
 export async function uploadImage(dataUrl, kind) {
   if (typeof dataUrl === 'string' && /^https?:\/\//i.test(dataUrl)) return dataUrl; // già un URL
   let res;

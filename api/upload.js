@@ -1,17 +1,29 @@
-import { put } from '@vercel/blob';
+import { createClient } from '@supabase/supabase-js';
 import { getSession, readJsonBody } from '../lib/session.js';
-import { BlobNotConfiguredError } from '../lib/blob-store.js';
-
-const FOLDERS = { place: 'restaurants', dish: 'dishes' };
-const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' };
+import { DbNotConfiguredError } from '../lib/db.js';
 
 /**
  * POST /api/upload  (sessione richiesta)
  * Body JSON: { image: "data:image/...;base64,...", kind: "place" | "dish" }
- * Carica l'immagine su Vercel Blob e restituisce { url }.
- * L'immagine arriva già ridimensionata dal client; nel JSON dei locali si
- * salvano solo gli URL, mai il Base64.
+ * Carica l'immagine su Supabase Storage (bucket pubblico `locali`) e restituisce
+ * { url }. L'immagine arriva già ridimensionata dal client; nel JSON dei locali
+ * si salvano solo gli URL, mai il Base64.
  */
+
+const BUCKET = 'locali';
+const FOLDERS = { place: 'restaurants', dish: 'dishes' };
+const EXT = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' };
+
+let client = null;
+function storage() {
+  if (client) return client;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new DbNotConfiguredError();
+  client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  return client;
+}
+
 export default async function handler(req, res) {
   try {
     if (req.method !== 'POST') {
@@ -21,9 +33,6 @@ export default async function handler(req, res) {
     if (!getSession(req)) {
       return res.status(401).json({ error: 'Sessione non valida. Effettua di nuovo l’accesso.' });
     }
-
-    const token = process.env.BLOB_READ_WRITE_TOKEN;
-    if (!token) throw new BlobNotConfiguredError();
 
     const { image, kind } = readJsonBody(req);
     const folder = FOLDERS[kind] || FOLDERS.dish;
@@ -39,19 +48,17 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Immagine vuota o troppo grande.' });
     }
 
-    // Suffisso casuale: ogni upload è un blob nuovo e distinto (nessun rischio di
-    // collisione o di sovrascrittura). Nel JSON dei locali si salva la URL restituita.
-    const name = `${folder}/${Date.now().toString(36)}.${ext}`;
-    const result = await put(name, buffer, {
-      access: 'public',
-      contentType,
-      addRandomSuffix: true,
-      token,
-    });
+    const path = `${folder}/${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const sb = storage();
+    const { error } = await sb.storage
+      .from(BUCKET)
+      .upload(path, buffer, { contentType, upsert: false });
+    if (error) throw new Error(error.message);
 
-    return res.status(200).json({ url: result.url });
+    const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
+    return res.status(200).json({ url: data.publicUrl });
   } catch (err) {
-    if (err instanceof BlobNotConfiguredError) {
+    if (err instanceof DbNotConfiguredError) {
       return res.status(503).json({ error: err.message });
     }
     return res.status(500).json({ error: err?.message || 'Caricamento immagine non riuscito.' });

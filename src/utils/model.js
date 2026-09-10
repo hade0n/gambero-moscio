@@ -1,9 +1,9 @@
 /**
  * Modello dati puro di Gambero Moscio - Recensioni Locali.
  *
- * Nessun accesso a `localStorage`, a Vercel Blob o alla rete: solo funzioni
+ * Nessun accesso a `localStorage`, al database o alla rete: solo funzioni
  * pure di normalizzazione/validazione. Usato sia dal client
- * (`RestaurantsContext`) sia dal server (`lib/blob-store.js`, `api/`).
+ * (`RestaurantsContext`) sia dal server (`lib/db.js`, `api/`).
  *
  * Un locale = dati condivisi + `reviews.{ilenia,salvatore}` indipendenti
  * (ciascuna può essere assente). Gli aggregati (`ratings`, `rankingScore`,

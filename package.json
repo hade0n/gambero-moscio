@@ -14,16 +14,19 @@
     "audit:gambero": "node scripts/audit-gambero-db.mjs",
     "geocode:gambero": "node scripts/geocode-gambero.mjs",
     "enrich:gambero": "node scripts/enrich-gambero-db.mjs",
-    "photos:gambero": "node scripts/fetch-photos-commons.mjs && node scripts/fetch-photos-sites.mjs"
+    "photos:gambero": "node scripts/fetch-photos-commons.mjs && node scripts/fetch-photos-sites.mjs",
+    "export:blob": "node scripts/export-blob.mjs",
+    "import:supabase": "node scripts/import-to-supabase.mjs"
   },
   "dependencies": {
-    "@vercel/blob": "^2.8.0",
+    "@supabase/supabase-js": "^2.45.4",
     "framer-motion": "^11.18.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2"
   },
   "devDependencies": {
+    "@vercel/blob": "^2.8.0",
     "@vitejs/plugin-react": "^4.3.2",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.47",

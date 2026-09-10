@@ -1,18 +1,18 @@
 import { getSession, readJsonBody } from '../lib/session.js';
 import {
-  BlobNotConfiguredError,
+  DbNotConfiguredError,
   createPlace,
   deletePlace,
   readCollection,
   saveReview,
   updateSharedFields,
-} from '../lib/blob-store.js';
+} from '../lib/db.js';
 import { pickPlaceFields, placeKey } from '../src/utils/model.js';
 import { isReviewer } from '../src/config/users.js';
 
 /**
- * /api/restaurants — accesso server-side all'archivio su Vercel Blob (un blob
- * per locale, vedi lib/blob-store.js).
+ * /api/restaurants — accesso server-side all'archivio su Supabase (tabella
+ * `places`, vedi lib/db.js).
  *
  * GET    (pubblico)  → { version, updatedAt, signature, restaurants }
  * POST   (sessione)  → { op: 'createPlace', data }
@@ -105,7 +105,7 @@ export default async function handler(req, res) {
     res.setHeader('Allow', 'GET, POST, PUT, DELETE');
     return res.status(405).json({ error: 'Metodo non consentito.' });
   } catch (err) {
-    if (err instanceof BlobNotConfiguredError) {
+    if (err instanceof DbNotConfiguredError) {
       return res.status(503).json({ error: err.message });
     }
     console.error('[restaurants] ERROR', err?.message || err);

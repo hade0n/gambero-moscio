@@ -75,7 +75,78 @@ sistema di voti (`ratings.js`), routing, tono di voce, requisiti Vercel.
 
 ---
 
-## Aggiornamento — Persistenza su Vercel Blob (override)
+## Aggiornamento — Persistenza su Supabase (override)
+
+Questa sezione **sostituisce** l'*Aggiornamento — Persistenza su Vercel Blob* qui sotto e
+ogni riferimento più avanti a Vercel Blob / `@vercel/blob` / `lib/blob-store.js` / «un blob
+per locale» / `manifest.json` / staleness della CDN. **L'hosting resta su Vercel** (SPA
+statica + serverless functions in `api/`): cambia solo la persistenza.
+
+### Perché
+Il free tier di Vercel Blob (transfer/operazioni) è troppo stretto: ogni `GET
+/api/restaurants` riscaricava ogni `places/*.json` e il client fa polling. Postgres è
+coerente (niente CDN) e la lettura è una query da pochi KB.
+
+### Dipendenze
+- Aggiunta: **`@supabase/supabase-js`** (unica). `@vercel/blob` resta solo come
+  **devDependency** per l'export una-tantum (`scripts/export-blob.mjs`), poi si rimuove.
+- Nessun altro servizio (no ORM, no Prisma).
+
+### Segreti — solo server-side
+- `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`: solo `process.env` nelle funzioni `api/`, mai
+  `VITE_*`, mai nel bundle client / props / JSON pubblici. In `.env.example` senza valore.
+  `vite.config.js` li carica per il dev via prefisso `SUPABASE_` in `loadEnv`.
+- La `service_role` key bypassa la Row Level Security. RLS resta **attiva senza policy** sulla
+  tabella `places`: il ruolo `anon`/`authenticated` non legge né scrive (il client non parla
+  mai con Supabase, solo le funzioni).
+
+### Schema (Postgres)
+Tabella unica **`places`**: `id text pk`, `name`, `category`, `town`, `province`,
+`image_url`, `dish_images jsonb`, `reviews jsonb` (`{ ilenia?, salvatore? }`),
+`updated_at timestamptz`. Indice unico su `lower(trim(name)), lower(trim(town)),
+lower(trim(province))` (= `placeKey()`). Solo campi **input**: `ratings` / `rankingScore` /
+`reviewCount` aggregati restano **derivati** e ricalcolati a ogni lettura da
+`normalizeRestaurant` (invariato).
+
+### `lib/db.js` (server-only, sostituisce `lib/blob-store.js`)
+`readCollection()` = `SELECT *` → `normalizeRestaurant` per riga; `signature` = sha1 di
+`id@updated_at` ordinati (stesso contratto verso il client). `createPlace` = insert.
+`updateSharedFields` / `saveReview` = read-modify-write con **compare-and-swap su
+`updated_at`** (`.eq('updated_at', prev)`), fino a 3 tentativi: Ilenia e Salvatore non si
+sovrascrivono mai, niente `ifMatch`, niente retry sul Blob. `deletePlace` = delete.
+`DbNotConfiguredError` → `503`. **Sparisce** tutta la logica CDN/ETag/`lastWrite`/`manifest`
+del vecchio store.
+
+### API — invariata nel contratto
+`api/restaurants.js`: stessi metodi/op/risposte (`{ version, updatedAt, signature,
+restaurants }`), cambia solo l'import (`../lib/db.js`). `api/upload.js`: carica su **Supabase
+Storage** (bucket pubblico `locali`, cartelle `restaurants/` e `dishes/`) e risponde ancora
+`{ url }` — `src/utils/api.js` e `PlaceForm` invariati.
+
+### Client — invariato
+`src/utils/api.js`, `RestaurantsContext` (solo `POLL_INTERVAL` 12s → **45s**), `model.js`,
+tutti i componenti/pagine/hook, routing. La UX non cambia.
+
+### Migrazione dati (una tantum)
+1. Export dal Blob: `npm run export:blob` → `./_blob-export/` (o download manuale dal tab
+   *Browser* del dashboard Vercel se la quota blocca l'SDK).
+2. In Supabase: esegui lo schema SQL + crea il bucket `locali` (public).
+3. `npm run import:supabase` → per ogni `places/*.json` ri-carica le immagini su Storage,
+   riscrive gli URL, fa `upsert` della riga. Re-eseguibile.
+4. Env su Vercel + `.env.local`, redeploy.
+
+Rollback: le env vecchie + `git revert` (il vecchio `lib/blob-store.js` è nella history).
+
+### Invariato
+Due account (`ilenia` / `salvatore`) con password in Environment Variables, auth **cookie
+HMAC** (`lib/session.js`, `api/auth/*` — nessun DB, niente Supabase Auth), sistema a due
+recensioni, pill del dettaglio, classifica, `ratings.js` / `ratingUtils.js`, Ruota del
+Gambero (`gamberoDiscovery.json` è dataset separato), `vercel.json`, nome, logo, palette,
+layout, animazioni, responsive, tono di voce.
+
+---
+
+## Aggiornamento — Persistenza su Vercel Blob (override) [SUPERATO — vedi sopra]
 
 Questa sezione **sostituisce** *localStorage Architecture*, *Image Upload* (parte storage) e
 ogni riferimento più avanti a «`localStorage` è il database» / «nessun backend server».

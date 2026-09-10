@@ -13,20 +13,19 @@ import { compareByRanking } from '../utils/ratings.js';
 const RestaurantsContext = createContext(null);
 
 /** Intervallo di polling per la sincronizzazione fra dispositivi (ms). */
-const POLL_INTERVAL = 12000;
+const POLL_INTERVAL = 45000;
 
 /**
  * Provider unico della collezione locali — punto di sincronizzazione dell'app.
  *
- * I dati vivono nell'archivio centrale su Vercel Blob (un blob per locale) e si
+ * I dati vivono nell'archivio centrale su Supabase (tabella `places`) e si
  * leggono/scrivono solo tramite `/api/restaurants`. Niente `localStorage`.
  *
  * - all'avvio: `GET /api/restaurants` (stato `loading` → `ready` | `error`);
  * - create / update / delete / recensioni: chiamano l'API e SOSTITUISCONO lo
  *   stato con la collezione restituita dal server (fonte autorevole);
- * - polling ogni ~12s (solo a scheda visibile): confronta `signature` (hash
- *   dell'elenco lato server, che deriva da `list()` ed è coerente) e applica solo
- *   se è cambiata. Una risposta di polling che "torna in corso" durante una
+ * - polling ogni ~45s (solo a scheda visibile): confronta `signature` (hash
+ *   di `id@updated_at` lato server) e applica solo se è cambiata. Una risposta di polling che "torna in corso" durante una
  *   mutazione viene scartata (contatore `mutationSeq`), così una modifica appena
  *   fatta non può essere sovrascritta da una lettura partita prima.
  */

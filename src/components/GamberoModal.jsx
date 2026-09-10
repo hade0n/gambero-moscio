@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import IconButton from './IconButton.jsx';
 import GamberoWheel from './GamberoWheel.jsx';
 import GamberoResult from './GamberoResult.jsx';
-import { cn } from '../lib/cn.js';
 import { fade, fadeUp } from '../lib/motion.js';
 import { useGamberoWheel } from '../hooks/useGamberoWheel.js';
 import { useRestaurants } from '../hooks/useRestaurants.js';
@@ -26,46 +25,6 @@ import {
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-function OptionRail({ items, activeId, label }) {
-  if (!items.length) return null;
-
-  return (
-    <section className="mt-7 w-full text-left" aria-label={label}>
-      <p className="mb-3 text-center text-[0.68rem] font-bold uppercase tracking-[0.18em] text-brown-soft">
-        {label}
-      </p>
-      <ul className="mx-auto grid max-w-md grid-cols-2 gap-x-5 gap-y-0.5">
-        {items.map((item, index) => {
-          const active = item.id === activeId;
-          return (
-            <motion.li
-              key={item.id}
-              aria-current={active ? 'true' : undefined}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(index, 8) * 0.025 }}
-              className={cn(
-                'flex min-w-0 items-center gap-3 rounded-lg px-2.5 py-1.5 transition-colors',
-                active ? 'bg-green-deep text-white' : 'text-brown',
-              )}
-            >
-              <span
-                className={cn(
-                  'font-display text-[0.95rem] font-semibold tabular',
-                  active ? 'text-white/80' : 'text-terracotta',
-                )}
-              >
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <span className="truncate text-sm font-medium leading-snug">{item.label}</span>
-            </motion.li>
-          );
-        })}
-      </ul>
-    </section>
-  );
-}
 
 export default function GamberoModal({ open, onClose, triggerRef }) {
   const dialogRef = useRef(null);
@@ -279,14 +238,6 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
             >
               {CTA_SPINNING}
             </button>
-          )}
-
-          {showWheel && (
-            <OptionRail
-              items={wheelItems}
-              activeId={selectedOptionId}
-              label={showPlaceWheel ? 'I locali in gara' : 'Le tipologie disponibili'}
-            />
           )}
 
           {phase === 'empty' && (

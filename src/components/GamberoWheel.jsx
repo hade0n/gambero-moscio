@@ -32,10 +32,31 @@ const R = 92;
 const rad = (d) => (d * Math.PI) / 180;
 const pt = (r, aDeg) => [C + r * Math.sin(rad(aDeg)), C - r * Math.cos(rad(aDeg))];
 
-// Due soli toni caldi del design system PNDR — calmo, non a scacchiera.
-const FILL_A = '#FFFAF3';
-const FILL_B = '#F3E3C9';
-const SEG_STROKE = '#EAD9BE';
+// SOLO token del design system PNDR: i due unici toni "superficie" (cream-soft /
+// cream) alternati, separati dallo stesso bordo di ogni altra superficie del
+// sito (--pndr-border = brown 12%). Nessun colore nuovo.
+const FILL_A = '#FFF9F1'; // cream-soft
+const FILL_B = '#FFF3E2'; // cream
+const SEG_STROKE = 'rgba(58,42,34,0.14)';
+
+// Nomi lunghi → forma corta leggibile dentro lo spicchio (il nome intero resta
+// nell'headline e nella card del risultato).
+const SHORT_LABEL = {
+  'Ristorante Carne': 'Carne',
+  'Ristorante Pesce': 'Pesce',
+};
+const labelText = (s) => SHORT_LABEL[s] || s || '';
+const shorten = (s, n) => {
+  const t = labelText(s).toUpperCase();
+  return t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t;
+};
+
+function labelSpec(n) {
+  if (n <= 4) return { fs: 8.6, max: 17 };
+  if (n <= 6) return { fs: 7.4, max: 14 };
+  if (n <= 8) return { fs: 6.5, max: 12 };
+  return { fs: 5.6, max: 10 };
+}
 
 function wedge(i, seg, r = R) {
   const [x0, y0] = pt(r, i * seg);
@@ -80,6 +101,8 @@ export default function GamberoWheel({
 }) {
   const count = items.length;
   const seg = count > 0 ? 360 / count : 360;
+  const L = labelSpec(Math.max(count, 1));
+  const showLabels = count > 1;
   const reduce = useReducedMotion();
   const coarse = useCoarsePointer();
   const flat = coarse || reduce;
@@ -157,8 +180,8 @@ export default function GamberoWheel({
 
   return (
     <div
-      className="relative mx-auto aspect-square w-[min(84vw,360px)] sm:w-[400px] lg:w-[440px]"
-      style={{ perspective: 1200 }}
+      className="relative mx-auto aspect-square w-[min(88vw,400px)] sm:w-[460px] lg:w-[500px]"
+      style={{ perspective: 1300 }}
     >
       {/* ombra a terra — respira appena durante l'idle */}
       <motion.div
@@ -181,16 +204,18 @@ export default function GamberoWheel({
         animate={idle ? { y: [0, -2, 0] } : { y: 0 }}
         transition={idle ? { duration: 7, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.4 }}
       >
-        {/* UNA cornice: bisello caldo con un solo sistema d'ombra */}
+        {/* Cornice = una superficie del sito: cream-soft + bordo --pndr-border +
+            elevazione sulla scala shadow-lg del design system, con un bisello
+            appena accennato per la fisicità. */}
         <div
-          className="absolute inset-0 rounded-full bg-cream-soft"
+          className="absolute inset-0 rounded-full border border-brown/12 bg-cream-soft"
           style={{
             boxShadow:
-              '0 26px 50px -12px rgba(58,42,34,0.32), 0 8px 20px -8px rgba(58,42,34,0.18), inset 0 4px 8px rgba(255,255,255,0.75), inset 0 -18px 30px rgba(58,42,34,0.14)',
+              '0 10px 24px rgba(58,42,34,0.10), 0 28px 64px rgba(58,42,34,0.16), inset 0 2px 4px rgba(255,255,255,0.7), inset 0 -12px 22px rgba(58,42,34,0.09)',
           }}
         />
-        {/* groove sottile prima del quadrante */}
-        <div className="absolute inset-[6%] rounded-full bg-brown/10" />
+        {/* groove sottile prima del quadrante — stesso bordo delle altre superfici */}
+        <div className="absolute inset-[6%] rounded-full border border-brown/12 bg-cream" />
 
         {/* quadrante rotante */}
         <motion.div
@@ -224,10 +249,35 @@ export default function GamberoWheel({
                     x2={ix}
                     y2={iy}
                     stroke="#3A2A22"
-                    strokeOpacity="0.16"
+                    strokeOpacity="0.12"
                     strokeWidth="1"
                     strokeLinecap="round"
                   />
+                );
+              })}
+            {/* nomi dentro gli spicchi — radiali, mai capovolti */}
+            {showLabels &&
+              items.map((it, i) => {
+                const a = (i + 0.5) * seg;
+                const flip = a > 180;
+                const rot = flip ? a - 270 : a - 90;
+                const [lx, ly] = pt(R * 0.63, a);
+                return (
+                  <text
+                    key={`t-${it.id}`}
+                    x={lx.toFixed(2)}
+                    y={ly.toFixed(2)}
+                    transform={`rotate(${rot.toFixed(2)} ${lx.toFixed(2)} ${ly.toFixed(2)})`}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="font-sans"
+                    fontSize={L.fs}
+                    fontWeight="700"
+                    letterSpacing="0.05em"
+                    fill="#3A2A22"
+                  >
+                    {shorten(it.label, L.max)}
+                  </text>
                 );
               })}
           </svg>
@@ -243,7 +293,8 @@ export default function GamberoWheel({
           }}
         />
 
-        {/* selezione: appare SOLO al momento della rivelazione (non è decorazione) */}
+        {/* selezione: appare SOLO alla rivelazione. Verde = lo stesso linguaggio
+            "attivo/scelto" del resto del sito (categoria attiva in homepage). */}
         {highlightTop && count > 1 && (
           <motion.div
             aria-hidden="true"
@@ -255,23 +306,24 @@ export default function GamberoWheel({
             <svg viewBox={`0 0 ${VB} ${VB}`} className="h-full w-full">
               <path
                 d={topWedge(seg)}
-                fill="#BB5A20"
-                fillOpacity="0.12"
-                stroke="#BB5A20"
-                strokeOpacity="0.35"
+                fill="#5F8F3A"
+                fillOpacity="0.14"
+                stroke="#385C32"
+                strokeOpacity="0.45"
                 strokeWidth="1.25"
               />
             </svg>
           </motion.div>
         )}
 
-        {/* mozzo — pomello concentrico, mascotte a intarsio ribassato */}
+        {/* mozzo — una superficie del sito (cream-soft + bordo --pndr-border),
+            appena rialzata, con la mascotte a intarsio */}
         <div
-          className="absolute left-1/2 top-1/2 z-20 flex h-[26%] w-[26%] items-center justify-center rounded-full bg-cream"
+          className="absolute left-1/2 top-1/2 z-20 flex h-[24%] w-[24%] items-center justify-center rounded-full border border-brown/12 bg-cream-soft"
           style={{
             transform: 'translate(-50%, -50%) translateZ(12px)',
             boxShadow:
-              '0 10px 20px -6px rgba(58,42,34,0.28), inset 0 3px 5px rgba(255,255,255,0.8), inset 0 -7px 13px rgba(58,42,34,0.16), 0 0 0 6px #FFF9F1, 0 0 0 7px rgba(58,42,34,0.10)',
+              '0 4px 10px rgba(58,42,34,0.10), 0 12px 26px rgba(58,42,34,0.12), inset 0 2px 3px rgba(255,255,255,0.75)',
           }}
         >
           <img
@@ -279,14 +331,13 @@ export default function GamberoWheel({
             alt=""
             aria-hidden="true"
             draggable="false"
-            className="h-[66%] w-[66%] select-none object-contain"
-            style={{ filter: 'drop-shadow(0 1px 1px rgba(58,42,34,0.15))' }}
+            className="h-[68%] w-[68%] select-none object-contain"
           />
         </div>
 
-        {/* puntatore — marcatore compatto con cappuccio, punta al centro */}
+        {/* puntatore — marcatore compatto in terracotta (stesso colore della CTA) */}
         <motion.div
-          className="absolute left-1/2 top-[-2%] z-30"
+          className="absolute left-1/2 top-[-2.5%] z-30"
           style={{ transform: 'translateX(-50%) translateZ(18px)' }}
           animate={spinning ? { rotate: -6 } : { rotate: 0 }}
           transition={{ type: 'spring', stiffness: 220, damping: 16 }}
@@ -298,11 +349,11 @@ export default function GamberoWheel({
             transition={{ duration: 0.4, ease: 'easeOut' }}
           >
             <svg
-              width="34"
-              height="36"
+              width="38"
+              height="40"
               viewBox="0 0 34 36"
               aria-hidden="true"
-              style={{ filter: 'drop-shadow(0 3px 5px rgba(58,42,34,0.28))' }}
+              style={{ filter: 'drop-shadow(0 3px 5px rgba(58,42,34,0.24))' }}
             >
               <rect x="7" y="0" width="20" height="9" rx="4.5" fill="#D96B32" />
               <path
@@ -312,7 +363,7 @@ export default function GamberoWheel({
               <path
                 d="M10 9.5 H24"
                 stroke="#FFF3E2"
-                strokeOpacity="0.5"
+                strokeOpacity="0.55"
                 strokeWidth="2"
                 strokeLinecap="round"
               />

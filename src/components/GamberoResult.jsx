@@ -74,11 +74,6 @@ export default function GamberoResult({ result, pndrMatch, onRespin, className =
             </span>
           </div>
         )}
-        {/* overlay gradient molto leggero + badge categoria in sovrimpressione */}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-brown/45 via-brown/5 to-transparent" />
-        <span className="absolute bottom-3 left-3 inline-flex items-center rounded-full bg-cream-soft/92 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wide text-green-deep shadow-sm backdrop-blur-sm">
-          {category}
-        </span>
       </div>
 
       <div className="p-5 sm:p-6">
@@ -135,6 +130,9 @@ export default function GamberoResult({ result, pndrMatch, onRespin, className =
         )}
 
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5">
+          <span className="inline-flex items-center rounded-full bg-green/10 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wide text-green-deep">
+            {category}
+          </span>
           {city && (
             <span className="flex items-center gap-1 text-sm font-medium text-brown-soft">
               <Icon name="pin" size={15} />

@@ -31,36 +31,34 @@ function OptionRail({ items, activeId, label }) {
   if (!items.length) return null;
 
   return (
-    <section className="mt-6 w-full text-left" aria-label={label}>
-      <p className="mb-2.5 text-center text-xs font-bold uppercase tracking-[0.14em] text-brown-soft">
+    <section className="mt-7 w-full text-left" aria-label={label}>
+      <p className="mb-3 text-center text-[0.68rem] font-bold uppercase tracking-[0.18em] text-brown-soft">
         {label}
       </p>
-      <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <ul className="mx-auto grid max-w-md grid-cols-2 gap-x-5 gap-y-0.5">
         {items.map((item, index) => {
           const active = item.id === activeId;
           return (
             <motion.li
               key={item.id}
               aria-current={active ? 'true' : undefined}
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(index, 8) * 0.03 }}
+              transition={{ delay: Math.min(index, 8) * 0.025 }}
               className={cn(
-                'flex min-w-0 items-baseline gap-2 rounded-xl border px-3 py-2.5 transition-colors',
-                active
-                  ? 'border-terracotta bg-terracotta-deep text-white shadow-sm'
-                  : 'border-brown/10 bg-cream-soft text-brown',
+                'flex min-w-0 items-center gap-3 rounded-lg px-2.5 py-1.5 transition-colors',
+                active ? 'bg-green-deep text-white' : 'text-brown',
               )}
             >
               <span
                 className={cn(
-                  'text-[0.68rem] font-bold tabular',
-                  active ? 'text-white/75' : 'text-brown-soft',
+                  'font-display text-[0.95rem] font-semibold tabular',
+                  active ? 'text-white/80' : 'text-terracotta',
                 )}
               >
                 {String(index + 1).padStart(2, '0')}
               </span>
-              <span className="truncate text-sm font-semibold leading-snug">{item.label}</span>
+              <span className="truncate text-sm font-medium leading-snug">{item.label}</span>
             </motion.li>
           );
         })}
@@ -246,12 +244,13 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
           ) : null}
 
           {showWheel && (
-            <div className="mt-7 w-full">
+            <div className="mt-8 w-full">
               <GamberoWheel
                 items={wheelItems}
                 rotation={showPlaceWheel ? wheel.placeRotation : wheel.typeRotation}
                 spinning={wheel.isSpinning}
                 durationMs={wheel.spinDurationMs}
+                highlightTop={Boolean(selectedOptionId)}
                 ariaLabel={
                   showPlaceWheel
                     ? `Ruota con ${wheel.candidates.length} locali`
@@ -266,7 +265,7 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
               type="button"
               onClick={wheel.start}
               disabled={wheel.types.length === 0}
-              className="btn btn-primary mt-7 w-full max-w-xs text-[0.95rem] uppercase tracking-wide sm:text-base md:h-14 md:text-lg"
+              className="btn btn-primary mt-8 w-full max-w-xs text-[0.95rem] uppercase tracking-wide sm:text-base md:h-14 md:text-lg"
             >
               {CTA_START}
             </button>
@@ -276,7 +275,7 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
             <button
               type="button"
               disabled
-              className="btn btn-primary mt-7 w-full max-w-xs text-[0.95rem] uppercase tracking-wide sm:text-base md:h-14 md:text-lg"
+              className="btn btn-primary mt-8 w-full max-w-xs text-[0.95rem] uppercase tracking-wide sm:text-base md:h-14 md:text-lg"
             >
               {CTA_SPINNING}
             </button>

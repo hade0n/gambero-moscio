@@ -10,52 +10,48 @@ import {
 } from 'framer-motion';
 
 /**
- * Quadrante del Food Picker — oggetto interattivo premium, 2.5D.
+ * Quadrante del Food Picker — un oggetto fisico, non un widget.
  *
- * Il CONCETTO (ruota grande e dominante come fulcro visivo, mozzo centrale con
- * la mascotte "che decide", puntatore fisico in alto, cornice a livelli, forte
- * rapporto ruota↔CTA) è ripreso dal riferimento UX. Lo STILE è interamente
- * quello di Gambero Moscio: cornice calda panna con filo terracotta, filo verde
- * d'accento, segmenti nei toni caldi del design system, tipografia Karla in
- * marrone, ombre diffuse dei token PNDR. Nessuna estetica da casinò.
+ * Riscritto da zero. Il CONCETTO (ruota come fulcro, mozzo con la mascotte che
+ * decide, puntatore in alto, cornice a livelli) resta; lo STILE è interamente
+ * quello di Gambero Moscio: un solo bisello caldo con un unico sistema d'ombra,
+ * quadrante calmo a due toni, tacche incise al bordo, mozzo concentrico con la
+ * mascotte a intarsio. Nessun nome nel quadrante — i nomi vivono nella legenda
+ * esterna (regola PNDR). Nessuna estetica da casinò.
  *
- * NON tocca la matematica del vincitore: `rotation` (da `useGamberoWheel`) porta
- * il centro del segmento vincente sotto il puntatore fisso a ore 12. Il disco
- * ruota di un valore SOLO CRESCENTE `spin` con `spin ≡ (360 − rotation mod 360)
- * (mod 360)`, quindi il segmento vincente finisce esattamente in cima. Lo swap
- * tipologie→locali (rotation che cambia di colpo) resta forward-only.
- *
- * Extra: prospettiva 3D che segue il mouse (solo desktop, ±5°), micro-blur
- * mappato dalla velocità angolare, puntatore con "tick" all'arresto, idle float
- * impercettibile. Tutto azzerato da `prefers-reduced-motion` e alleggerito su
- * puntatore coarse (touch).
+ * MATEMATICA DEL VINCITORE INVARIATA: `rotation` (da `useGamberoWheel`) porta il
+ * centro del segmento vincente sotto il puntatore fisso a ore 12. Il disco ruota
+ * di un valore SOLO CRESCENTE `spin`, con `spin ≡ (360 − rotation mod 360) (mod
+ * 360)`. Lo swap tipologie→locali resta forward-only.
  */
 
 const VB = 200;
 const C = 100;
-const R = 88;
+const R = 92;
 
 const rad = (d) => (d * Math.PI) / 180;
 const pt = (r, aDeg) => [C + r * Math.sin(rad(aDeg)), C - r * Math.cos(rad(aDeg))];
 
-// Toni caldi, food-oriented, bassa saturazione — derivati dal design system PNDR
-// (cream-soft, una sabbia calda, una sfumatura verde tenue).
-const FILLS = ['#FFF9F1', '#F6E7CD', '#ECF1E0'];
+// Due soli toni caldi del design system PNDR — calmo, non a scacchiera.
+const FILL_A = '#FFFAF3';
+const FILL_B = '#F3E3C9';
+const SEG_STROKE = '#EAD9BE';
 
-function segPath(i, seg) {
-  const [x0, y0] = pt(R, i * seg);
-  const [x1, y1] = pt(R, (i + 1) * seg);
+function wedge(i, seg, r = R) {
+  const [x0, y0] = pt(r, i * seg);
+  const [x1, y1] = pt(r, (i + 1) * seg);
   const large = seg > 180 ? 1 : 0;
-  return `M ${C} ${C} L ${x0.toFixed(2)} ${y0.toFixed(2)} A ${R} ${R} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z`;
+  return `M ${C} ${C} L ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z`;
 }
 
-function labelSpec(n) {
-  if (n <= 4) return { fs: 9, max: 15 };
-  if (n <= 6) return { fs: 8, max: 13 };
-  if (n <= 8) return { fs: 6.9, max: 11 };
-  return { fs: 6, max: 9 };
+// Segmento fisso a ore 12: il vincitore atterra sempre qui.
+function topWedge(seg, r = R) {
+  const half = seg / 2;
+  const [x0, y0] = pt(r, -half);
+  const [x1, y1] = pt(r, half);
+  const large = seg > 180 ? 1 : 0;
+  return `M ${C} ${C} L ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z`;
 }
-const clip = (s, n) => (s && s.length > n ? `${s.slice(0, n - 1).trimEnd()}…` : s || '');
 
 function useCoarsePointer() {
   const [coarse, setCoarse] = useState(
@@ -80,21 +76,20 @@ export default function GamberoWheel({
   spinning = false,
   durationMs = 4600,
   ariaLabel,
+  highlightTop = false,
 }) {
   const count = items.length;
   const seg = count > 0 ? 360 / count : 360;
   const reduce = useReducedMotion();
   const coarse = useCoarsePointer();
   const flat = coarse || reduce;
-  const L = labelSpec(Math.max(count, 1));
-  const showLabels = count > 1 && count <= 8;
 
-  // ---- prospettiva 3D che segue il puntatore (solo desktop) -------------------
+  // ---- profondità 3D (solo desktop): tilt fisso + micro-parallax sul mouse ----
   const boardRef = useRef(null);
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
-  const rotX = useSpring(useTransform(my, [-0.5, 0.5], [11, 1]), { stiffness: 120, damping: 18 });
-  const rotY = useSpring(useTransform(mx, [-0.5, 0.5], [-5, 5]), { stiffness: 120, damping: 18 });
+  const rotX = useSpring(useTransform(my, [-0.5, 0.5], [10, 3]), { stiffness: 110, damping: 18 });
+  const rotY = useSpring(useTransform(mx, [-0.5, 0.5], [-4, 4]), { stiffness: 110, damping: 18 });
 
   useEffect(() => {
     if (flat) return undefined;
@@ -144,10 +139,10 @@ export default function GamberoWheel({
   }, [rotation, spinning, durationMs, reduce, spin]);
 
   const spinVel = useVelocity(spin);
-  const discFilter = useTransform(spinVel, (v) => {
+  const discBlur = useTransform(spinVel, (v) => {
     if (flat) return 'none';
-    const b = Math.min(1.6, Math.abs(v) / 950);
-    return b < 0.05 ? 'none' : `blur(${b.toFixed(2)}px)`;
+    const b = Math.min(1.4, Math.abs(v) / 1100);
+    return b < 0.06 ? 'none' : `blur(${b.toFixed(2)}px)`;
   });
 
   // ---- "tick" del puntatore all'arresto -------------------------------------
@@ -162,15 +157,17 @@ export default function GamberoWheel({
 
   return (
     <div
-      className="relative mx-auto aspect-square w-[min(82vw,340px)] sm:w-[380px] lg:w-[412px]"
-      style={{ perspective: 1100 }}
+      className="relative mx-auto aspect-square w-[min(84vw,360px)] sm:w-[400px] lg:w-[440px]"
+      style={{ perspective: 1200 }}
     >
-      {/* ombra a terra che "respira" durante l'idle */}
+      {/* ombra a terra — respira appena durante l'idle */}
       <motion.div
         aria-hidden="true"
-        className="absolute left-1/2 top-[85%] h-[15%] w-[76%] -translate-x-1/2 rounded-[50%] bg-brown/25 blur-xl"
-        animate={idle ? { scale: [1, 1.05, 1], opacity: [0.5, 0.36, 0.5] } : { scale: 1, opacity: 0.5 }}
-        transition={idle ? { duration: 6, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.4 }}
+        className="absolute left-1/2 top-[86%] h-[13%] w-[74%] -translate-x-1/2 rounded-[50%] bg-brown/25 blur-xl"
+        animate={
+          idle ? { scale: [1, 1.04, 1], opacity: [0.45, 0.32, 0.45] } : { scale: 1, opacity: 0.45 }
+        }
+        transition={idle ? { duration: 7, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.4 }}
       />
 
       <motion.div
@@ -178,90 +175,103 @@ export default function GamberoWheel({
         className="relative h-full w-full"
         style={{
           transformStyle: 'preserve-3d',
-          rotateX: flat ? 6 : rotX,
+          rotateX: flat ? 7 : rotX,
           rotateY: flat ? 0 : rotY,
         }}
-        animate={idle ? { y: [0, -3, 0] } : { y: 0 }}
-        transition={idle ? { duration: 6, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.4 }}
+        animate={idle ? { y: [0, -2, 0] } : { y: 0 }}
+        transition={idle ? { duration: 7, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.4 }}
       >
-        {/* cornice: livelli concentrici caldi, profondità via shadow / inset.
-            Filo terracotta (brand) all'esterno, non un bordo piatto. */}
+        {/* UNA cornice: bisello caldo con un solo sistema d'ombra */}
         <div
           className="absolute inset-0 rounded-full bg-cream-soft"
           style={{
             boxShadow:
-              '0 22px 46px rgba(58,42,34,0.26), 0 0 0 2px rgba(217,107,50,0.20), inset 0 3px 6px rgba(255,255,255,0.65), inset 0 -14px 26px rgba(58,42,34,0.12)',
+              '0 26px 50px -12px rgba(58,42,34,0.32), 0 8px 20px -8px rgba(58,42,34,0.18), inset 0 4px 8px rgba(255,255,255,0.75), inset 0 -18px 30px rgba(58,42,34,0.14)',
           }}
         />
-        <div
-          className="absolute inset-[4.5%] rounded-full bg-cream"
-          style={{ boxShadow: 'inset 0 2px 6px rgba(58,42,34,0.16)' }}
-        />
-        {/* filo verde d'accento — presente ma non dominante (gerarchia PNDR) */}
-        <div
-          className="absolute inset-[7.5%] rounded-full"
-          style={{ boxShadow: '0 0 0 1.5px rgba(95,143,58,0.35)' }}
-        />
+        {/* groove sottile prima del quadrante */}
+        <div className="absolute inset-[6%] rounded-full bg-brown/10" />
 
-        {/* disco dei segmenti — un solo layer, rotazione + micro-blur */}
+        {/* quadrante rotante */}
         <motion.div
-          className="absolute inset-[9%] rounded-full"
-          style={{ rotate: spin, filter: discFilter, willChange: 'transform, filter' }}
+          className="absolute inset-[7.5%] rounded-full"
+          style={{ rotate: spin, filter: discBlur, willChange: 'transform, filter' }}
         >
           <svg viewBox={`0 0 ${VB} ${VB}`} className="h-full w-full">
             {count <= 1 ? (
-              <circle cx={C} cy={C} r={R} fill={FILLS[0]} />
+              <circle cx={C} cy={C} r={R} fill={FILL_A} />
             ) : (
               items.map((it, i) => (
                 <path
                   key={it.id}
-                  d={segPath(i, seg)}
-                  fill={FILLS[i % FILLS.length]}
-                  stroke="#FCF3E6"
-                  strokeWidth="1"
+                  d={wedge(i, seg)}
+                  fill={i % 2 === 0 ? FILL_A : FILL_B}
+                  stroke={SEG_STROKE}
+                  strokeWidth="0.75"
                 />
               ))
             )}
-            {showLabels &&
+            {/* tacche incise al bordo di ogni segmento */}
+            {count > 1 &&
               items.map((it, i) => {
-                const a = (i + 0.5) * seg;
-                const [lx, ly] = pt(R * 0.72, a);
+                const [ox, oy] = pt(R * 0.995, i * seg);
+                const [ix, iy] = pt(R * 0.92, i * seg);
                 return (
-                  <text
-                    key={`t-${it.id}`}
-                    x={lx}
-                    y={ly}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    className="font-sans"
-                    fontSize={L.fs}
-                    fontWeight="700"
-                    fill="#3A2A22"
-                  >
-                    {clip(it.label, L.max)}
-                  </text>
+                  <line
+                    key={`k-${it.id}`}
+                    x1={ox}
+                    y1={oy}
+                    x2={ix}
+                    y2={iy}
+                    stroke="#3A2A22"
+                    strokeOpacity="0.16"
+                    strokeWidth="1"
+                    strokeLinecap="round"
+                  />
                 );
               })}
           </svg>
         </motion.div>
 
-        {/* lift 2.5D: luce dall'alto, statica (non ruota col disco) */}
+        {/* luce dall'alto — statica, non ruota col disco */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-[9%] rounded-full"
+          className="pointer-events-none absolute inset-[7.5%] rounded-full"
           style={{
             background:
-              'radial-gradient(115% 90% at 50% 22%, rgba(255,255,255,0.55), rgba(255,255,255,0) 55%, rgba(58,42,34,0.12) 100%)',
+              'radial-gradient(120% 92% at 50% 18%, rgba(255,255,255,0.6), rgba(255,255,255,0) 52%, rgba(58,42,34,0.14) 100%)',
           }}
         />
 
-        {/* mozzo — pozzetto centrale con la mascotte che decide */}
+        {/* selezione: appare SOLO al momento della rivelazione (non è decorazione) */}
+        {highlightTop && count > 1 && (
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-[7.5%]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25 }}
+          >
+            <svg viewBox={`0 0 ${VB} ${VB}`} className="h-full w-full">
+              <path
+                d={topWedge(seg)}
+                fill="#BB5A20"
+                fillOpacity="0.12"
+                stroke="#BB5A20"
+                strokeOpacity="0.35"
+                strokeWidth="1.25"
+              />
+            </svg>
+          </motion.div>
+        )}
+
+        {/* mozzo — pomello concentrico, mascotte a intarsio ribassato */}
         <div
-          className="absolute left-1/2 top-1/2 z-20 flex h-[27%] w-[27%] items-center justify-center rounded-full bg-cream-soft"
+          className="absolute left-1/2 top-1/2 z-20 flex h-[26%] w-[26%] items-center justify-center rounded-full bg-cream"
           style={{
-            transform: 'translate(-50%, -50%) translateZ(10px)',
+            transform: 'translate(-50%, -50%) translateZ(12px)',
             boxShadow:
-              '0 8px 18px rgba(58,42,34,0.22), inset 0 2px 4px rgba(255,255,255,0.7), inset 0 -5px 10px rgba(58,42,34,0.12), 0 0 0 3px #FFF9F1, 0 0 0 4.5px rgba(95,143,58,0.30)',
+              '0 10px 20px -6px rgba(58,42,34,0.28), inset 0 3px 5px rgba(255,255,255,0.8), inset 0 -7px 13px rgba(58,42,34,0.16), 0 0 0 6px #FFF9F1, 0 0 0 7px rgba(58,42,34,0.10)',
           }}
         >
           <img
@@ -269,44 +279,43 @@ export default function GamberoWheel({
             alt=""
             aria-hidden="true"
             draggable="false"
-            className="h-[74%] w-[74%] select-none object-contain"
+            className="h-[66%] w-[66%] select-none object-contain"
+            style={{ filter: 'drop-shadow(0 1px 1px rgba(58,42,34,0.15))' }}
           />
         </div>
 
-        {/* puntatore fisico — fisso in alto, punta verso il centro */}
+        {/* puntatore — marcatore compatto con cappuccio, punta al centro */}
         <motion.div
-          className="absolute left-1/2 top-[-3%] z-30"
-          style={{ transform: 'translateX(-50%) translateZ(16px)' }}
-          animate={spinning ? { rotate: -7 } : { rotate: 0 }}
-          transition={{ type: 'spring', stiffness: 210, damping: 15 }}
+          className="absolute left-1/2 top-[-2%] z-30"
+          style={{ transform: 'translateX(-50%) translateZ(18px)' }}
+          animate={spinning ? { rotate: -6 } : { rotate: 0 }}
+          transition={{ type: 'spring', stiffness: 220, damping: 16 }}
         >
           <motion.div
             key={tick}
             style={{ originX: 0.5, originY: 0 }}
-            animate={tick ? { rotate: [0, -15, 8, -4, 0] } : {}}
-            transition={{ duration: 0.42, ease: 'easeOut' }}
+            animate={tick ? { rotate: [0, -13, 7, -3, 0] } : {}}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
           >
             <svg
               width="34"
-              height="44"
-              viewBox="0 0 34 44"
+              height="36"
+              viewBox="0 0 34 36"
               aria-hidden="true"
-              style={{ filter: 'drop-shadow(0 4px 6px rgba(58,42,34,0.30))' }}
+              style={{ filter: 'drop-shadow(0 3px 5px rgba(58,42,34,0.28))' }}
             >
-              {/* goccia morbida terracotta con una leggera coda — cenno marino, non un prop da cartone */}
+              <rect x="7" y="0" width="20" height="9" rx="4.5" fill="#D96B32" />
               <path
-                d="M17 42 C10 29 3 22 3 13.5 A14 14 0 0 1 31 13.5 C31 20.5 26.5 24.5 22 30 C19.8 32.6 18.2 36 17 42 Z"
+                d="M7 6 H27 Q30.5 6 28.2 10.5 L19 28 Q17 31.5 15 28 L5.8 10.5 Q3.5 6 7 6 Z"
                 fill="#BB5A20"
               />
               <path
-                d="M6.5 9.5 A12 12 0 0 1 27.5 9.5"
-                fill="none"
-                stroke="#FCF3E6"
+                d="M10 9.5 H24"
+                stroke="#FFF3E2"
                 strokeOpacity="0.5"
-                strokeWidth="2.5"
+                strokeWidth="2"
                 strokeLinecap="round"
               />
-              <circle cx="17" cy="13.5" r="4.3" fill="#FCF3E6" opacity="0.92" />
             </svg>
           </motion.div>
         </motion.div>

@@ -163,6 +163,16 @@ export default function GamberoWheel({
     wasSpinning.current = spinning;
   }, [spinning]);
 
+  // Scarto (jitter) con cui lo spicchio vincente si ferma rispetto a ore 12:
+  // l'hook non lo centra esattamente. L'evidenziazione lo segue, così resta
+  // perfettamente centrata sullo spicchio pescato.
+  let highlightSkew = 0;
+  if (highlightTop && count > 1) {
+    const w = ((rotation % 360) + 360) % 360;
+    const nearestCenter = (Math.round(w / seg - 0.5) + 0.5) * seg;
+    highlightSkew = w - nearestCenter; // ≈ jitter applicato dall'hook, |.| < seg/2
+  }
+
   return (
     <div className="group relative mx-auto aspect-square w-[min(88vw,400px)] sm:w-[460px] lg:w-[500px]">
       {/* UN solo cerchio: la cornice. Superficie del sito, piatta, ombra UI leggera. */}
@@ -255,6 +265,7 @@ export default function GamberoWheel({
           <svg viewBox={`0 0 ${VB} ${VB}`} className="h-full w-full">
             <path
               d={topWedge(seg)}
+              transform={`rotate(${(-highlightSkew).toFixed(2)} ${C} ${C})`}
               fill="#5F8F3A"
               fillOpacity="0.14"
               stroke="#385C32"

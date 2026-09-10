@@ -19,7 +19,7 @@ import { animate, motion, useMotionValue, useReducedMotion } from 'framer-motion
 
 const VB = 200;
 const C = 100;
-const R = 92;
+const R = 100;
 
 const rad = (d) => (d * Math.PI) / 180;
 const pt = (r, aDeg) => [C + r * Math.sin(rad(aDeg)), C - r * Math.cos(rad(aDeg))];
@@ -165,14 +165,12 @@ export default function GamberoWheel({
 
   return (
     <div className="group relative mx-auto aspect-square w-[min(88vw,400px)] sm:w-[460px] lg:w-[500px]">
-      {/* cornice: una superficie del sito, piatta, ombra UI molto leggera */}
+      {/* UN solo cerchio: la cornice. Superficie del sito, piatta, ombra UI leggera. */}
       <div className="absolute inset-0 rounded-full border border-brown/12 bg-cream-soft shadow-[0_8px_28px_rgba(58,42,34,0.08)] transition-colors duration-200 group-hover:border-brown/20" />
-      {/* anello interno trattenuto — hairline terracotta come accento editoriale del sito */}
-      <div className="absolute inset-[5.5%] rounded-full border border-terracotta/20 bg-cream" />
 
-      {/* quadrante rotante */}
+      {/* quadrante rotante — riempie la cornice, bordo tagliato netto */}
       <motion.div
-        className="absolute inset-[8%] rounded-full"
+        className="absolute inset-[3.5%] overflow-hidden rounded-full"
         style={{ rotate: spin, willChange: 'transform' }}
       >
         <svg viewBox={`0 0 ${VB} ${VB}`} className="h-full w-full">
@@ -180,15 +178,25 @@ export default function GamberoWheel({
             <circle cx={C} cy={C} r={R} fill={FILL_A} />
           ) : (
             items.map((it, i) => (
-              <path
-                key={it.id}
-                d={wedge(i, seg)}
-                fill={i % 2 === 0 ? FILL_A : FILL_B}
-                stroke={DIVIDER}
-                strokeWidth="0.75"
-              />
+              <path key={it.id} d={wedge(i, seg)} fill={i % 2 === 0 ? FILL_A : FILL_B} />
             ))
           )}
+          {/* divisori radiali sottili (linee, non cerchi) */}
+          {count > 1 &&
+            items.map((it, i) => {
+              const [ox, oy] = pt(R, i * seg);
+              return (
+                <line
+                  key={`d-${it.id}`}
+                  x1={C}
+                  y1={C}
+                  x2={ox.toFixed(2)}
+                  y2={oy.toFixed(2)}
+                  stroke={DIVIDER}
+                  strokeWidth="0.75"
+                />
+              );
+            })}
 
           {/* icona + nome = un'unità radiale per segmento (solo ruota tipologie) */}
           {showLabels &&
@@ -239,7 +247,7 @@ export default function GamberoWheel({
       {highlightTop && count > 1 && (
         <motion.div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-[8%]"
+          className="pointer-events-none absolute inset-[3.5%]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.25 }}
@@ -257,17 +265,15 @@ export default function GamberoWheel({
         </motion.div>
       )}
 
-      {/* hub 2D — cerchi concentrici, mascotte al centro */}
-      <div className="absolute left-1/2 top-1/2 z-20 flex h-[20%] w-[20%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-brown/12 bg-cream-soft shadow-[0_2px_8px_rgba(58,42,34,0.08)]">
-        <div className="flex h-[80%] w-[80%] items-center justify-center rounded-full border border-brown/10 bg-cream">
-          <img
-            src="/shrimp.svg"
-            alt=""
-            aria-hidden="true"
-            draggable="false"
-            className="h-[68%] w-[68%] select-none object-contain"
-          />
-        </div>
+      {/* hub 2D — UN solo cerchio, mascotte al centro */}
+      <div className="absolute left-1/2 top-1/2 z-20 flex h-[19%] w-[19%] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-brown/12 bg-cream-soft shadow-[0_2px_8px_rgba(58,42,34,0.08)]">
+        <img
+          src="/shrimp.svg"
+          alt=""
+          aria-hidden="true"
+          draggable="false"
+          className="h-[64%] w-[64%] select-none object-contain"
+        />
       </div>
 
       {/* puntatore 2D — richiamo trattenuto alla coda del gambero, in terracotta */}

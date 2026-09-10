@@ -218,3 +218,23 @@ ridable `lib/blob-store.js` (resta in git history).
 - Schema SQL (te lo do io) eseguito + bucket creato
 - La cartella con l'export del Blob (per lo script di import)
 - Le due env aggiunte su Vercel **e** in `.env.local`
+
+---
+
+## 11. Stato — migrazione completata (produzione)
+
+- ✅ Codice migrato e in `main` (commit `1ebf376`). `lib/blob-store.js` rimosso, `lib/db.js` attivo.
+- ✅ Supabase: tabella `places` + indice unico + RLS creati; bucket `locali` (public) creato.
+- ✅ Vercel: `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` su Production; redeploy fatto.
+- ✅ Produzione verificata: `GET /api/restaurants` → `200 {restaurants: []}` (Supabase connesso,
+  tabella vuota). `auth/session`, gate 401 su POST/upload: ok.
+- ⏳ **Da fare a mano:**
+  - smoke test del percorso di scrittura (login → crea locale + foto → recensione);
+  - `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` (l'`URL` è già stato aggiunto);
+  - le due env anche su **Preview** su Vercel (ora solo Production);
+  - **recupero dei ~2 locali** dal Blob (rinviato: al reset quota, `export-blob.mjs` +
+    `import-to-supabase.mjs`);
+  - pulizia (dopo il recupero): rimuovere env `BLOB_*` da Vercel, eliminare lo store Blob,
+    togliere `@vercel/blob` (devDep) + `scripts/export-blob.mjs`.
+- ⚠️ **Non eliminare lo store Blob** finché i locali non sono recuperati: contiene l'unica
+  copia dei dati.

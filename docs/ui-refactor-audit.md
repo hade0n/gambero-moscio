@@ -67,7 +67,7 @@ Branch: `refactor/ui-ux-motion`. Ordine di lavoro: §28 del brief.
 | 9 | Toast su Framer Motion | `Toast.jsx` | ✅ `3275a7a` |
 | 10 | Rimozione CSS motion morto | `index.css` | ✅ `44278d7` |
 | 11 | Responsive QA (360/390/430/768/1440) + build finale + smoke test | — | ✅ (build verde, nessun overflow) |
-| 12 | **Wheeler — redesign da zero** (3D premium) | `GamberoWheel.jsx`, `GamberoResult.jsx` | ✅ `<hash>` |
+| 12 | **Wheeler — redesign da zero** (3D premium) | `GamberoWheel.jsx`, `GamberoResult.jsx` | ✅ `3d96cb2` |
 
 ## Fase 12 — Wheeler premium (deroga esplicita al "no 3D" per questo componente)
 

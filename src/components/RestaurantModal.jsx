@@ -74,6 +74,17 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
 
           {activeReview ? (
             <div>
+              <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border bg-cream px-4 py-3">
+                <span className="text-sm font-semibold text-brown-soft">Voto complessivo</span>
+                <ShrimpRating
+                  key={activeKey}
+                  rating={activeReview.ratings.overall}
+                  size="md"
+                  valueClassName="text-lg"
+                  animateValue
+                />
+              </div>
+
               {hasPills && (
                 <div
                   role="tablist"
@@ -129,15 +140,6 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
                   <h3 className="mb-2 text-base font-semibold">
                     La valutazione di {reviewerLabel(activeKey)}
                   </h3>
-                  <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border bg-cream px-4 py-3">
-                    <span className="text-sm font-semibold text-brown-soft">Voto complessivo</span>
-                    <ShrimpRating
-                      rating={activeReview.ratings.overall}
-                      size="md"
-                      valueClassName="text-lg"
-                      animateValue
-                    />
-                  </div>
                   <RatingBreakdown ratings={activeReview.ratings} />
 
                   {activeReview.review && (

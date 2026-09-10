@@ -133,20 +133,6 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
     ? wheel.candidates.map((place) => ({ id: place.id, label: place.name }))
     : wheel.types;
   const selectedOptionId = phase === 'type-reveal' ? wheel.pickedType : null;
-  const centerTitle =
-    phase === 'type-reveal'
-      ? wheel.pickedType
-      : phase === 'place-spin'
-        ? String(wheel.candidates.length)
-        : 'Il Gambero';
-  const centerDetail =
-    phase === 'type-reveal'
-      ? 'tipologia scelta'
-      : phase === 'place-spin'
-        ? 'locali in sfida'
-        : phase === 'type-spin'
-          ? 'sta scegliendo'
-          : 'decide per voi';
 
   const headline =
     phase === 'empty'
@@ -260,24 +246,17 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
           ) : null}
 
           {showWheel && (
-            <div className="mt-6 w-full">
+            <div className="mt-7 w-full">
               <GamberoWheel
                 items={wheelItems}
                 rotation={showPlaceWheel ? wheel.placeRotation : wheel.typeRotation}
                 spinning={wheel.isSpinning}
                 durationMs={wheel.spinDurationMs}
-                centerTitle={centerTitle}
-                centerDetail={centerDetail}
                 ariaLabel={
                   showPlaceWheel
                     ? `Ruota con ${wheel.candidates.length} locali`
                     : `Ruota con ${wheel.types.length} tipologie`
                 }
-              />
-              <OptionRail
-                items={wheelItems}
-                activeId={selectedOptionId}
-                label={showPlaceWheel ? 'I locali in gara' : 'Le tipologie disponibili'}
               />
             </div>
           )}
@@ -287,7 +266,7 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
               type="button"
               onClick={wheel.start}
               disabled={wheel.types.length === 0}
-              className="btn btn-primary mt-8 w-full max-w-xs text-[0.95rem] uppercase tracking-wide sm:text-base md:h-14 md:text-lg"
+              className="btn btn-primary mt-7 w-full max-w-xs text-[0.95rem] uppercase tracking-wide sm:text-base md:h-14 md:text-lg"
             >
               {CTA_START}
             </button>
@@ -297,10 +276,18 @@ export default function GamberoModal({ open, onClose, triggerRef }) {
             <button
               type="button"
               disabled
-              className="btn btn-primary mt-8 w-full max-w-xs text-[0.95rem] uppercase tracking-wide sm:text-base md:h-14 md:text-lg"
+              className="btn btn-primary mt-7 w-full max-w-xs text-[0.95rem] uppercase tracking-wide sm:text-base md:h-14 md:text-lg"
             >
               {CTA_SPINNING}
             </button>
+          )}
+
+          {showWheel && (
+            <OptionRail
+              items={wheelItems}
+              activeId={selectedOptionId}
+              label={showPlaceWheel ? 'I locali in gara' : 'Le tipologie disponibili'}
+            />
           )}
 
           {phase === 'empty' && (

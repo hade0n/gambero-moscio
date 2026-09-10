@@ -10,18 +10,25 @@ import {
 } from 'framer-motion';
 
 /**
- * Quadrante del Food Picker — versione premium.
+ * Quadrante del Food Picker — oggetto interattivo premium, 2.5D.
+ *
+ * Il CONCETTO (ruota grande e dominante come fulcro visivo, mozzo centrale con
+ * la mascotte "che decide", puntatore fisico in alto, cornice a livelli, forte
+ * rapporto ruota↔CTA) è ripreso dal riferimento UX. Lo STILE è interamente
+ * quello di Gambero Moscio: cornice calda panna con filo terracotta, filo verde
+ * d'accento, segmenti nei toni caldi del design system, tipografia Karla in
+ * marrone, ombre diffuse dei token PNDR. Nessuna estetica da casinò.
  *
  * NON tocca la matematica del vincitore: `rotation` (da `useGamberoWheel`) porta
  * il centro del segmento vincente sotto il puntatore fisso a ore 12. Il disco
- * ruota di un valore SOLO CRESCENTE `s` con `s ≡ (360 − rotation mod 360) (mod
- * 360)`, quindi il segmento vincente finisce esattamente in cima. Lo swap
+ * ruota di un valore SOLO CRESCENTE `spin` con `spin ≡ (360 − rotation mod 360)
+ * (mod 360)`, quindi il segmento vincente finisce esattamente in cima. Lo swap
  * tipologie→locali (rotation che cambia di colpo) resta forward-only.
  *
- * Extra: cornice a livelli concentrici, prospettiva 3D che segue il mouse
- * (solo desktop, ±5°), micro-blur mappato dalla velocità angolare, puntatore
- * fisico con "tick" all'arresto, idle float impercettibile. Tutto azzerato da
- * `prefers-reduced-motion` e alleggerito su touch.
+ * Extra: prospettiva 3D che segue il mouse (solo desktop, ±5°), micro-blur
+ * mappato dalla velocità angolare, puntatore con "tick" all'arresto, idle float
+ * impercettibile. Tutto azzerato da `prefers-reduced-motion` e alleggerito su
+ * puntatore coarse (touch).
  */
 
 const VB = 200;
@@ -31,7 +38,8 @@ const R = 88;
 const rad = (d) => (d * Math.PI) / 180;
 const pt = (r, aDeg) => [C + r * Math.sin(rad(aDeg)), C - r * Math.cos(rad(aDeg))];
 
-// Toni caldi, food-oriented, bassa saturazione — derivati dal design system PNDR.
+// Toni caldi, food-oriented, bassa saturazione — derivati dal design system PNDR
+// (cream-soft, una sabbia calda, una sfumatura verde tenue).
 const FILLS = ['#FFF9F1', '#F6E7CD', '#ECF1E0'];
 
 function segPath(i, seg) {
@@ -72,8 +80,6 @@ export default function GamberoWheel({
   spinning = false,
   durationMs = 4600,
   ariaLabel,
-  centerTitle = 'Il Gambero',
-  centerDetail = 'decide',
 }) {
   const count = items.length;
   const seg = count > 0 ? 360 / count : 360;
@@ -156,7 +162,7 @@ export default function GamberoWheel({
 
   return (
     <div
-      className="relative mx-auto aspect-square w-[min(78vw,320px)] sm:w-[356px] lg:w-[380px]"
+      className="relative mx-auto aspect-square w-[min(82vw,340px)] sm:w-[380px] lg:w-[412px]"
       style={{ perspective: 1100 }}
     >
       {/* ombra a terra che "respira" durante l'idle */}
@@ -178,19 +184,24 @@ export default function GamberoWheel({
         animate={idle ? { y: [0, -3, 0] } : { y: 0 }}
         transition={idle ? { duration: 6, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.4 }}
       >
-        {/* cornice: livelli concentrici, profondità via shadow / inset */}
+        {/* cornice: livelli concentrici caldi, profondità via shadow / inset.
+            Filo terracotta (brand) all'esterno, non un bordo piatto. */}
         <div
-          className="absolute inset-0 rounded-full bg-green-deep"
+          className="absolute inset-0 rounded-full bg-cream-soft"
           style={{
             boxShadow:
-              '0 22px 46px rgba(58,42,34,0.30), inset 0 3px 6px rgba(255,255,255,0.22), inset 0 -12px 24px rgba(0,0,0,0.30)',
+              '0 22px 46px rgba(58,42,34,0.26), 0 0 0 2px rgba(217,107,50,0.20), inset 0 3px 6px rgba(255,255,255,0.65), inset 0 -14px 26px rgba(58,42,34,0.12)',
           }}
         />
         <div
-          className="absolute inset-[5.5%] rounded-full bg-cream-soft"
-          style={{ boxShadow: 'inset 0 2px 5px rgba(58,42,34,0.22)' }}
+          className="absolute inset-[4.5%] rounded-full bg-cream"
+          style={{ boxShadow: 'inset 0 2px 6px rgba(58,42,34,0.16)' }}
         />
-        <div className="absolute inset-[8.5%] rounded-full bg-brown/10" />
+        {/* filo verde d'accento — presente ma non dominante (gerarchia PNDR) */}
+        <div
+          className="absolute inset-[7.5%] rounded-full"
+          style={{ boxShadow: '0 0 0 1.5px rgba(95,143,58,0.35)' }}
+        />
 
         {/* disco dei segmenti — un solo layer, rotazione + micro-blur */}
         <motion.div
@@ -214,7 +225,7 @@ export default function GamberoWheel({
             {showLabels &&
               items.map((it, i) => {
                 const a = (i + 0.5) * seg;
-                const [lx, ly] = pt(R * 0.6, a);
+                const [lx, ly] = pt(R * 0.72, a);
                 return (
                   <text
                     key={`t-${it.id}`}
@@ -234,23 +245,32 @@ export default function GamberoWheel({
           </svg>
         </motion.div>
 
-        {/* mozzo — cappuccio fisico centrale */}
+        {/* lift 2.5D: luce dall'alto, statica (non ruota col disco) */}
         <div
-          className="absolute left-1/2 top-1/2 z-20 flex h-[31%] w-[31%] flex-col items-center justify-center rounded-full bg-cream-soft text-center"
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-[9%] rounded-full"
           style={{
-            transform: 'translate(-50%, -50%) translateZ(8px)',
+            background:
+              'radial-gradient(115% 90% at 50% 22%, rgba(255,255,255,0.55), rgba(255,255,255,0) 55%, rgba(58,42,34,0.12) 100%)',
+          }}
+        />
+
+        {/* mozzo — pozzetto centrale con la mascotte che decide */}
+        <div
+          className="absolute left-1/2 top-1/2 z-20 flex h-[27%] w-[27%] items-center justify-center rounded-full bg-cream-soft"
+          style={{
+            transform: 'translate(-50%, -50%) translateZ(10px)',
             boxShadow:
-              '0 7px 16px rgba(58,42,34,0.24), inset 0 2px 4px rgba(255,255,255,0.65), inset 0 -4px 9px rgba(58,42,34,0.14)',
+              '0 8px 18px rgba(58,42,34,0.22), inset 0 2px 4px rgba(255,255,255,0.7), inset 0 -5px 10px rgba(58,42,34,0.12), 0 0 0 3px #FFF9F1, 0 0 0 4.5px rgba(95,143,58,0.30)',
           }}
         >
-          <span className="px-1 font-display text-[0.78rem] font-bold leading-none text-brown sm:text-sm">
-            {centerTitle}
-          </span>
-          {centerDetail && (
-            <span className="mt-1 text-[0.52rem] font-bold uppercase tracking-[0.12em] text-brown-soft">
-              {centerDetail}
-            </span>
-          )}
+          <img
+            src="/shrimp.svg"
+            alt=""
+            aria-hidden="true"
+            draggable="false"
+            className="h-[74%] w-[74%] select-none object-contain"
+          />
         </div>
 
         {/* puntatore fisico — fisso in alto, punta verso il centro */}
@@ -268,24 +288,25 @@ export default function GamberoWheel({
           >
             <svg
               width="34"
-              height="42"
-              viewBox="0 0 34 42"
+              height="44"
+              viewBox="0 0 34 44"
               aria-hidden="true"
-              style={{ filter: 'drop-shadow(0 4px 6px rgba(58,42,34,0.32))' }}
+              style={{ filter: 'drop-shadow(0 4px 6px rgba(58,42,34,0.30))' }}
             >
+              {/* goccia morbida terracotta con una leggera coda — cenno marino, non un prop da cartone */}
               <path
-                d="M17 40 C9 27 2 21 2 13 A15 15 0 0 1 32 13 C32 21 25 27 17 40 Z"
+                d="M17 42 C10 29 3 22 3 13.5 A14 14 0 0 1 31 13.5 C31 20.5 26.5 24.5 22 30 C19.8 32.6 18.2 36 17 42 Z"
                 fill="#BB5A20"
               />
               <path
-                d="M6 9 A12 12 0 0 1 28 9"
+                d="M6.5 9.5 A12 12 0 0 1 27.5 9.5"
                 fill="none"
                 stroke="#FCF3E6"
                 strokeOpacity="0.5"
                 strokeWidth="2.5"
                 strokeLinecap="round"
               />
-              <circle cx="17" cy="13" r="4.5" fill="#FCF3E6" opacity="0.92" />
+              <circle cx="17" cy="13.5" r="4.3" fill="#FCF3E6" opacity="0.92" />
             </svg>
           </motion.div>
         </motion.div>

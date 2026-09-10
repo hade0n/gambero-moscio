@@ -24,7 +24,9 @@ export const CTA_START = 'Fai girare il Gambero';
 export const CTA_SPINNING = 'Il Gambero sta decidendo…';
 export const CTA_CLOSE = 'Chiudi';
 
-export const RESULT_EYEBROW = 'Il Gambero ha parlato.';
+// Nella card del risultato il titolo del modal dice già «Il Gambero ha parlato»:
+// qui si evita la ripetizione e si passa direttamente al verdetto.
+export const RESULT_EYEBROW = 'Stasera si mangia qui.';
 export const RESULT_SINGLE_EYEBROW = 'Il Gambero non ha avuto molta scelta.';
 
 export const ACTION_LOCATION = 'Vedi dove si trova';
@@ -58,7 +60,7 @@ export const PLACE_SPIN_MESSAGES = [
 
 /** Frase ironica sotto il risultato (scelta a caso a ogni estrazione). */
 export const RESULT_MESSAGES = [
-  'Il Gambero ha parlato. Non discutere.',
+  'Il verdetto è servito. Non si torna indietro.',
   'Fanculo l’indecisione: stasera si mangia qui.',
   'Non sapevi dove andare. Adesso lo sai.',
   'Il destino ha deciso. E il destino ha fame.',

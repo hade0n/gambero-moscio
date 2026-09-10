@@ -85,10 +85,7 @@ export default function GamberoResult({ result, pndrMatch, onRespin, className =
         <div className="flex flex-wrap items-center gap-2">
           <img src="/shrimp.svg" alt="" aria-hidden="true" className="h-6 w-6 select-none" />
           {reviewed ? (
-            <span
-              className="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide text-brown"
-              style={{ backgroundColor: '#E58A1F' }}
-            >
+            <span className="inline-flex items-center rounded-full bg-rating px-3 py-1 text-xs font-bold uppercase tracking-wide text-brown">
               {BADGE_ALREADY_REVIEWED}
             </span>
           ) : (

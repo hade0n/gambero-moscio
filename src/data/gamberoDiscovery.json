@@ -787,7 +787,11 @@
       "rating": 8.1,
       "rank": 6,
       "description": "Ai Tribunali, menu del giorno scritto a mano, cucina casalinga.",
-      "phone": "081 459034"
+      "phone": "081 459034",
+      "photoUrl": "/gambero/os-campagnola-na.jpg",
+      "sources": {
+        "photo": "https://www.dolcevia.com/nl/italie-reizen/regio/campanie/10-restaurants-in-napels-die-in-het-stadsbeeld-zijn-vereeuwigd"
+      }
     },
     {
       "id": "rc-bifulco-na",
@@ -932,15 +936,19 @@
       "rank": 4,
       "description": "Paninoteca con salumi e formaggi del territorio."
     },
-    {
-      "id": "pn-ino-sorrento-na",
+  {
+    "id": "pn-ino-sorrento-na",
       "category": "Paninoteca",
       "province": "NA",
       "city": "Sorrento",
       "name": "Inn Bufalito / Soul & Fish panino",
       "rating": 8,
       "rank": 5,
-      "description": "Panini con bufala campana e prodotti a km 0 a Sorrento."
+    "description": "Panini con bufala campana e prodotti a km 0 a Sorrento.",
+    "photoUrl": "/gambero/pn-ino-sorrento-na.jpg",
+    "sources": {
+      "photo": "https://www.innbufalito.it/"
+    }
     },
     {
       "id": "ag-vannulo-sa",
@@ -994,8 +1002,8 @@
         "photo": "https://www.booking.com/hotel/it/agriturismo-i-moresani.html"
       }
     },
-    {
-      "id": "ag-le-querce-sa",
+  {
+    "id": "ag-le-querce-sa",
       "category": "Agriturismo",
       "province": "SA",
       "city": "Agropoli",
@@ -1003,7 +1011,11 @@
       "rating": 8.6,
       "rank": 4,
       "description": "Relais nella campagna cilentana, cucina a km 0 e piscina.",
-      "phone": "339 4588607"
+    "phone": "339 4588607",
+    "photoUrl": "/gambero/ag-le-querce-sa.webp",
+    "sources": {
+      "photo": "https://www.italia.it/it/campania/agropoli/dove-mangiare/agriturismo-le-querce-farmhouse"
+    }
     },
     {
       "id": "ag-zio-cristoforo-sa",
@@ -1028,8 +1040,8 @@
         }
       }
     },
-    {
-      "id": "ag-porta-sirena-sa",
+  {
+    "id": "ag-porta-sirena-sa",
       "category": "Agriturismo",
       "province": "SA",
       "city": "Capaccio Paestum",
@@ -1041,8 +1053,10 @@
       "lat": 40.4209046,
       "lng": 15.0200478,
       "address": "Via Ponte Marmoreo · Capaccio Paestum · 84047",
-      "sources": {
-        "location": {
+      "photoUrl": "/gambero/ag-porta-sirena-sa.jpg",
+    "sources": {
+      "photo": "https://www.cilentotop.it/agriturismo-porta-sirena-a-capaccio-paestum",
+      "location": {
           "provider": "OpenStreetMap Nominatim",
           "url": "https://www.openstreetmap.org/?mlat=40.4209046&mlon=15.0200478#map=19/40.4209046/15.0200478",
           "verifiedAt": "2026-09-09"

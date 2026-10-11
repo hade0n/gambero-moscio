@@ -43,7 +43,7 @@ export default function Header({ variant = 'public', onLogout, categoryFilter })
           <Link
             to="/backend"
             aria-label="Accedi"
-            className={cn('press col-start-3 row-start-1 inline-flex min-h-[44px] w-11 items-center justify-center justify-self-end rounded-lg text-brown', categoryFilter && 'lg:hidden')}
+            className={cn('btn btn-outline btn-sm col-start-3 row-start-1 w-11 shrink-0 justify-center justify-self-end px-0', categoryFilter && 'lg:hidden')}
           >
             <Icon name="login" size={18} />
             <span className="sr-only">Accedi</span>
@@ -89,7 +89,7 @@ export default function Header({ variant = 'public', onLogout, categoryFilter })
           </button>
 
           {!isAdmin && categoryFilter && (
-            <Link to="/backend" aria-label="Accedi" title="Accedi" className="btn btn-secondary btn-sm hidden lg:inline-flex">
+            <Link to="/backend" aria-label="Accedi" title="Accedi" className="ranking-picker btn btn-outline btn-sm hidden shrink-0 justify-center lg:inline-flex">
               <Icon name="login" size={18} />
             </Link>
           )}

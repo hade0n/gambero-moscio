@@ -10,6 +10,7 @@ import { useRestaurants } from '../hooks/useRestaurants.js';
 import { compareByRanking } from '../utils/ratings.js';
 import { ALL } from '../config/categories.js';
 import Icon from '../components/Icon.jsx';
+import ProvinceFilter from '../components/ProvinceFilter.jsx';
 
 /** Homepage pubblica: filtro categorie + classifica ordinata per voto complessivo. */
 export default function Home() {
@@ -68,14 +69,7 @@ export default function Home() {
             <Icon name="search" size={22} />
             <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cerca un locale, una città o una cucina…" />
           </label>
-          <label className="ranking-province">
-            <span className="sr-only">Filtra per provincia</span>
-            <Icon name="pin" size={20} />
-            <select value={province} onChange={(e) => setProvince(e.target.value)}>
-              <option value="">Tutte le province</option>
-              {provinces.map((code) => <option key={code} value={code}>{code}</option>)}
-            </select>
-          </label>
+          <ProvinceFilter provinces={provinces} value={province} onChange={setProvince} />
         </div>
         </div>
 

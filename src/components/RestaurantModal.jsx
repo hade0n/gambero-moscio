@@ -35,7 +35,7 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
   const hasPills = available.length > 1;
 
   const hero = (
-    <div className="relative aspect-[16/10] w-full overflow-hidden bg-cream-soft sm:aspect-[16/9]">
+    <div className="relative aspect-[16/10] w-full bg-cream-soft sm:aspect-[16/9]">
       {imageUrl && !imgError ? (
         <img
           src={imageUrl}
@@ -52,7 +52,7 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-brown/35 to-transparent" />
       {/* velo in basso per staccare il contenuto dall'immagine */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-16"
+        className="pointer-events-none absolute inset-x-0 -bottom-1 z-10 h-[68px]"
         style={{ background: 'linear-gradient(to bottom, rgba(255, 249, 241, 0), var(--pndr-cream-soft) 80%)' }}
       />
     </div>

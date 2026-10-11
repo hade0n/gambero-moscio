@@ -272,17 +272,17 @@
   .ranking-header.public-container {
     height: 88px;
     grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: 24px;
+    gap: 40px;
   }
   .ranking-header .ranking-brand { grid-column: 1; justify-self: start; padding: 0; }
   .ranking-brand img { height: 54px; }
   .ranking-navigation { grid-column: 2; grid-row: 1; }
   .ranking-header > div:last-child { grid-column: 3; grid-row: 1; }
-  .ranking-header .ranking-picker { min-height: 50px; padding: 0 20px; border-radius: 22px; }
+  .ranking-header .ranking-picker { min-height: 50px; padding: 0 24px; border-radius: 22px; }
   .ranking-category-filter .ranking-category-list { max-width: none; padding: 6px 2px; gap: 4px; }
   .ranking-category-filter button {
     min-height: 48px;
-    padding: 0 12px;
+    padding: 0 10px;
     gap: 7px;
     border-color: transparent;
     font-size: 12px;
@@ -303,8 +303,8 @@
   .ranking-search svg, .ranking-province svg { flex-shrink: 0; color: var(--pndr-terracotta-deep); }
   .ranking-search input { width: 100%; min-width: 0; background: transparent; font-size: 14px; outline: none; }
   .ranking-search:focus-within { outline: 2px solid var(--pndr-terracotta); outline-offset: 2px; }
-  .ranking-province { flex-shrink: 0; padding-right: 14px; }
-  .ranking-province select { max-width: 150px; background: transparent; font-size: 14px; }
+  .ranking-province { flex-shrink: 0; gap: 6px; padding: 0 16px; }
+  .ranking-province > svg:last-child { margin-left: 4px; }
   .restaurant-card { border-radius: 20px; box-shadow: 0 4px 18px rgba(58,42,34,0.055); }
   .restaurant-card:hover { box-shadow: 0 5px 20px rgba(58,42,34,0.08); }
   .restaurant-card .restaurant-card-photo { aspect-ratio: 9 / 5; }

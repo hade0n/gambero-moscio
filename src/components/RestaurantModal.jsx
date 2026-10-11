@@ -35,12 +35,12 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
   const hasPills = available.length > 1;
 
   const hero = (
-    <div className="relative aspect-[16/10] w-full bg-cream sm:aspect-[16/9]">
+    <div className="relative -mb-px aspect-[16/10] w-full overflow-hidden bg-cream sm:aspect-[16/9]">
       {imageUrl && !imgError ? (
         <img
           src={imageUrl}
           alt={`Ambiente di ${name}`}
-          className="h-full w-full object-cover"
+          className="block h-full w-full object-cover"
           onError={() => setImgError(true)}
         />
       ) : (

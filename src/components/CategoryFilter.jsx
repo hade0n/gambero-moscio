@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '../lib/cn.js';
 import { FILTER_CATEGORIES } from '../config/categories.js';
+import CategoryIcon from './CategoryIcon.jsx';
 
 /**
  * Filtro categorie a scorrimento orizzontale (swipe su mobile).
@@ -10,7 +11,8 @@ import { FILTER_CATEGORIES } from '../config/categories.js';
  * davvero contenuto nascosto in quella direzione (a riposo, allineato a
  * sinistra, non c'è nessuna sfumatura). Al cambio, la pill scelta si centra.
  */
-export default function CategoryFilter({ active, onChange }) {
+export default function CategoryFilter({ active, onChange, inline = false }) {
+  const filterId = useId();
   const scrollerRef = useRef(null);
   const [edges, setEdges] = useState({ left: false, right: false });
 
@@ -39,7 +41,7 @@ export default function CategoryFilter({ active, onChange }) {
   };
 
   return (
-    <nav aria-label="Filtra per categoria" className="relative border-b bg-cream">
+    <nav aria-label="Filtra per categoria" className={cn('relative bg-cream', inline ? 'ranking-category-filter' : 'border-b')}>
       <div
         aria-hidden="true"
         className={cn(
@@ -57,7 +59,7 @@ export default function CategoryFilter({ active, onChange }) {
 
       <ul
         ref={scrollerRef}
-        className="mx-auto flex max-w-content gap-2 overflow-x-auto scroll-smooth px-4 py-3 scrollbar-hide md:px-6"
+        className={cn('mx-auto flex max-w-content gap-2 overflow-x-auto scroll-smooth px-4 py-3 scrollbar-hide md:px-6', inline && 'ranking-category-list')}
         style={{ WebkitOverflowScrolling: 'touch', scrollSnapType: 'x proximity' }}
       >
         {FILTER_CATEGORIES.map((category) => {
@@ -77,11 +79,12 @@ export default function CategoryFilter({ active, onChange }) {
               >
                 {isActive && (
                   <motion.span
-                    layoutId="category-active"
+                    layoutId={`${filterId}-category-active`}
                     className="absolute inset-0 bg-green-deep"
                     transition={{ type: 'spring', stiffness: 480, damping: 40, mass: 0.6 }}
                   />
                 )}
+                {inline && <CategoryIcon category={category} size={18} className="relative z-10 shrink-0" />}
                 <span className={cn('relative z-10', isActive && 'font-bold')}>{category}</span>
               </button>
             </li>

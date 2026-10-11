@@ -12,7 +12,7 @@ import { NAV_BUTTON_ARIA, NAV_BUTTON_LABEL } from '../config/wheelMessages.js';
  * A scroll 0 l'header è piatto; scorrendo compaiono con delicatezza ombra e
  * velo. L'altezza non cambia mai (niente layout shift).
  */
-export default function Header({ variant = 'public', onLogout }) {
+export default function Header({ variant = 'public', onLogout, categoryFilter }) {
   const [scrolled, setScrolled] = useState(false);
   const [gamberoOpen, setGamberoOpen] = useState(false);
   const gamberoBtnRef = useRef(null);
@@ -36,6 +36,7 @@ export default function Header({ variant = 'public', onLogout }) {
         className={cn(
           'mx-auto flex max-w-content items-center gap-3 px-4 md:px-6',
           isAdmin ? 'h-16' : 'grid grid-cols-[1fr_auto_1fr] h-[60px] md:h-[68px]',
+          categoryFilter && 'ranking-header public-container',
         )}
       >
         <Link
@@ -43,6 +44,7 @@ export default function Header({ variant = 'public', onLogout }) {
           className={cn(
             'press flex min-h-[44px] items-center rounded-lg',
             isAdmin ? '-ml-1' : 'col-start-2 justify-self-center px-1',
+            categoryFilter && 'ranking-brand',
           )}
           aria-label="Gambero Moscio - Recensioni Locali — vai alla homepage"
         >
@@ -54,6 +56,8 @@ export default function Header({ variant = 'public', onLogout }) {
             className={isAdmin ? 'h-10 w-auto sm:h-11' : 'h-10 w-auto sm:h-11 md:h-12'}
           />
         </Link>
+
+        {categoryFilter && <div className="ranking-navigation hidden min-w-0 lg:block">{categoryFilter}</div>}
 
         <div
           className={cn(
@@ -67,10 +71,11 @@ export default function Header({ variant = 'public', onLogout }) {
             onClick={() => setGamberoOpen(true)}
             aria-label={NAV_BUTTON_ARIA}
             aria-haspopup="dialog"
-            className="btn btn-outline btn-sm w-11 shrink-0 justify-center px-0 sm:w-auto sm:gap-1.5 sm:px-3.5"
+            className={cn('btn btn-outline btn-sm w-11 shrink-0 justify-center px-0 sm:w-auto sm:gap-1.5 sm:px-3.5', categoryFilter && 'ranking-picker')}
           >
             <Icon name="wheel" size={18} className="shrink-0" />
-            <span className="hidden sm:inline">{NAV_BUTTON_LABEL}</span>
+            <span className={cn('hidden sm:inline', categoryFilter && 'lg:hidden')}>{NAV_BUTTON_LABEL}</span>
+            {categoryFilter && <span className="hidden lg:inline">Decidi per noi</span>}
           </button>
 
           {isAdmin && (

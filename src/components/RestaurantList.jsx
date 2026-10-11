@@ -9,18 +9,18 @@ import { DUR, EASE } from '../lib/motion.js';
  * (`whileInView`, una tantum). Le card già visibili al caricamento entrano
  * subito; nessun ritardo a cascata che cresce con la lista.
  */
-export default function RestaurantList({ restaurants, onOpen, isFiltered }) {
+export default function RestaurantList({ restaurants, onOpen, isFiltered, positions }) {
   if (restaurants.length === 0) {
     return (
       <EmptyState
         title={
           isFiltered
-            ? 'Nessun locale trovato per questa categoria.'
+            ? 'Nessun locale trovato con questi filtri.'
             : 'Non sono ancora presenti locali recensiti.'
         }
         description={
           isFiltered
-            ? 'Prova a scegliere un’altra categoria dal filtro qui sopra.'
+            ? 'Prova a cambiare categoria, ricerca o provincia.'
             : 'Le recensioni compariranno qui non appena saranno pubblicate.'
         }
       />
@@ -32,13 +32,13 @@ export default function RestaurantList({ restaurants, onOpen, isFiltered }) {
       {restaurants.map((restaurant, index) => (
         <motion.li
           key={restaurant.id}
-          className="h-full"
+          className="restaurant-list-item h-full"
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ duration: DUR.slow, ease: EASE.out }}
         >
-          <RestaurantCard restaurant={restaurant} position={index + 1} onOpen={onOpen} />
+          <RestaurantCard restaurant={restaurant} position={positions?.get(restaurant.id) ?? index + 1} onOpen={onOpen} />
         </motion.li>
       ))}
     </ul>

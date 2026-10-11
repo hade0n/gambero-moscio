@@ -243,7 +243,7 @@ function ModalShell({ onClose, title, headingId, size, hero, initialFocusRef, ch
           </div>
         )}
 
-        <div ref={scrollRef} className="overscroll-none overflow-y-auto">
+        <div ref={scrollRef} className="scrollbar-hide overscroll-none overflow-y-auto">
           {hero && <div className="w-full">{hero}</div>}
           <div className="px-5 py-5 md:px-6">{children}</div>
         </div>

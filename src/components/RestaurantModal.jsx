@@ -146,9 +146,14 @@ export default function RestaurantModal({ restaurant, open, onClose }) {
                   <RatingBreakdown ratings={activeReview.ratings} />
 
                   {activeReview.review && (
-                    <p className="mt-4 text-[1.0625rem] leading-relaxed text-brown">
-                      {activeReview.review}
-                    </p>
+                    <div className="mt-8 space-y-3">
+                      <h3 className="text-base font-semibold">
+                        La recensione di {reviewerLabel(activeKey)}
+                      </h3>
+                      <p className="max-w-[65ch] whitespace-pre-line break-words text-base leading-[1.8] text-brown sm:text-lg">
+                        {activeReview.review}
+                      </p>
+                    </div>
                   )}
                 </motion.div>
               </AnimatePresence>

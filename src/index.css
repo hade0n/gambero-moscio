@@ -291,7 +291,7 @@
   .ranking-category-filter button[aria-pressed="false"] { background: rgba(58,42,34,0.025); }
   .ranking-main { padding-top: 42px; padding-bottom: 64px; }
   .ranking-introduction { display: flex; align-items: center; justify-content: space-between; gap: 32px; }
-  .ranking-main .ranking-title { font-size: clamp(44px, 3.8vw, 62px); letter-spacing: -0.04em; color: var(--pndr-green-deep); }
+  .ranking-main .ranking-title { font-size: clamp(44px, 3.8vw, 62px); letter-spacing: -0.04em; color: var(--pndr-brown); }
   .ranking-main .ranking-description { margin-top: 8px; font-size: 18px; }
   .ranking-search-controls { align-items: center; gap: 16px; flex: 1; max-width: 650px; }
   .ranking-search, .ranking-province {

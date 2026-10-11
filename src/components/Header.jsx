@@ -42,17 +42,18 @@ export default function Header({ variant = 'public', onLogout, categoryFilter })
         {!isAdmin && (
           <Link
             to="/backend"
-            className={cn('press col-start-1 row-start-1 inline-flex min-h-[44px] items-center gap-1.5 justify-self-start rounded-lg text-sm font-semibold text-brown', categoryFilter && 'lg:hidden')}
+            aria-label="Accedi"
+            className={cn('press col-start-3 row-start-1 inline-flex min-h-[44px] w-11 items-center justify-center justify-self-end rounded-lg text-brown', categoryFilter && 'lg:hidden')}
           >
             <Icon name="login" size={18} />
-            Accedi
+            <span className="sr-only">Accedi</span>
           </Link>
         )}
         <Link
           to="/"
           className={cn(
             'press flex min-h-[44px] items-center rounded-lg',
-            isAdmin ? '-ml-1' : 'col-start-2 justify-self-center px-1',
+            isAdmin ? '-ml-1' : 'col-start-2 row-start-1 justify-self-center px-1',
             categoryFilter && 'ranking-brand',
           )}
           aria-label="Gambero Moscio - Recensioni Locali — vai alla homepage"
@@ -71,7 +72,7 @@ export default function Header({ variant = 'public', onLogout, categoryFilter })
         <div
           className={cn(
             'flex items-center gap-2 sm:gap-3',
-            isAdmin ? 'ml-auto' : 'col-start-3 justify-self-end',
+            isAdmin ? 'ml-auto' : 'col-start-1 row-start-1 justify-self-start lg:col-start-3 lg:justify-self-end',
           )}
         >
           <button
@@ -80,10 +81,10 @@ export default function Header({ variant = 'public', onLogout, categoryFilter })
             onClick={() => setGamberoOpen(true)}
             aria-label={NAV_BUTTON_ARIA}
             aria-haspopup="dialog"
-            className={cn('btn btn-outline btn-sm w-11 shrink-0 justify-center px-0 sm:w-auto sm:gap-1.5 sm:px-3.5', categoryFilter && 'ranking-picker')}
+            className={cn('btn btn-outline btn-sm w-11 shrink-0 justify-center px-0', isAdmin && 'sm:w-auto sm:gap-1.5 sm:px-3.5', categoryFilter && 'ranking-picker')}
           >
             <Icon name="wheel" size={18} className="shrink-0" />
-            <span className={cn('hidden sm:inline', categoryFilter && 'lg:hidden')}>{NAV_BUTTON_LABEL}</span>
+            <span className={isAdmin ? 'hidden sm:inline' : 'sr-only'}>{NAV_BUTTON_LABEL}</span>
             {categoryFilter && <span className="sr-only">Decidi per noi</span>}
           </button>
 

@@ -6,6 +6,19 @@
  */
 
 const PATHS = {
+  crown: (
+    <>
+      <path d="m3 6 4 5 5-7 5 7 4-5-2 12H5L3 6Z" />
+      <path d="M5 21h14" />
+    </>
+  ),
+  medal: (
+    <>
+      <path d="m7 3 5 7 5-7M4 3h5l3 4 3-4h5" />
+      <circle cx="12" cy="15" r="6" />
+      <circle cx="12" cy="15" r="2" />
+    </>
+  ),
   // Ruota — cerchio + mozzo + raggi (Tabler Icons "wheel", MIT).
   wheel: (
     <>

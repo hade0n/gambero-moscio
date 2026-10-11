@@ -49,12 +49,13 @@ export default function RestaurantCard({ restaurant, position, onOpen }) {
 
         <span
           className={cn(
-            'restaurant-position absolute left-3 top-3 inline-flex items-center justify-center rounded-full font-bold tabular shadow-sm',
+            'restaurant-position absolute left-3 top-3 inline-flex items-center justify-center gap-1.5 rounded-full font-bold tabular shadow-sm',
             isTop
               ? 'min-w-[2.1rem] bg-terracotta-deep px-2 py-1 text-sm text-white ring-2 ring-cream-soft/70'
               : 'min-w-[1.9rem] bg-brown/72 px-2 py-0.5 text-xs text-cream-soft backdrop-blur-[1px]',
           )}
         >
+          {isTop && <Icon name={position === 1 ? 'crown' : 'medal'} size={15} className="shrink-0" />}
           #{position}
         </span>
       </div>

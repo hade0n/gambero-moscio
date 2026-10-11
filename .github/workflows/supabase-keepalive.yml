@@ -1,0 +1,50 @@
+name: Gambero Moscio — Supabase keepalive
+
+on:
+  schedule:
+    # Supabase Free may pause projects with very low database activity.
+    # A few real application reads per day are more reliable than a weekly ping.
+    - cron: '17 6,14,22 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-keepalive
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Query the app's Supabase-backed endpoint
+        env:
+          APP_URL: ${{ vars.GAMBERO_MOSCIOS_APP_URL }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${APP_URL:-}" ]]; then
+            echo "Set the GAMBERO_MOSCIOS_APP_URL Actions variable to the public Vercel site URL."
+            exit 1
+          fi
+
+          response_file="${RUNNER_TEMP}/gambero-moscio-keepalive.json"
+          status="$(curl --silent --show-error --max-time 30 \
+            --output "$response_file" --write-out '%{http_code}' \
+            "${APP_URL%/}/api/restaurants")"
+
+          if [[ "$status" != "200" ]]; then
+            echo "The app endpoint returned HTTP ${status}."
+            exit 1
+          fi
+
+          node -e '
+            const fs = require("node:fs");
+            const data = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+            if (!Array.isArray(data.restaurants)) {
+              throw new Error("Unexpected response from /api/restaurants");
+            }
+            console.log(`Keepalive OK; database returned ${data.restaurants.length} places.`);
+          ' "$response_file"

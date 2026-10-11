@@ -28,7 +28,7 @@ export default function Header({ variant = 'public', onLogout, categoryFilter })
   return (
     <header
       className={cn(
-        'sticky top-0 z-40 transition-[background-color,box-shadow] duration-200 ease-pndr',
+        'relative z-40 transition-[background-color,box-shadow] duration-200 ease-pndr lg:sticky lg:top-0',
         scrolled ? 'bg-cream/90 shadow-sm backdrop-blur-sm' : 'bg-cream shadow-none',
       )}
     >

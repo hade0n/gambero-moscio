@@ -84,13 +84,12 @@ export default function Header({ variant = 'public', onLogout, categoryFilter })
           >
             <Icon name="wheel" size={18} className="shrink-0" />
             <span className={cn('hidden sm:inline', categoryFilter && 'lg:hidden')}>{NAV_BUTTON_LABEL}</span>
-            {categoryFilter && <span className="hidden lg:inline">Decidi per noi</span>}
+            {categoryFilter && <span className="sr-only">Decidi per noi</span>}
           </button>
 
           {!isAdmin && categoryFilter && (
-            <Link to="/backend" className="btn btn-secondary btn-sm hidden lg:inline-flex">
+            <Link to="/backend" aria-label="Accedi" title="Accedi" className="btn btn-secondary btn-sm hidden lg:inline-flex">
               <Icon name="login" size={18} />
-              Accedi
             </Link>
           )}
 

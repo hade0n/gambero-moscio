@@ -39,6 +39,15 @@ export default function Header({ variant = 'public', onLogout, categoryFilter })
           categoryFilter && 'ranking-header public-container',
         )}
       >
+        {!isAdmin && (
+          <Link
+            to="/backend"
+            className={cn('press col-start-1 row-start-1 inline-flex min-h-[44px] items-center gap-1.5 justify-self-start rounded-lg text-sm font-semibold text-brown', categoryFilter && 'lg:hidden')}
+          >
+            <Icon name="login" size={18} />
+            Accedi
+          </Link>
+        )}
         <Link
           to="/"
           className={cn(
@@ -77,6 +86,13 @@ export default function Header({ variant = 'public', onLogout, categoryFilter })
             <span className={cn('hidden sm:inline', categoryFilter && 'lg:hidden')}>{NAV_BUTTON_LABEL}</span>
             {categoryFilter && <span className="hidden lg:inline">Decidi per noi</span>}
           </button>
+
+          {!isAdmin && categoryFilter && (
+            <Link to="/backend" className="btn btn-secondary btn-sm hidden lg:inline-flex">
+              <Icon name="login" size={18} />
+              Accedi
+            </Link>
+          )}
 
           {isAdmin && (
             <button

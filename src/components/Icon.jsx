@@ -76,6 +76,11 @@ const PATHS = {
       <path d="M12 18h.01" />
     </>
   ),
+  login: (
+    <>
+      <path d="M14 4h5v16h-5M3 12h12M10 7l5 5-5 5" />
+    </>
+  ),
   logout: (
     <>
       <path d="M15 4h3a2 2 0 012 2v12a2 2 0 01-2 2h-3" />

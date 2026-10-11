@@ -18,7 +18,6 @@ export default function Home() {
   const [selected, setSelected] = useState(null);
   const [query, setQuery] = useState('');
   const [province, setProvince] = useState('');
-  const [sort, setSort] = useState('ranking');
   const rankingPositions = useMemo(() => new Map(restaurants.filter((r) => r.reviewCount > 0).sort(compareByRanking).map((r, index) => [r.id, index + 1])), [restaurants]);
   const provinces = useMemo(() => [...new Set(restaurants.filter((r) => r.reviewCount > 0).map((r) => r.province).filter(Boolean))].sort(), [restaurants]);
   const normalizeSearch = (text) => String(text || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('it');
@@ -33,8 +32,8 @@ export default function Home() {
     // Ordinata sul rankingScore ad alta precisione, non sull'overall arrotondato.
     const search = normalizeSearch(query.trim());
     const visible = filtered.filter((r) => (!province || r.province === province) && (!search || normalizeSearch(`${r.name} ${r.town} ${r.category} ${r.province}`).includes(search)));
-    return [...visible].sort(sort === 'name' ? (a, b) => a.name.localeCompare(b.name, 'it') : sort === 'lowest' ? (a, b) => compareByRanking(b, a) : compareByRanking);
-  }, [restaurants, activeCategory, query, province, sort]);
+    return [...visible].sort(compareByRanking);
+  }, [restaurants, activeCategory, query, province]);
 
   const count = ranked.length;
   const showList = status === 'ready';
@@ -80,18 +79,7 @@ export default function Home() {
         </div>
         </div>
 
-        {showList && <div className="ranking-toolbar hidden lg:flex">
-          <p role="status" className="flex items-center gap-2.5 font-semibold"><Icon name="bowl" size={22} className="text-terracotta" />{count === 1 ? '1 locale trovato' : `${count} locali trovati`}</p>
-          <label className="flex items-center gap-3 text-sm">Ordina per:
-            <select className="ranking-sort" value={sort} onChange={(e) => setSort(e.target.value)}>
-              <option value="ranking">Voto più alto</option>
-              <option value="lowest">Voto più basso</option>
-              <option value="name">Nome A–Z</option>
-            </select>
-          </label>
-        </div>}
-
-        <div className="mt-7 lg:mt-5">
+        <div className="mt-7 lg:mt-9">
           <AnimatePresence mode="wait">
             {status === 'loading' && (
               <motion.div key="loading" exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>

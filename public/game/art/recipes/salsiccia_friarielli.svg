@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 140" fill="none">
+      <!-- Ombra piatto -->
+      <ellipse cx="80" cy="116" rx="66" ry="18" fill="#000" fill-opacity="0.22"/>
+      <!-- Piatto in ceramica vietrese bianca e blu -->
+      <ellipse cx="80" cy="110" rx="64" ry="17" fill="#FFFDF9" stroke="#2D5A88" stroke-width="3.5"/>
+      <ellipse cx="80" cy="110" rx="54" ry="13" fill="#F7EFE2" stroke="#D96B32" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <!-- Carta paglia da paninoteca -->
+      <polygon points="34,108 80,94 128,107 84,121" fill="#F2D8A7" stroke="#C6985A" stroke-width="1.4"/>
+      <g transform="translate(32, 38) scale(1, 0.78)">
+        <defs>
+          <radialGradient id="casCrust" cx="45%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#E6AC6E"/>
+            <stop offset="65%" stop-color="#B87333"/>
+            <stop offset="100%" stop-color="#7D491B"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="73" rx="36" ry="9" fill="#000" fill-opacity="0.18"/>
+        <path d="M12 52 C10 26, 28 18, 48 18 C68 18, 86 26, 84 52 C83 66, 68 72, 48 72 C28 72, 13 66, 12 52 Z" fill="url(#casCrust)" stroke="#3A2A22" stroke-width="2.6"/>
+        <!-- Spolverata di farina e tagli a rosetta -->
+        <ellipse cx="48" cy="40" rx="25" ry="14" fill="#FFF8EB" fill-opacity="0.22"/>
+        <path d="M26 38 Q48 28 70 38 M30 49 Q48 39 66 49 M48 23 L48 56" stroke="#F7DFB9" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M20 57 Q48 65 76 57" stroke="#FCE7C2" stroke-width="2.4" stroke-dasharray="4 3" fill="none"/>
+      </g><g transform="translate(32, 27) scale(1, 0.78)">
+        <defs>
+          <linearGradient id="salsGrad_cooked" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#9E4632"/>
+            <stop offset="100%" stop-color="#612518"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="48" cy="65" rx="34" ry="10" fill="#000" fill-opacity="0.2"/>
+        <path d="M15 53 C13 33, 30 25, 50 26 C70 26, 82 35, 80 51 C79 62, 66 65, 57 59 C49 54, 41 54, 33 60 C23 65, 16 61, 15 53 Z" fill="url(#salsGrad_cooked)" stroke="#3A2A22" stroke-width="2.6"/>
+        <!-- Granelli di pepe e finocchietto + segni griglia -->
+        <circle cx="32" cy="42" r="2.3" fill="#FCEAD2" opacity="0.85"/>
+        <circle cx="48" cy="38" r="2.2" fill="#FCEAD2" opacity="0.85"/>
+        <circle cx="63" cy="44" r="2.3" fill="#FCEAD2" opacity="0.85"/>
+        <path d="M28 34 L34 49 M47 32 L52 48 M63 35 L68 50" stroke="#29100A" stroke-width="2.6" stroke-linecap="round"/>
+      </g><g transform="translate(32, 16) scale(1, 0.78)">
+        <defs>
+          <radialGradient id="friaGrad" cx="45%" cy="38%" r="60%">
+            <stop offset="0%" stop-color="#5B8C4A"/>
+            <stop offset="100%" stop-color="#27421E"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="66" rx="32" ry="9" fill="#000" fill-opacity="0.2"/>
+        <path d="M17 54 C14 37, 26 24, 46 27 C64 23, 79 35, 76 52 C72 64, 56 68, 40 66 C26 66, 19 61, 17 54 Z" fill="url(#friaGrad)" stroke="#3A2A22" stroke-width="2.5"/>
+        <path d="M29 53 Q44 37 61 47 M36 39 Q48 33 58 40" stroke="#8CC470" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <!-- Spicchio d'aglio e peperoncino rosso -->
+        <ellipse cx="35" cy="54" rx="5" ry="3.4" fill="#FFF5DC" stroke="#3A2A22" stroke-width="1.5"/>
+        <path d="M55 31 C65 31, 71 37, 67 45 C61 42, 56 37, 55 31 Z" fill="#E03424" stroke="#3A2A22" stroke-width="1.8"/>
+      </g><g transform="translate(32, 5) scale(1, 0.78)">
+        <defs>
+          <linearGradient id="provGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FFF2C2"/>
+            <stop offset="65%" stop-color="#F0C76E"/>
+            <stop offset="100%" stop-color="#C68938"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="48" cy="66" rx="32" ry="9" fill="#000" fill-opacity="0.16"/>
+        <path d="M16 34 L76 26 L72 56 L56 56 L51 69 L43 56 L20 54 Z" fill="url(#provGrad)" stroke="#8C531E" stroke-width="2.8" stroke-linejoin="round"/>
+        <circle cx="36" cy="43" r="4.2" fill="#C68446" fill-opacity="0.45"/>
+        <circle cx="57" cy="41" r="3.4" fill="#C68446" fill-opacity="0.45"/>
+        <path d="M24 38 L66 32" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+      </g><g transform="translate(32, -6) scale(1, 0.75)">
+        <defs>
+          <radialGradient id="casCrust" cx="45%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#E6AC6E"/>
+            <stop offset="65%" stop-color="#B87333"/>
+            <stop offset="100%" stop-color="#7D491B"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="73" rx="36" ry="9" fill="#000" fill-opacity="0.18"/>
+        <path d="M12 52 C10 26, 28 18, 48 18 C68 18, 86 26, 84 52 C83 66, 68 72, 48 72 C28 72, 13 66, 12 52 Z" fill="url(#casCrust)" stroke="#3A2A22" stroke-width="2.6"/>
+        <!-- Spolverata di farina e tagli a rosetta -->
+        <ellipse cx="48" cy="40" rx="25" ry="14" fill="#FFF8EB" fill-opacity="0.22"/>
+        <path d="M26 38 Q48 28 70 38 M30 49 Q48 39 66 49 M48 23 L48 56" stroke="#F7DFB9" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M20 57 Q48 65 76 57" stroke="#FCE7C2" stroke-width="2.4" stroke-dasharray="4 3" fill="none"/>
+      </g>
+    </svg>

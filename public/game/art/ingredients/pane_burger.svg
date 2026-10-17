@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+        <defs>
+          <radialGradient id="bunTop" cx="42%" cy="32%" r="60%">
+            <stop offset="0%" stop-color="#F7C97E"/>
+            <stop offset="55%" stop-color="#D89143"/>
+            <stop offset="100%" stop-color="#9E5B1E"/>
+          </radialGradient>
+          <linearGradient id="bunBase" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FCE5B8"/>
+            <stop offset="100%" stop-color="#C8823B"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="48" cy="74" rx="34" ry="9" fill="#000" fill-opacity="0.18"/>
+        <!-- Base soffice tostata -->
+        <path d="M16 58 C16 53, 80 53, 80 58 L77 69 C75 75, 21 75, 19 69 Z" fill="url(#bunBase)" stroke="#3A2A22" stroke-width="2.5"/>
+        <ellipse cx="48" cy="58" rx="32" ry="6.5" fill="#FFF3D6" stroke="#D89A56" stroke-width="1.5"/>
+        <!-- Cupola brioche dorata -->
+        <path d="M14 48 C14 22, 82 22, 82 48 C82 54, 14 54, 14 48 Z" fill="url(#bunTop)" stroke="#3A2A22" stroke-width="2.5"/>
+        <!-- Riflesso caldo sulla crosta -->
+        <path d="M26 32 C34 25, 52 24, 62 30" stroke="#FFE9B5" stroke-width="3" stroke-linecap="round" opacity="0.65" fill="none"/>
+        <!-- Semi di sesamo -->
+        <g fill="#FFF9F1" stroke="#8C5323" stroke-width="0.8">
+          <ellipse cx="34" cy="34" rx="3.2" ry="1.6" transform="rotate(-18 34 34)"/>
+          <ellipse cx="48" cy="30" rx="3.2" ry="1.6" transform="rotate(6 48 30)"/>
+          <ellipse cx="62" cy="35" rx="3.2" ry="1.6" transform="rotate(20 62 35)"/>
+          <ellipse cx="40" cy="42" rx="3.2" ry="1.6" transform="rotate(-8 40 42)"/>
+          <ellipse cx="55" cy="41" rx="3.2" ry="1.6" transform="rotate(12 55 41)"/>
+          <ellipse cx="27" cy="43" rx="2.9" ry="1.5" transform="rotate(-24 27 43)"/>
+          <ellipse cx="68" cy="43" rx="2.9" ry="1.5" transform="rotate(24 68 43)"/>
+        </g>
+      </svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+        <defs>
+          <radialGradient id="casCrust" cx="45%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#E6AC6E"/>
+            <stop offset="65%" stop-color="#B87333"/>
+            <stop offset="100%" stop-color="#7D491B"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="73" rx="36" ry="9" fill="#000" fill-opacity="0.18"/>
+        <path d="M12 52 C10 26, 28 18, 48 18 C68 18, 86 26, 84 52 C83 66, 68 72, 48 72 C28 72, 13 66, 12 52 Z" fill="url(#casCrust)" stroke="#3A2A22" stroke-width="2.6"/>
+        <!-- Spolverata di farina e tagli a rosetta -->
+        <ellipse cx="48" cy="40" rx="25" ry="14" fill="#FFF8EB" fill-opacity="0.22"/>
+        <path d="M26 38 Q48 28 70 38 M30 49 Q48 39 66 49 M48 23 L48 56" stroke="#F7DFB9" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M20 57 Q48 65 76 57" stroke="#FCE7C2" stroke-width="2.4" stroke-dasharray="4 3" fill="none"/>
+      </svg>

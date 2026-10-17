@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+        <defs>
+          <radialGradient id="vegGrad_cooking" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#658A3B"/>
+            <stop offset="100%" stop-color="#3C5720"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="64" rx="33" ry="10" fill="#000" fill-opacity="0.2"/>
+        <rect x="15" y="34" width="66" height="28" rx="14" fill="url(#vegGrad_cooking)" stroke="#3A2A22" stroke-width="2.6"/>
+        <circle cx="32" cy="47" r="3.2" fill="#F5D387"/>
+        <circle cx="48" cy="43" r="3" fill="#FFF3E2"/>
+        <circle cx="62" cy="49" r="3.2" fill="#E89846"/>
+        <circle cx="41" cy="53" r="2.6" fill="#A3D96C"/>
+        <path d="M27 38 L34 56 M55 38 L62 56" stroke="#2A3D16" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>

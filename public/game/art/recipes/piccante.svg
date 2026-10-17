@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 140" fill="none">
+      <!-- Ombra piatto -->
+      <ellipse cx="80" cy="116" rx="66" ry="18" fill="#000" fill-opacity="0.22"/>
+      <!-- Piatto in ceramica vietrese bianca e blu -->
+      <ellipse cx="80" cy="110" rx="64" ry="17" fill="#FFFDF9" stroke="#2D5A88" stroke-width="3.5"/>
+      <ellipse cx="80" cy="110" rx="54" ry="13" fill="#F7EFE2" stroke="#D96B32" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <!-- Carta paglia da paninoteca -->
+      <polygon points="34,108 80,94 128,107 84,121" fill="#F2D8A7" stroke="#C6985A" stroke-width="1.4"/>
+      <g transform="translate(32, 38) scale(1, 0.78)">
+        <defs>
+          <radialGradient id="bunTop" cx="42%" cy="32%" r="60%">
+            <stop offset="0%" stop-color="#F7C97E"/>
+            <stop offset="55%" stop-color="#D89143"/>
+            <stop offset="100%" stop-color="#9E5B1E"/>
+          </radialGradient>
+          <linearGradient id="bunBase" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FCE5B8"/>
+            <stop offset="100%" stop-color="#C8823B"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="48" cy="74" rx="34" ry="9" fill="#000" fill-opacity="0.18"/>
+        <!-- Base soffice tostata -->
+        <path d="M16 58 C16 53, 80 53, 80 58 L77 69 C75 75, 21 75, 19 69 Z" fill="url(#bunBase)" stroke="#3A2A22" stroke-width="2.5"/>
+        <ellipse cx="48" cy="58" rx="32" ry="6.5" fill="#FFF3D6" stroke="#D89A56" stroke-width="1.5"/>
+        <!-- Cupola brioche dorata -->
+        <path d="M14 48 C14 22, 82 22, 82 48 C82 54, 14 54, 14 48 Z" fill="url(#bunTop)" stroke="#3A2A22" stroke-width="2.5"/>
+        <!-- Riflesso caldo sulla crosta -->
+        <path d="M26 32 C34 25, 52 24, 62 30" stroke="#FFE9B5" stroke-width="3" stroke-linecap="round" opacity="0.65" fill="none"/>
+        <!-- Semi di sesamo -->
+        <g fill="#FFF9F1" stroke="#8C5323" stroke-width="0.8">
+          <ellipse cx="34" cy="34" rx="3.2" ry="1.6" transform="rotate(-18 34 34)"/>
+          <ellipse cx="48" cy="30" rx="3.2" ry="1.6" transform="rotate(6 48 30)"/>
+          <ellipse cx="62" cy="35" rx="3.2" ry="1.6" transform="rotate(20 62 35)"/>
+          <ellipse cx="40" cy="42" rx="3.2" ry="1.6" transform="rotate(-8 40 42)"/>
+          <ellipse cx="55" cy="41" rx="3.2" ry="1.6" transform="rotate(12 55 41)"/>
+          <ellipse cx="27" cy="43" rx="2.9" ry="1.5" transform="rotate(-24 27 43)"/>
+          <ellipse cx="68" cy="43" rx="2.9" ry="1.5" transform="rotate(24 68 43)"/>
+        </g>
+      </g><g transform="translate(32, 27) scale(1, 0.78)">
+        <defs>
+          <radialGradient id="beefGrad_cooked" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#7D3E28"/>
+            <stop offset="100%" stop-color="#4D2214"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="64" rx="35" ry="11" fill="#000" fill-opacity="0.22"/>
+        <path d="M14 46 C14 33, 82 33, 82 46 L82 56 C82 69, 14 69, 14 56 Z" fill="url(#beefGrad_cooked)" stroke="#3A2A22" stroke-width="2.6"/>
+        <ellipse cx="48" cy="45" rx="33" ry="12" fill="url(#beefGrad_cooked)" stroke="#3A2A22" stroke-width="2"/>
+        <!-- Rigature di ghisa o venature -->
+        <path d="M26 38 L36 53 M43 36 L54 54 M60 38 L69 52" stroke="#260E07" stroke-width="3.6" stroke-linecap="round"/>
+        <path d="M26 42 Q48 36 68 43" stroke="#FFF3E2" stroke-width="2" stroke-linecap="round" opacity="0.38" fill="none"/>
+      </g><g transform="translate(32, 16) scale(1, 0.78)">
+        <defs>
+          <linearGradient id="provGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FFF2C2"/>
+            <stop offset="65%" stop-color="#F0C76E"/>
+            <stop offset="100%" stop-color="#C68938"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="48" cy="66" rx="32" ry="9" fill="#000" fill-opacity="0.16"/>
+        <path d="M16 34 L76 26 L72 56 L56 56 L51 69 L43 56 L20 54 Z" fill="url(#provGrad)" stroke="#8C531E" stroke-width="2.8" stroke-linejoin="round"/>
+        <circle cx="36" cy="43" r="4.2" fill="#C68446" fill-opacity="0.45"/>
+        <circle cx="57" cy="41" r="3.4" fill="#C68446" fill-opacity="0.45"/>
+        <path d="M24 38 L66 32" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+      </g><g transform="translate(32, 5) scale(1, 0.78)">
+        <ellipse cx="48" cy="66" rx="32" ry="8" fill="#000" fill-opacity="0.15"/>
+        <ellipse cx="39" cy="51" rx="22" ry="15" stroke="#8E3B63" stroke-width="5.5" fill="#FFF9F1" fill-opacity="0.35"/>
+        <ellipse cx="57" cy="44" rx="20" ry="14" stroke="#B55D85" stroke-width="5" fill="none"/>
+        <ellipse cx="39" cy="51" rx="11" ry="7.5" stroke="#D99AB5" stroke-width="3.5" fill="none"/>
+      </g><g transform="translate(32, -6) scale(1, 0.78)">
+        <ellipse cx="48" cy="68" rx="28" ry="7" fill="#000" fill-opacity="0.18"/>
+        <path d="M24 62 C40 65, 64 53, 72 30 C74 24, 67 20, 62 25 C51 40, 36 48, 22 50 C16 51, 17 61, 24 62 Z" fill="#D9321C" stroke="#3A2A22" stroke-width="2.6"/>
+        <path d="M68 25 L78 16" stroke="#487A2E" stroke-width="4.5" stroke-linecap="round"/>
+        <path d="M32 55 Q49 51 60 36" stroke="#FF9B7A" stroke-width="2.8" stroke-linecap="round" fill="none"/>
+      </g><g transform="translate(32, -17) scale(1, 0.75)">
+        <defs>
+          <radialGradient id="bunTop" cx="42%" cy="32%" r="60%">
+            <stop offset="0%" stop-color="#F7C97E"/>
+            <stop offset="55%" stop-color="#D89143"/>
+            <stop offset="100%" stop-color="#9E5B1E"/>
+          </radialGradient>
+          <linearGradient id="bunBase" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FCE5B8"/>
+            <stop offset="100%" stop-color="#C8823B"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="48" cy="74" rx="34" ry="9" fill="#000" fill-opacity="0.18"/>
+        <!-- Base soffice tostata -->
+        <path d="M16 58 C16 53, 80 53, 80 58 L77 69 C75 75, 21 75, 19 69 Z" fill="url(#bunBase)" stroke="#3A2A22" stroke-width="2.5"/>
+        <ellipse cx="48" cy="58" rx="32" ry="6.5" fill="#FFF3D6" stroke="#D89A56" stroke-width="1.5"/>
+        <!-- Cupola brioche dorata -->
+        <path d="M14 48 C14 22, 82 22, 82 48 C82 54, 14 54, 14 48 Z" fill="url(#bunTop)" stroke="#3A2A22" stroke-width="2.5"/>
+        <!-- Riflesso caldo sulla crosta -->
+        <path d="M26 32 C34 25, 52 24, 62 30" stroke="#FFE9B5" stroke-width="3" stroke-linecap="round" opacity="0.65" fill="none"/>
+        <!-- Semi di sesamo -->
+        <g fill="#FFF9F1" stroke="#8C5323" stroke-width="0.8">
+          <ellipse cx="34" cy="34" rx="3.2" ry="1.6" transform="rotate(-18 34 34)"/>
+          <ellipse cx="48" cy="30" rx="3.2" ry="1.6" transform="rotate(6 48 30)"/>
+          <ellipse cx="62" cy="35" rx="3.2" ry="1.6" transform="rotate(20 62 35)"/>
+          <ellipse cx="40" cy="42" rx="3.2" ry="1.6" transform="rotate(-8 40 42)"/>
+          <ellipse cx="55" cy="41" rx="3.2" ry="1.6" transform="rotate(12 55 41)"/>
+          <ellipse cx="27" cy="43" rx="2.9" ry="1.5" transform="rotate(-24 27 43)"/>
+          <ellipse cx="68" cy="43" rx="2.9" ry="1.5" transform="rotate(24 68 43)"/>
+        </g>
+      </g>
+    </svg>

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 140" fill="none">
+      <!-- Ombra piatto -->
+      <ellipse cx="80" cy="116" rx="66" ry="18" fill="#000" fill-opacity="0.22"/>
+      <!-- Piatto in ceramica vietrese bianca e blu -->
+      <ellipse cx="80" cy="110" rx="64" ry="17" fill="#FFFDF9" stroke="#2D5A88" stroke-width="3.5"/>
+      <ellipse cx="80" cy="110" rx="54" ry="13" fill="#F7EFE2" stroke="#D96B32" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <!-- Carta paglia da paninoteca -->
+      <polygon points="34,108 80,94 128,107 84,121" fill="#F2D8A7" stroke="#C6985A" stroke-width="1.4"/>
+      <g transform="translate(32, 38) scale(1, 0.78)">
+        <defs>
+          <radialGradient id="casCrust" cx="45%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#E6AC6E"/>
+            <stop offset="65%" stop-color="#B87333"/>
+            <stop offset="100%" stop-color="#7D491B"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="73" rx="36" ry="9" fill="#000" fill-opacity="0.18"/>
+        <path d="M12 52 C10 26, 28 18, 48 18 C68 18, 86 26, 84 52 C83 66, 68 72, 48 72 C28 72, 13 66, 12 52 Z" fill="url(#casCrust)" stroke="#3A2A22" stroke-width="2.6"/>
+        <!-- Spolverata di farina e tagli a rosetta -->
+        <ellipse cx="48" cy="40" rx="25" ry="14" fill="#FFF8EB" fill-opacity="0.22"/>
+        <path d="M26 38 Q48 28 70 38 M30 49 Q48 39 66 49 M48 23 L48 56" stroke="#F7DFB9" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M20 57 Q48 65 76 57" stroke="#FCE7C2" stroke-width="2.4" stroke-dasharray="4 3" fill="none"/>
+      </g><g transform="translate(32, 27) scale(1, 0.78)">
+        <ellipse cx="48" cy="68" rx="33" ry="9" fill="#000" fill-opacity="0.22"/>
+        <!-- Strato melanzana viola scura -->
+        <rect x="16" y="50" width="64" height="14" rx="6" fill="#4A2040" stroke="#3A2A22" stroke-width="2.4"/>
+        <!-- Strato provola filante -->
+        <rect x="19" y="39" width="58" height="12" rx="5" fill="#F5D382" stroke="#3A2A22" stroke-width="2.2"/>
+        <!-- Strato sugo di pomodoro e basilico -->
+        <rect x="16" y="27" width="64" height="14" rx="6" fill="#B52B1E" stroke="#3A2A22" stroke-width="2.4"/>
+        <path d="M26 34 Q48 40 70 34" stroke="#FF7868" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        <ellipse cx="48" cy="27" rx="8" ry="4.5" fill="#5F8F3A" stroke="#3A2A22" stroke-width="1.8"/>
+      </g><g transform="translate(32, 16) scale(1, 0.78)">
+        <defs>
+          <linearGradient id="provGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#FFF2C2"/>
+            <stop offset="65%" stop-color="#F0C76E"/>
+            <stop offset="100%" stop-color="#C68938"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="48" cy="66" rx="32" ry="9" fill="#000" fill-opacity="0.16"/>
+        <path d="M16 34 L76 26 L72 56 L56 56 L51 69 L43 56 L20 54 Z" fill="url(#provGrad)" stroke="#8C531E" stroke-width="2.8" stroke-linejoin="round"/>
+        <circle cx="36" cy="43" r="4.2" fill="#C68446" fill-opacity="0.45"/>
+        <circle cx="57" cy="41" r="3.4" fill="#C68446" fill-opacity="0.45"/>
+        <path d="M24 38 L66 32" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" opacity="0.7"/>
+      </g><g transform="translate(32, 5) scale(1, 0.78)">
+        <ellipse cx="48" cy="68" rx="26" ry="7" fill="#000" fill-opacity="0.15"/>
+        <path d="M48 18 C61 28, 61 46, 48 56 C35 46, 35 28, 48 18 Z" fill="#689F3E" stroke="#3A2A22" stroke-width="2.4"/>
+        <path d="M21 43 C32 34, 47 40, 48 56 C32 61, 21 53, 21 43 Z" fill="#4C7D2B" stroke="#3A2A22" stroke-width="2.4"/>
+        <path d="M75 43 C64 34, 49 40, 48 56 C64 61, 75 53, 75 43 Z" fill="#4C7D2B" stroke="#3A2A22" stroke-width="2.4"/>
+        <path d="M48 24 L48 68 M30 46 L48 55 M66 46 L48 55" stroke="#B6E388" stroke-width="2.2" stroke-linecap="round"/>
+      </g><g transform="translate(32, -6) scale(1, 0.75)">
+        <defs>
+          <radialGradient id="casCrust" cx="45%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#E6AC6E"/>
+            <stop offset="65%" stop-color="#B87333"/>
+            <stop offset="100%" stop-color="#7D491B"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="73" rx="36" ry="9" fill="#000" fill-opacity="0.18"/>
+        <path d="M12 52 C10 26, 28 18, 48 18 C68 18, 86 26, 84 52 C83 66, 68 72, 48 72 C28 72, 13 66, 12 52 Z" fill="url(#casCrust)" stroke="#3A2A22" stroke-width="2.6"/>
+        <!-- Spolverata di farina e tagli a rosetta -->
+        <ellipse cx="48" cy="40" rx="25" ry="14" fill="#FFF8EB" fill-opacity="0.22"/>
+        <path d="M26 38 Q48 28 70 38 M30 49 Q48 39 66 49 M48 23 L48 56" stroke="#F7DFB9" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M20 57 Q48 65 76 57" stroke="#FCE7C2" stroke-width="2.4" stroke-dasharray="4 3" fill="none"/>
+      </g>
+    </svg>

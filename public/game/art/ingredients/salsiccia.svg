@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+        <defs>
+          <linearGradient id="salsGrad_cooked" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#9E4632"/>
+            <stop offset="100%" stop-color="#612518"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="48" cy="65" rx="34" ry="10" fill="#000" fill-opacity="0.2"/>
+        <path d="M15 53 C13 33, 30 25, 50 26 C70 26, 82 35, 80 51 C79 62, 66 65, 57 59 C49 54, 41 54, 33 60 C23 65, 16 61, 15 53 Z" fill="url(#salsGrad_cooked)" stroke="#3A2A22" stroke-width="2.6"/>
+        <!-- Granelli di pepe e finocchietto + segni griglia -->
+        <circle cx="32" cy="42" r="2.3" fill="#FCEAD2" opacity="0.85"/>
+        <circle cx="48" cy="38" r="2.2" fill="#FCEAD2" opacity="0.85"/>
+        <circle cx="63" cy="44" r="2.3" fill="#FCEAD2" opacity="0.85"/>
+        <path d="M28 34 L34 49 M47 32 L52 48 M63 35 L68 50" stroke="#29100A" stroke-width="2.6" stroke-linecap="round"/>
+      </svg>

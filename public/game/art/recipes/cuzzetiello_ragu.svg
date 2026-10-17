@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 140" fill="none">
+      <!-- Ombra piatto -->
+      <ellipse cx="80" cy="116" rx="66" ry="18" fill="#000" fill-opacity="0.22"/>
+      <!-- Piatto in ceramica vietrese bianca e blu -->
+      <ellipse cx="80" cy="110" rx="64" ry="17" fill="#FFFDF9" stroke="#2D5A88" stroke-width="3.5"/>
+      <ellipse cx="80" cy="110" rx="54" ry="13" fill="#F7EFE2" stroke="#D96B32" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <!-- Carta paglia da paninoteca -->
+      <polygon points="34,108 80,94 128,107 84,121" fill="#F2D8A7" stroke="#C6985A" stroke-width="1.4"/>
+      <g transform="translate(32, 38) scale(1, 0.78)">
+        <defs>
+          <linearGradient id="cuzzBody" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#D48845"/>
+            <stop offset="55%" stop-color="#9E5622"/>
+            <stop offset="100%" stop-color="#693410"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="48" cy="76" rx="30" ry="8" fill="#000" fill-opacity="0.2"/>
+        <!-- Punta conica di pane cafone -->
+        <path d="M16 38 L41 75 C45 80, 51 80, 55 75 L80 38 Z" fill="url(#cuzzBody)" stroke="#3A2A22" stroke-width="2.6"/>
+        <!-- Crosta rustica rigata -->
+        <path d="M27 50 Q48 56 69 50 M34 62 Q48 66 62 62" stroke="#592B0C" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <!-- Apertura scavata con mollica calda -->
+        <ellipse cx="48" cy="38" rx="32" ry="13" fill="#F2D7A7" stroke="#3A2A22" stroke-width="2.5"/>
+        <ellipse cx="48" cy="38" rx="22" ry="8" fill="#7D3B18" stroke="#C68446" stroke-width="1.6"/>
+      </g><g transform="translate(32, 27) scale(1, 0.78)">
+        <defs>
+          <radialGradient id="polpGrad" cx="38%" cy="32%" r="62%">
+            <stop offset="0%" stop-color="#A84832"/>
+            <stop offset="100%" stop-color="#5E2114"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="68" rx="33" ry="10" fill="#000" fill-opacity="0.22"/>
+        <!-- Salsa ragù alla base -->
+        <ellipse cx="48" cy="60" rx="30" ry="11" fill="#AD2E1E" stroke="#3A2A22" stroke-width="2"/>
+        <!-- 3 Polpette tonde -->
+        <circle cx="32" cy="52" r="15" fill="url(#polpGrad)" stroke="#3A2A22" stroke-width="2.4"/>
+        <circle cx="64" cy="52" r="15" fill="url(#polpGrad)" stroke="#3A2A22" stroke-width="2.4"/>
+        <circle cx="48" cy="36" r="15.5" fill="url(#polpGrad)" stroke="#3A2A22" stroke-width="2.4"/>
+        <!-- Glassa di ragù e fogliolina di basilico -->
+        <path d="M37 33 Q48 43 59 33" stroke="#E04836" stroke-width="5" stroke-linecap="round" fill="none"/>
+        <path d="M24 49 Q32 56 40 49 M56 49 Q64 56 72 49" stroke="#E04836" stroke-width="4" stroke-linecap="round" fill="none"/>
+        <path d="M48 18 C55 21, 56 28, 48 31 C40 28, 41 21, 48 18 Z" fill="#5F8F3A" stroke="#3A2A22" stroke-width="1.8"/>
+      </g><g transform="translate(32, 16) scale(1, 0.78)">
+        <ellipse cx="48" cy="70" rx="30" ry="8" fill="#000" fill-opacity="0.2"/>
+        <!-- Tegamino di terracotta con ragù napoletano -->
+        <path d="M18 42 H78 C78 61, 64 70, 48 70 C32 70, 18 61, 18 42 Z" fill="#9E3B24" stroke="#3A2A22" stroke-width="2.5"/>
+        <ellipse cx="48" cy="42" rx="30" ry="11" fill="#C83E2B" stroke="#3A2A22" stroke-width="2.4"/>
+        <ellipse cx="48" cy="42" rx="21" ry="7" fill="#9C2315"/>
+        <path d="M36 22 Q33 29 38 33 M50 19 Q47 27 52 31 M62 23 Q59 29 64 33" stroke="#D96B32" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+      </g>
+    </svg>

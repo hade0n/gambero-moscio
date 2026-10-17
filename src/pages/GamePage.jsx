@@ -2,15 +2,20 @@
  * Pagina `/game` — "Il Banco del Gambero" (Gioco Co-Op nel Browser 1–4 giocatori).
  * Isolata dal resto dell'app di recensioni: non usa `RestaurantsContext` né l'auth admin.
  *
- * Architettura della schermata di gioco (`view === 'playing'`):
- * 1. Barra Superiore Turno & Brigata Co-Op (Timer, Fase, Punteggio, Combo, Ruoli e stato live dei 1–4 cuochi)
- * 2. Fascia Bancone Clienti & Comande Attive (Avatar con umore dinamico, timer pazienza, note SENZA/EXTRA,
- *    stato preparazione del tagliere associato e consegna rapida quando il panino è pronto)
- * 3. Area Operativa Cucina a 3 Postazioni Distinte:
- *    - Postazione A: Piastra in Ghisa (4 fuochi con pre-allarme bruciatura + Scarta) & Vassoio Caldo condiviso
- *    - Postazione B: Taglieri di Assemblaggio (Banco 1 / Banco 2) con Checklist passo-passo,
- *      rilevamento immediato errori (`SandwichStackSvg`) e pulsante primario di Consegna
- *    - Postazione C: Dispensa Napoletana con 21 illustrazioni dedicate e badge contestuali (`★ Serve`, `✓ Messo`, `⛔ Evita`)
+ * Direzione artistica 2.5D — Paninoteca Napoletana Contemporanea:
+ * - Ingresso / Lobby (`view === 'menu' | 'lobby'`): Ambientata all'ingresso del locale
+ *   (`lobby_paninoteca_bg.jpg`) con lavagna ricette illustrate in 2.5D (`RecipePlateSvg`),
+ *   4 cuochi a mezzo busto (`Gennaro`, `Chiara`, `Tano`, `Sofia`) e creazione/accesso rapido con Party Code.
+ * - Scena di Gioco (`view === 'playing'`): Un unico spazio cucina continuo e immersivo:
+ *   1. HUD Superiore Compatto su architrave in legno scuro (Timer, Fase, Punteggio, Combo, Party Code,
+ *      4 cuochi di brigata con stato connessione e cambio ruolo rapido).
+ *   2. Palcoscenico 2.5D (`KitchenPhaserCanvas` 1280×510 + Comande Appese al Pass):
+ *      Sala con scorcio sul vicolo napoletano (`sala_vicolo_bg.jpg`), clienti espressivi al bancone,
+ *      ticket illustrati vicino a ciascun cliente, piastra a 4 fuochi, taglieri con panino che cresce
+ *      visivamente e dispensa sul banco.
+ *   3. Bancone Operativo Tattile Integrato (Ghisa per la Piastra, Legno d'ulivo per i Taglieri,
+ *      Vaschette Gastronorm per la Dispensa) progettato per desktop (con shortcut `[1-6]`, `[Q W E R]`,
+ *      `Backspace`, `Ctrl+Enter`) e mobile portrait/landscape (target ≥ 48px).
  */
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -34,6 +39,7 @@ import {
 } from '../game/data/ingredients.js';
 import { RECIPES } from '../game/data/recipes.js';
 import { CUSTOMER_ARCHETYPES } from '../game/data/archetypes.js';
+import { GAME_ART_MANIFEST } from '../game/data/artManifest.js';
 import {
   applyPlayerAction,
   getGrillSlotStatus,
@@ -47,6 +53,7 @@ import {
   GameUiIcon,
   GrillBurnerSvg,
   IngredientIconSvg,
+  RecipePlateSvg,
   SandwichStackSvg,
 } from '../game/components/GameArt.jsx';
 import {
@@ -390,7 +397,7 @@ export default function GamePage() {
       applyServerSnapshot(res.snapshot);
       setNowTickMs(Date.now() + (res.snapshot.serverNowMs - Date.now()));
       playGameSound('serve_ok');
-      showNotice('Saracinesca alzata! Guardate le comande in alto e coordinatevi!');
+      showNotice('Saracinesca alzata! Guardate le comande al bancone e coordinatevi!');
     } catch (err) {
       setNetState('connected');
       setErrorBanner(err.message || 'Impossibile avviare la partita.');
@@ -582,7 +589,6 @@ export default function GamePage() {
   );
 
   // Calcola quante proteine da griglia servono in questo momento tra tutti i ticket attivi
-  // (al netto di quelle già nei panini, nel vassoio caldo o già sulla piastra)
   const grillDemandByIngredient = useMemo(() => {
     const demand = {};
     for (const gIng of GRILLABLE_INGREDIENTS) {
@@ -615,8 +621,6 @@ export default function GamePage() {
     return demand;
   }, [activeTickets, prepBoards, snapshot?.game?.cookedTray, snapshot?.game?.grillSlots, effectiveNowMs]);
 
-  // Ingredienti della dispensa (escludiamo le 4 proteine crude che hanno già la loro postazione Piastra dedicata,
-  // ma se una proteina è PRONTA sulla piastra o nel Vassoio Caldo mostriamo anche l'azione rapida se in vista "Tutti")
   const pantryIngredients = useMemo(() => {
     const nonGrill = INGREDIENTS.filter((i) => !i.requiresGrill);
     if (stationTab === 'all') return nonGrill;
@@ -639,18 +643,18 @@ export default function GamePage() {
   };
 
   return (
-    <div className="min-h-dvh bg-cream text-brown overflow-x-hidden flex flex-col">
-      {/* Top Navbar del Gioco */}
-      <header className="sticky top-0 z-30 border-b border-brown/12 bg-cream-soft/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-content items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
-          <div className="flex items-center gap-3 min-w-0">
+    <div className="min-h-dvh bg-[#23150E] text-brown overflow-x-hidden flex flex-col">
+      {/* Top Navbar del Gioco (Insegna in legno bruciato, rame e maiolica) */}
+      <header className="sticky top-0 z-30 border-b-2 border-[#5C341D] bg-[#2D1B12]/95 text-cream backdrop-blur-sm">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3 px-3 py-2 sm:px-5">
+          <div className="flex items-center gap-2.5 min-w-0">
             <Link
               to="/"
-              className="btn btn-secondary btn-sm press shrink-0"
+              className="btn btn-sm press shrink-0 border border-[#8C583A] bg-[#3E2519] text-cream hover:bg-[#523222]"
               aria-label="Torna a Gambero Moscio - Recensioni Locali"
             >
-              <GameUiIcon name="arrow-left" size={18} />
-              <span className="hidden sm:inline">Torna a Gambero Moscio</span>
+              <GameUiIcon name="arrow-left" size={17} />
+              <span className="hidden sm:inline">Gambero Moscio</span>
               <span className="sm:hidden">Home</span>
             </Link>
             <div className="flex items-center gap-2.5 min-w-0">
@@ -661,10 +665,10 @@ export default function GamePage() {
                 className="h-8 w-8 shrink-0 object-contain"
               />
               <div className="min-w-0">
-                <h1 className="font-display text-base sm:text-lg font-bold leading-tight truncate">
+                <h1 className="font-display text-base sm:text-lg font-bold leading-tight text-cream truncate">
                   Il Banco del Gambero
                 </h1>
-                <p className="text-xs text-brown-soft truncate">
+                <p className="text-[11px] text-[#E6C9A8] truncate">
                   Paninoteca cooperativa napoletana · 1–4 giocatori
                 </p>
               </div>
@@ -676,26 +680,26 @@ export default function GamePage() {
               <span
                 role="status"
                 aria-live="polite"
-                className={`inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1 text-xs font-semibold border ${
+                className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold border ${
                   netState === 'connected'
-                    ? 'bg-green/12 text-green-deep border-green/30'
+                    ? 'bg-[#2A4723] text-[#C5F2A7] border-[#5F8F3A]'
                     : netState === 'reconnecting'
-                      ? 'bg-rating/20 text-brown border-rating/40'
-                      : 'bg-cream text-brown-soft border-brown/15'
+                      ? 'bg-rating/25 text-cream border-rating'
+                      : 'bg-[#3E2519] text-[#E6C9A8] border-[#8C583A]'
                 }`}
               >
                 <span
                   className={`h-2 w-2 rounded-full ${
                     netState === 'connected'
-                      ? 'bg-green'
+                      ? 'bg-[#8AE856]'
                       : netState === 'reconnecting'
                         ? 'bg-rating'
-                        : 'bg-brown-soft'
+                        : 'bg-[#E6C9A8]'
                   }`}
                 />
                 <span>
                   {netState === 'connected'
-                    ? `Codice ${snapshot?.code || ''}`
+                    ? `Stanza ${snapshot?.code || ''}`
                     : netState === 'reconnecting'
                       ? 'Riconnessione…'
                       : 'Sincronizzazione…'}
@@ -706,7 +710,7 @@ export default function GamePage() {
             <button
               type="button"
               onClick={() => setShowGuideModal((v) => !v)}
-              className="btn btn-secondary btn-sm press"
+              className="btn btn-sm press border border-[#8C583A] bg-[#3E2519] text-cream hover:bg-[#523222]"
               aria-expanded={showGuideModal}
             >
               <span>Ricettario</span>
@@ -718,7 +722,7 @@ export default function GamePage() {
               aria-pressed={muted}
               aria-label={muted ? 'Riattiva effetti sonori' : 'Disattiva effetti sonori'}
               title={muted ? 'Audio disattivato' : 'Audio attivo'}
-              className="btn btn-secondary btn-sm press min-w-[44px] px-2.5"
+              className="btn btn-sm press min-w-[44px] px-2.5 border border-[#8C583A] bg-[#3E2519] text-cream hover:bg-[#523222]"
             >
               <GameUiIcon name={muted ? 'volume-off' : 'volume-on'} size={18} />
               <span className="sr-only">{muted ? 'Audio muto' : 'Audio attivo'}</span>
@@ -728,17 +732,17 @@ export default function GamePage() {
       </header>
 
       {/* Banner Errori / Riconnessione */}
-      <div className="mx-auto w-full max-w-content px-4 pt-2 sm:px-6" aria-live="polite">
+      <div className="mx-auto w-full max-w-[1400px] px-3 pt-2 sm:px-5" aria-live="polite">
         {errorBanner && (
           <div
             role="alert"
-            className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-danger/35 bg-danger/10 px-4 py-3 text-sm font-medium text-danger"
+            className="mb-2.5 flex items-center justify-between gap-3 rounded-xl border border-danger bg-[#4A1814] px-4 py-2.5 text-sm font-semibold text-white"
           >
             <span>{errorBanner}</span>
             <button
               type="button"
               onClick={() => setErrorBanner('')}
-              className="btn btn-sm min-h-[36px] px-3 text-xs font-bold underline"
+              className="btn btn-sm min-h-[34px] px-3 text-xs font-bold underline text-white"
             >
               Chiudi
             </button>
@@ -748,567 +752,649 @@ export default function GamePage() {
         {netState === 'reconnecting' && (
           <div
             role="alert"
-            className="mb-3 rounded-xl border border-rating/50 bg-rating/15 px-4 py-2.5 text-sm font-semibold text-brown"
+            className="mb-2.5 rounded-xl border border-rating bg-[#4A3214] px-4 py-2 text-sm font-semibold text-cream"
           >
             Connessione instabile: riconnessione allo stato autorevole della cucina in corso…
           </div>
         )}
       </div>
 
-      {/* Contenuto Principale per Stato (Menu / Lobby / Partita / Risultato) */}
-      <main className="mx-auto flex-1 w-full max-w-content px-4 pb-10 pt-1 sm:px-6">
+      {/* Contenuto Principale */}
+      <main className="mx-auto flex-1 w-full max-w-[1400px] px-3 pb-8 pt-1 sm:px-5">
         {/* ===================================================================
-            VISTA 1: MENU PRINCIPALE & PERSONALIZZAZIONE CUOCO + RUOLO
+            VISTA 1: INGRESSO DELLA PANINOTECA (MENU PRINCIPALE + BRIGATA)
            =================================================================== */}
         {view === 'menu' && (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
-            <section
-              aria-labelledby="chef-custom-heading"
-              className="surface p-5 sm:p-6 lg:col-span-7"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-brown/10">
-                <div>
-                  <span className="inline-block rounded-sm bg-terracotta/15 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-terracotta-deep">
-                    Brigata di cucina
+          <div className="space-y-5">
+            {/* Hero Scenografico 2.5D dell'Ingresso al Ristorante */}
+            <div className="relative overflow-hidden rounded-3xl border-2 border-[#7A482A] bg-[#2D1B12] shadow-lg">
+              <img
+                src={GAME_ART_MANIFEST.scenes.lobby_paninoteca_bg}
+                alt="Ingresso illustrato de Il Banco del Gambero con piastra in ghisa, maioliche di Vietri e cesti di pane"
+                className="h-52 sm:h-64 w-full object-cover object-center opacity-55"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#1E110B]/95 via-[#2B180F]/80 to-[#1E110B]/55" />
+              <div className="absolute inset-0 flex flex-col justify-between p-5 sm:p-7">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-terracotta/60 bg-[#3B2115]/90 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-[#FFB48A]">
+                    <GameUiIcon name="flame" size={14} />
+                    <span>Cucina Cooperativa in Tempo Reale · 1–4 Cuochi</span>
                   </span>
-                  <h2 id="chef-custom-heading" className="mt-1 font-display text-2xl sm:text-3xl font-bold">
-                    Scegli il tuo cuoco e il ruolo
-                  </h2>
-                  <p className="mt-1 text-sm text-brown-soft">
-                    Nessun account richiesto. Scegli nome, divisa e il ruolo che preferisci tenere al Banco.
-                  </p>
+                  <span className="rounded-full border border-[#8C583A] bg-[#2B1911]/90 px-3 py-1 text-xs font-bold text-[#F5DEC2]">
+                    Turno da 165s · 8 Ricette Napoletane
+                  </span>
                 </div>
-                <div className="flex items-center gap-3 self-start sm:self-center bg-cream rounded-2xl p-3 border border-brown/10">
-                  <ChefAvatarSvg avatar={avatar} size={72} showRoleBadge />
-                  <div className="pr-2">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-brown-soft">
-                      {getBrigadeRole(avatar.role).label}
-                    </p>
-                    <p className="font-display text-lg font-bold text-brown">
-                      {nickname.trim() || 'Cuoco Ospite'}
+
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                  <div className="max-w-xl">
+                    <h2 className="font-display text-2xl sm:text-4xl font-bold text-cream drop-shadow-sm">
+                      Benvenuti a Il Banco del Gambero
+                    </h2>
+                    <p className="mt-1 text-sm sm:text-base text-[#F2DEC4]">
+                      Indossa il grembiule, scalda la piastra in ghisa e servi cuzzetielli fumanti,
+                      salsiccia e friarielli insieme alla tua brigata.
                     </p>
                   </div>
-                </div>
-              </div>
 
-              {/* Campo Nickname */}
-              <div className="mt-5">
-                <label htmlFor="player-nickname" className="block text-sm font-bold text-brown mb-1.5">
-                  Il tuo nickname al bancone (2–16 caratteri)
-                </label>
-                <input
-                  id="player-nickname"
-                  type="text"
-                  maxLength={16}
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  placeholder="Es. Gennaro, Chiara, Mastro…"
-                  className="field-control text-base font-semibold"
-                />
-              </div>
-
-              {/* Scelta Ruolo Operativo di Brigata */}
-              <div className="mt-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-brown-soft mb-2">
-                  Ruolo preferito in cucina (modificabile anche in partita)
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {BRIGADE_ROLES.map((role) => {
-                    const selected = avatar.role === role.id;
-                    return (
-                      <button
-                        key={role.id}
-                        type="button"
-                        onClick={() => setAvatar((a) => ({ ...a, role: role.id }))}
-                        aria-pressed={selected}
-                        className={`press rounded-xl border p-3 text-left transition ${
-                          selected
-                            ? 'border-terracotta bg-terracotta/10 shadow-xs'
-                            : 'border-brown/15 bg-white hover:bg-cream/60'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-display text-sm font-bold text-brown">
-                            {role.label}
-                          </span>
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${role.badgeClass}`}>
-                            {role.shortLabel}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-xs text-brown-soft">{role.description}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Preset Archetipo Cuoco */}
-              <div className="mt-5">
-                <p className="text-xs font-bold uppercase tracking-wider text-brown-soft mb-2">
-                  Preset Personaggio
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {CHEF_PERSONAS.map((persona) => {
-                    const selected = avatar.chefId === persona.id;
-                    return (
-                      <button
-                        key={persona.id}
-                        type="button"
-                        onClick={() =>
-                          setAvatar(
-                            normalizePlayerAvatar({
-                              ...persona.defaultAvatar,
-                              chefId: persona.id,
-                            }),
-                          )
-                        }
-                        aria-pressed={selected}
-                        className={`press flex items-center gap-3 rounded-xl border p-3 text-left min-h-[56px] ${
-                          selected
-                            ? 'border-terracotta bg-terracotta/10 shadow-xs'
-                            : 'border-brown/15 bg-white hover:bg-cream/60'
-                        }`}
-                      >
-                        <ChefAvatarSvg
-                          avatar={{ ...persona.defaultAvatar, chefId: persona.id }}
-                          size={44}
-                        />
-                        <div className="min-w-0">
-                          <p className="font-display text-sm font-bold text-brown truncate">
-                            {persona.name}
-                          </p>
-                          <p className="text-xs text-brown-soft truncate">{persona.tagline}</p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Personalizzazione Dettagliata */}
-              <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-brown/10">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-brown-soft mb-1.5">
-                    Carnagione
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {SKIN_TONES.map((tone) => (
-                      <button
-                        key={tone.id}
-                        type="button"
-                        onClick={() => setAvatar((a) => ({ ...a, skinTone: tone.id }))}
-                        aria-label={`Carnagione ${tone.label}`}
-                        aria-pressed={avatar.skinTone === tone.id}
-                        className={`press h-11 w-11 rounded-xl border-2 flex items-center justify-center ${
-                          avatar.skinTone === tone.id
-                            ? 'border-terracotta ring-2 ring-terracotta/30'
-                            : 'border-brown/20'
-                        }`}
-                        style={{ backgroundColor: tone.hex }}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-brown-soft mb-1.5">
-                    Colore grembiule
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {APRON_COLORS.map((apron) => (
-                      <button
-                        key={apron.id}
-                        type="button"
-                        onClick={() => setAvatar((a) => ({ ...a, apronColor: apron.id }))}
-                        aria-label={`Grembiule ${apron.label}`}
-                        aria-pressed={avatar.apronColor === apron.id}
-                        className={`press h-11 w-11 rounded-xl border-2 flex items-center justify-center ${
-                          avatar.apronColor === apron.id
-                            ? 'border-brown ring-2 ring-terracotta/40'
-                            : 'border-brown/20'
-                        }`}
-                        style={{ backgroundColor: apron.hex }}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="select-hair-style" className="block text-xs font-bold uppercase tracking-wide text-brown-soft mb-1.5">
-                    Acconciatura
-                  </label>
-                  <select
-                    id="select-hair-style"
-                    value={avatar.hairStyle}
-                    onChange={(e) => setAvatar((a) => ({ ...a, hairStyle: e.target.value }))}
-                    className="field-control text-sm font-medium"
-                  >
-                    {HAIR_STYLES.map((h) => (
-                      <option key={h.id} value={h.id}>
-                        {h.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="select-hair-color" className="block text-xs font-bold uppercase tracking-wide text-brown-soft mb-1.5">
-                    Colore capelli
-                  </label>
-                  <select
-                    id="select-hair-color"
-                    value={avatar.hairColor}
-                    onChange={(e) => setAvatar((a) => ({ ...a, hairColor: e.target.value }))}
-                    className="field-control text-sm font-medium"
-                  >
-                    {HAIR_COLORS.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="sm:col-span-2">
-                  <p className="text-xs font-bold uppercase tracking-wide text-brown-soft mb-1.5">
-                    Accessorio da banco
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {ACCESSORIES.map((acc) => (
-                      <button
-                        key={acc.id}
-                        type="button"
-                        onClick={() => setAvatar((a) => ({ ...a, accessory: acc.id }))}
-                        aria-pressed={avatar.accessory === acc.id}
-                        className={`btn btn-sm press ${
-                          avatar.accessory === acc.id ? 'btn-primary' : 'btn-secondary'
-                        }`}
-                      >
-                        {acc.label}
-                      </button>
+                  {/* Vetrina Piatti del Giorno sul Bancone */}
+                  <div className="hidden lg:flex items-center gap-2 rounded-2xl border border-[#8C583A]/70 bg-[#26160E]/90 px-3.5 py-2 backdrop-blur-xs">
+                    {RECIPES.slice(0, 4).map((r) => (
+                      <div key={r.id} className="flex flex-col items-center px-1.5">
+                        <RecipePlateSvg recipeId={r.id} size={56} />
+                        <span className="text-[10px] font-bold text-[#F5DEC2] max-w-[74px] truncate">
+                          {r.name}
+                        </span>
+                      </div>
                     ))}
                   </div>
                 </div>
               </div>
-            </section>
+            </div>
 
-            {/* Colonna Destra: Crea Lobby / Unisciti con Party Code */}
-            <section
-              aria-labelledby="lobby-actions-heading"
-              className="surface p-5 sm:p-6 lg:col-span-5 flex flex-col gap-5"
-            >
-              <div>
-                <span className="inline-block rounded-sm bg-green/15 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-green-deep">
-                  Cooperativa 1–4 Giocatori
-                </span>
-                <h2 id="lobby-actions-heading" className="mt-1 font-display text-2xl font-bold">
-                  Apri o raggiungi il Banco
-                </h2>
-                <p className="mt-1 text-sm text-brown-soft">
-                  Gioca da solo o invita fino a 3 amici condividendo il codice partita di 6 caratteri.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-brown/12 bg-cream/60 p-4">
-                <h3 className="font-display text-lg font-bold">Nuova brigata</h3>
-                <p className="mt-1 text-xs text-brown-soft">
-                  Genera subito un codice stanza e alza la saracinesca quando siete pronti.
-                </p>
-                <button
-                  type="button"
-                  disabled={netState === 'loading'}
-                  onClick={handleCreateLobby}
-                  className="btn btn-primary w-full mt-3"
-                >
-                  {netState === 'loading' ? 'Apertura in corso…' : 'Crea lobby'}
-                </button>
-              </div>
-
-              <form
-                onSubmit={handleJoinLobby}
-                className="rounded-2xl border border-brown/12 bg-cream/60 p-4"
+            {/* Griglia Ingresso: A Destra/Alto Azione Immediata (Tavolo Accoglienza), A Sinistra Vestiario Brigata */}
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 items-start">
+              {/* Colonna Accoglienza & Partita (Priorità CTA) */}
+              <section
+                aria-labelledby="lobby-actions-heading"
+                className="rounded-3xl border-2 border-[#7A482A] bg-cream-soft p-5 sm:p-6 lg:col-span-5 flex flex-col gap-4 shadow-md order-1 lg:order-2"
               >
-                <h3 className="font-display text-lg font-bold">Unisciti con codice</h3>
-                <label htmlFor="party-code-input" className="block mt-1 text-xs text-brown-soft">
-                  Inserisci il Party Code di 6 caratteri comunicato dall’host:
-                </label>
-                <div className="mt-3 flex flex-col sm:flex-row gap-2.5">
+                <div className="border-b border-brown/12 pb-3.5">
+                  <span className="inline-block rounded-sm bg-terracotta/15 px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wider text-terracotta-deep">
+                    Ingresso Ristorante
+                  </span>
+                  <h2 id="lobby-actions-heading" className="mt-1 font-display text-2xl font-bold text-brown">
+                    Apri o raggiungi il Banco
+                  </h2>
+                  <p className="mt-0.5 text-xs text-brown-soft">
+                    Inserisci il tuo nome da cuoco e apri subito la cucina o entra col codice di 6 lettere.
+                  </p>
+                </div>
+
+                {/* Campo Nickname sempre in primo piano vicino alla CTA */}
+                <div>
+                  <label htmlFor="player-nickname" className="block text-sm font-bold text-brown mb-1">
+                    Il tuo nickname al bancone (2–16 caratteri)
+                  </label>
                   <input
-                    id="party-code-input"
+                    id="player-nickname"
                     type="text"
-                    maxLength={6}
-                    value={joinCodeInput}
-                    onChange={(e) =>
-                      setJoinCodeInput(
-                        e.target.value.toUpperCase().replace(/[^23456789ABCDEFGHJKLMNPQRSTUVWXYZ]/g, ''),
-                      )
-                    }
-                    placeholder="ES. GMB42K"
-                    className="field-control text-center font-mono text-lg font-bold uppercase tracking-widest"
+                    maxLength={16}
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    placeholder="Es. Gennaro, Chiara, Mastro…"
+                    className="field-control text-base font-bold"
                   />
+                </div>
+
+                {/* CTA Primaria: Crea Lobby */}
+                <div className="rounded-2xl border-2 border-terracotta/40 bg-gradient-to-b from-white to-cream p-4 shadow-xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <h3 className="font-display text-lg font-bold text-brown">
+                        Nuova brigata (1–4 cuochi)
+                      </h3>
+                      <p className="text-xs text-brown-soft">
+                        Apri la paninoteca e ottieni il Party Code da inviare agli amici.
+                      </p>
+                    </div>
+                  </div>
                   <button
-                    type="submit"
+                    type="button"
+                    data-testid="create-lobby-btn"
                     disabled={netState === 'loading'}
-                    className="btn btn-outline shrink-0"
+                    onClick={handleCreateLobby}
+                    className="btn btn-primary w-full mt-3 text-base font-extrabold shadow-sm"
                   >
-                    Entra in lobby
+                    <GameUiIcon name="flame" size={18} />
+                    <span>{netState === 'loading' ? 'Apertura in corso…' : 'Crea lobby'}</span>
                   </button>
                 </div>
-              </form>
 
-              {/* Guida visiva in 3 passi */}
-              <div className="rounded-2xl border border-brown/10 bg-white/90 p-4 text-xs text-brown-soft space-y-2.5">
-                <p className="font-bold text-brown text-sm">Come si gioca in 3 mosse (turno da 165s):</p>
-                <div className="flex items-start gap-2.5">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-terracotta text-[11px] font-extrabold text-white">
-                    1
-                  </span>
+                {/* Form Secondario: Entra con Party Code */}
+                <form
+                  onSubmit={handleJoinLobby}
+                  className="rounded-2xl border border-brown/15 bg-cream/70 p-4"
+                >
+                  <h3 className="font-display text-base font-bold text-brown">
+                    Unisciti a una cucina aperta
+                  </h3>
+                  <label htmlFor="party-code-input" className="block mt-0.5 text-xs text-brown-soft">
+                    Hai ricevuto il Party Code di 6 caratteri dal Capo Brigata?
+                  </label>
+                  <div className="mt-2.5 flex flex-col sm:flex-row gap-2">
+                    <input
+                      id="party-code-input"
+                      type="text"
+                      maxLength={6}
+                      value={joinCodeInput}
+                      onChange={(e) =>
+                        setJoinCodeInput(
+                          e.target.value
+                            .toUpperCase()
+                            .replace(/[^23456789ABCDEFGHJKLMNPQRSTUVWXYZ]/g, ''),
+                        )
+                      }
+                      placeholder="ES. GMB42K"
+                      className="field-control text-center font-mono text-lg font-extrabold uppercase tracking-widest"
+                    />
+                    <button
+                      type="submit"
+                      disabled={netState === 'loading'}
+                      className="btn btn-outline shrink-0 font-bold"
+                    >
+                      Entra in lobby
+                    </button>
+                  </div>
+                </form>
+
+                {/* Lavagna Rapida delle 3 Regole d'Oro */}
+                <div className="rounded-2xl border border-[#5C341D] bg-[#2B1911] p-4 text-xs text-[#F2DEC4] space-y-2">
+                  <p className="font-display text-sm font-bold text-cream">
+                    Lavagna di Brigata — Come funziona il servizio:
+                  </p>
                   <p>
-                    <strong>Guarda le Comande in alto:</strong> ogni cliente chiede un panino (con eventuali note{' '}
-                    <strong className="text-danger">SENZA</strong> o <strong className="text-terracotta-deep">EXTRA</strong>).
+                    <strong className="text-[#FFB48A]">1. Scegli la Comanda:</strong> ogni cliente al
+                    bancone ha il suo fumetto con il piatto illustrato e le note{' '}
+                    <span className="underline">SENZA</span> o <span className="underline">EXTRA</span>.
+                  </p>
+                  <p>
+                    <strong className="text-[#FFB48A]">2. Piastra a 4 Fuochi:</strong> cuoci Manzo,
+                    Pollo, Salsiccia e Burger Veg; spostali sul tagliere o nel{' '}
+                    <strong>Vassoio Caldo</strong> prima che brucino.
+                  </p>
+                  <p>
+                    <strong className="text-[#C5F2A7]">3. Assembla e Suona il Campanello:</strong> componi
+                    gli strati sul Banco 1 o Banco 2 e premi <strong>Consegna</strong>!
                   </p>
                 </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-terracotta text-[11px] font-extrabold text-white">
-                    2
-                  </span>
-                  <p>
-                    <strong>Cuoci sulla Piastra (se serve 🔥):</strong> Manzo, Pollo, Salsiccia e Burger Veg vanno cotti nei 4 fuochi e spostati sul tagliere o nel <strong>Vassoio Caldo</strong> prima che brucino.
-                  </p>
+              </section>
+
+              {/* Colonna Sinistra: Scelta Cuoco della Brigata, Ruolo e Divisa */}
+              <section
+                aria-labelledby="chef-custom-heading"
+                className="rounded-3xl border-2 border-[#7A482A] bg-cream-soft p-5 sm:p-6 lg:col-span-7 shadow-md order-2 lg:order-1"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brown/12">
+                  <div>
+                    <span className="inline-block rounded-sm bg-terracotta/15 px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wider text-terracotta-deep">
+                      Spogliatoio della Brigata
+                    </span>
+                    <h2 id="chef-custom-heading" className="mt-1 font-display text-2xl font-bold text-brown">
+                      Scegli il tuo cuoco e il ruolo al banco
+                    </h2>
+                  </div>
+
+                  {/* Anteprima live del Cuoco a mezzo busto */}
+                  <div className="flex items-center gap-3 rounded-2xl border-2 border-terracotta/35 bg-white px-4 py-2.5 shadow-2xs">
+                    <ChefAvatarSvg avatar={avatar} size={74} showRoleBadge />
+                    <div>
+                      <p className="text-[11px] font-extrabold uppercase tracking-wider text-terracotta-deep">
+                        {getBrigadeRole(avatar.role).label}
+                      </p>
+                      <p className="font-display text-lg font-bold text-brown">
+                        {nickname.trim() || 'Cuoco Ospite'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-green text-[11px] font-extrabold text-white">
-                    3
-                  </span>
-                  <p>
-                    <strong>Assembla e Consegna:</strong> tocca gli ingredienti evidenziati con <strong>★ Serve</strong>. Quando la checklist è tutta verde, premi <strong>Consegna</strong>!
+
+                {/* I 4 Protagonisti della Brigata (Gennaro, Chiara, Tano, Sofia) */}
+                <div className="mt-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-brown-soft mb-2">
+                    I 4 Maestri del Banco (tocca un personaggio o personalizzalo sotto):
                   </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {CHEF_PERSONAS.map((persona) => {
+                      const selected = avatar.chefId === persona.id;
+                      const roleInfo = getBrigadeRole(persona.defaultAvatar.role);
+                      return (
+                        <button
+                          key={persona.id}
+                          type="button"
+                          onClick={() =>
+                            setAvatar(
+                              normalizePlayerAvatar({
+                                ...persona.defaultAvatar,
+                                chefId: persona.id,
+                              }),
+                            )
+                          }
+                          aria-pressed={selected}
+                          className={`press flex items-center gap-3 rounded-2xl border-2 p-3 text-left min-h-[72px] transition ${
+                            selected
+                              ? 'border-terracotta bg-white shadow-xs ring-2 ring-terracotta/20'
+                              : 'border-brown/15 bg-cream/60 hover:bg-white'
+                          }`}
+                        >
+                          <ChefAvatarSvg
+                            avatar={{ ...persona.defaultAvatar, chefId: persona.id }}
+                            size={58}
+                            showRoleBadge
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-1">
+                              <p className="font-display text-sm font-bold text-brown truncate">
+                                {persona.name}
+                              </p>
+                              <span className="text-[10px] font-bold text-brown-soft">
+                                {roleInfo.shortLabel}
+                              </span>
+                            </div>
+                            <p className="text-xs text-brown-soft line-clamp-2">{persona.tagline}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            </section>
+
+                {/* Scelta Ruolo Operativo */}
+                <div className="mt-5">
+                  <p className="text-xs font-bold uppercase tracking-wider text-brown-soft mb-2">
+                    Postazione operativa preferita (cambiabile anche durante il turno):
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {BRIGADE_ROLES.map((role) => {
+                      const selected = avatar.role === role.id;
+                      return (
+                        <button
+                          key={role.id}
+                          type="button"
+                          onClick={() => setAvatar((a) => ({ ...a, role: role.id }))}
+                          aria-pressed={selected}
+                          className={`press rounded-xl border-2 p-3 text-left transition ${
+                            selected
+                              ? 'border-terracotta bg-white shadow-2xs'
+                              : 'border-brown/15 bg-cream/50 hover:bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-display text-sm font-bold text-brown">
+                              {role.label}
+                            </span>
+                            <span
+                              className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold ${role.badgeClass}`}
+                            >
+                              {role.shortLabel}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs text-brown-soft">{role.description}</p>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Personalizzazione Divisa, Capelli, Carnagione e Accessori */}
+                <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-brown/12">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wide text-brown-soft mb-1.5">
+                      Carnagione
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {SKIN_TONES.map((tone) => (
+                        <button
+                          key={tone.id}
+                          type="button"
+                          onClick={() => setAvatar((a) => ({ ...a, skinTone: tone.id }))}
+                          aria-label={`Carnagione ${tone.label}`}
+                          aria-pressed={avatar.skinTone === tone.id}
+                          className={`press h-11 w-11 rounded-xl border-2 ${
+                            avatar.skinTone === tone.id
+                              ? 'border-terracotta ring-2 ring-terracotta/30'
+                              : 'border-brown/25'
+                          }`}
+                          style={{ backgroundColor: tone.hex }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-wide text-brown-soft mb-1.5">
+                      Grembiule da banco
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {APRON_COLORS.map((apron) => (
+                        <button
+                          key={apron.id}
+                          type="button"
+                          onClick={() => setAvatar((a) => ({ ...a, apronColor: apron.id }))}
+                          aria-label={`Grembiule ${apron.label}`}
+                          aria-pressed={avatar.apronColor === apron.id}
+                          className={`press h-11 w-11 rounded-xl border-2 ${
+                            avatar.apronColor === apron.id
+                              ? 'border-brown ring-2 ring-terracotta/40'
+                              : 'border-brown/25'
+                          }`}
+                          style={{ backgroundColor: apron.hex }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="select-hair-style"
+                      className="block text-xs font-bold uppercase tracking-wide text-brown-soft mb-1.5"
+                    >
+                      Acconciatura
+                    </label>
+                    <select
+                      id="select-hair-style"
+                      value={avatar.hairStyle}
+                      onChange={(e) => setAvatar((a) => ({ ...a, hairStyle: e.target.value }))}
+                      className="field-control text-sm font-semibold"
+                    >
+                      {HAIR_STYLES.map((h) => (
+                        <option key={h.id} value={h.id}>
+                          {h.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="select-hair-color"
+                      className="block text-xs font-bold uppercase tracking-wide text-brown-soft mb-1.5"
+                    >
+                      Colore capelli
+                    </label>
+                    <select
+                      id="select-hair-color"
+                      value={avatar.hairColor}
+                      onChange={(e) => setAvatar((a) => ({ ...a, hairColor: e.target.value }))}
+                      className="field-control text-sm font-semibold"
+                    >
+                      {HAIR_COLORS.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <p className="text-xs font-bold uppercase tracking-wide text-brown-soft mb-1.5">
+                      Segno distintivo in cucina
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {ACCESSORIES.map((acc) => (
+                        <button
+                          key={acc.id}
+                          type="button"
+                          onClick={() => setAvatar((a) => ({ ...a, accessory: acc.id }))}
+                          aria-pressed={avatar.accessory === acc.id}
+                          className={`btn btn-sm press ${
+                            avatar.accessory === acc.id ? 'btn-primary' : 'btn-secondary'
+                          }`}
+                        >
+                          {acc.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
           </div>
         )}
 
         {/* ===================================================================
-            VISTA 2: SALA D'ATTESA LOBBY
+            VISTA 2: SALA PRE-SERVIZIO (LOBBY COOPERATIVA 1–4 CUOCHI)
            =================================================================== */}
         {view === 'lobby' && snapshot && (
           <section
             aria-labelledby="lobby-room-heading"
-            className="surface p-5 sm:p-8 max-w-4xl mx-auto"
+            className="overflow-hidden rounded-3xl border-2 border-[#7A482A] bg-cream-soft shadow-lg max-w-5xl mx-auto"
           >
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-brown/12">
-              <div>
-                <span className="inline-flex items-center gap-1.5 rounded-sm bg-terracotta/15 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-terracotta-deep">
-                  <GameUiIcon name="users" size={14} />
-                  <span>Brigata pronta ({snapshot.players.length}/4 cuochi)</span>
-                </span>
-                <h2 id="lobby-room-heading" className="mt-1.5 font-display text-2xl sm:text-3xl font-bold">
-                  Sala pre-servizio · Il Banco del Gambero
-                </h2>
-                <p className="mt-1 text-sm text-brown-soft">
-                  Coordinate i ruoli della brigata (Piastra, Banco 1, Banco 2, Jolly) prima di alzare la saracinesca.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3 rounded-2xl border-2 border-terracotta/40 bg-cream px-4 py-3 self-start md:self-center">
+            {/* Header illustrato della Lobby */}
+            <div className="relative border-b-2 border-[#7A482A] bg-[#2B1911] p-5 sm:p-7 text-cream">
+              <img
+                src={GAME_ART_MANIFEST.scenes.lobby_paninoteca_bg}
+                alt=""
+                aria-hidden="true"
+                className="absolute inset-0 h-full w-full object-cover opacity-35"
+              />
+              <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-brown-soft">
-                    Codice Partita
-                  </p>
-                  <p
-                    className="font-mono text-2xl sm:text-3xl font-extrabold tracking-widest text-terracotta-deep"
-                    data-testid="lobby-party-code"
-                  >
-                    {snapshot.code}
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-terracotta px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-white">
+                    <GameUiIcon name="users" size={14} />
+                    <span>Brigata al Bancone ({snapshot.players.length}/4 cuochi)</span>
+                  </span>
+                  <h2 id="lobby-room-heading" className="mt-2 font-display text-2xl sm:text-3xl font-bold !text-[#FFF8EC] drop-shadow-sm">
+                    Sala Pre-Servizio · Il Banco del Gambero
+                  </h2>
+                  <p className="mt-1 text-sm text-[#E8D5B7]">
+                    Assegnatevi Piastra, Banco 1, Banco 2 e Jolly prima di alzare la saracinesca.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleCopyCode}
-                  className="btn btn-secondary btn-sm press"
-                  aria-label="Copia codice partita"
-                >
-                  <GameUiIcon name={copiedCode ? 'check' : 'copy'} size={16} />
-                  <span>{copiedCode ? 'Copiato' : 'Copia'}</span>
-                </button>
+
+                {/* Party Code ben visibile */}
+                <div className="flex items-center gap-3 rounded-2xl border-2 border-terracotta bg-[#1F120C]/95 px-4 py-3 self-start md:self-center shadow-md">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-[#E8D5B7]">
+                      Party Code Stanza
+                    </p>
+                    <p
+                      className="font-mono text-2xl sm:text-3xl font-extrabold tracking-widest text-[#FFB48A]"
+                      data-testid="lobby-party-code"
+                    >
+                      {snapshot.code}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCopyCode}
+                    className="btn btn-secondary btn-sm press"
+                    aria-label="Copia codice partita"
+                  >
+                    <GameUiIcon name={copiedCode ? 'check' : 'copy'} size={16} />
+                    <span>{copiedCode ? 'Copiato' : 'Copia'}</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Selettore rapido del proprio ruolo in Lobby */}
-            <div className="mt-5 rounded-2xl border border-brown/12 bg-cream/60 p-3.5 flex flex-wrap items-center justify-between gap-3">
-              <span className="text-xs font-bold text-brown">
-                Il tuo ruolo nella brigata:
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {BRIGADE_ROLES.map((role) => {
-                  const myRole = mePlayer?.avatar?.role || avatar.role || 'jolly';
-                  const active = myRole === role.id;
+            <div className="p-5 sm:p-7 space-y-5">
+              {/* Selettore rapido del proprio ruolo in Lobby */}
+              <div className="rounded-2xl border border-brown/15 bg-cream p-3.5 flex flex-wrap items-center justify-between gap-3">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-brown">
+                  La tua postazione nella brigata:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {BRIGADE_ROLES.map((role) => {
+                    const myRole = mePlayer?.avatar?.role || avatar.role || 'jolly';
+                    const active = myRole === role.id;
+                    return (
+                      <button
+                        key={role.id}
+                        type="button"
+                        onClick={() => handleChangeMyRole(role.id)}
+                        aria-pressed={active}
+                        className={`rounded-xl px-3 py-1.5 text-xs font-bold min-h-[40px] transition ${
+                          active
+                            ? `${role.badgeClass} shadow-xs`
+                            : 'bg-white border border-brown/15 text-brown hover:bg-cream-soft'
+                        }`}
+                      >
+                        {role.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* I 4 Posti della Brigata al Bancone */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }, (_, idx) => {
+                  const player = snapshot.players[idx];
+                  if (!player) {
+                    return (
+                      <div
+                        key={`empty-${idx}`}
+                        className="rounded-2xl border-2 border-dashed border-brown/20 bg-cream/50 p-5 flex flex-col items-center justify-center text-center min-h-[210px]"
+                      >
+                        <p className="font-display text-base font-bold text-brown-soft">
+                          Postazione Cuoco #{idx + 1}
+                        </p>
+                        <p className="mt-1 text-xs text-brown-soft">
+                          Invita un amico col codice <strong>{snapshot.code}</strong>
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  const isMe = player.id === session?.playerId;
+                  const roleInfo = getBrigadeRole(player.avatar?.role);
                   return (
-                    <button
-                      key={role.id}
-                      type="button"
-                      onClick={() => handleChangeMyRole(role.id)}
-                      aria-pressed={active}
-                      className={`rounded-xl px-3 py-1.5 text-xs font-bold min-h-[38px] transition ${
-                        active
-                          ? `${role.badgeClass} shadow-xs`
-                          : 'bg-white border border-brown/15 text-brown hover:bg-cream'
+                    <div
+                      key={player.id}
+                      className={`rounded-2xl border-2 p-4 flex flex-col items-center text-center min-h-[210px] justify-between ${
+                        isMe
+                          ? 'border-terracotta bg-white shadow-sm'
+                          : 'border-brown/15 bg-cream'
                       }`}
                     >
-                      {role.label}
-                    </button>
+                      <div className="flex w-full items-center justify-between text-xs font-bold">
+                        <span
+                          className={`rounded-md px-2 py-0.5 ${
+                            player.isHost
+                              ? 'bg-terracotta text-white'
+                              : 'bg-brown/10 text-brown'
+                          }`}
+                        >
+                          {player.isHost ? 'Capo Brigata' : `Cuoco #${idx + 1}`}
+                        </span>
+                        <span
+                          className={`inline-flex items-center gap-1 ${
+                            player.isOnline ? 'text-green-deep' : 'text-brown-soft'
+                          }`}
+                        >
+                          <span
+                            className={`h-2 w-2 rounded-full ${
+                              player.isOnline ? 'bg-green' : 'bg-rating'
+                            }`}
+                          />
+                          {player.isOnline ? 'Online' : 'Riconnessione'}
+                        </span>
+                      </div>
+
+                      <div className="my-2 flex flex-col items-center">
+                        <ChefAvatarSvg avatar={player.avatar} size={82} showRoleBadge />
+                        <p className="mt-2.5 font-display text-lg font-bold text-brown">
+                          {player.nickname} {isMe ? '(Tu)' : ''}
+                        </p>
+                        <p className="text-xs font-semibold text-brown-soft">
+                          {roleInfo.label}
+                        </p>
+                      </div>
+
+                      <span
+                        className={`w-full rounded-xl py-1.5 text-xs font-extrabold ${
+                          player.isReady
+                            ? 'bg-green/15 text-green-deep border border-green/35'
+                            : 'bg-rating/20 text-brown border border-rating/45'
+                        }`}
+                      >
+                        {player.isReady ? '✓ Grembiule allacciato' : 'In preparazione…'}
+                      </span>
+                    </div>
                   );
                 })}
               </div>
-            </div>
 
-            {/* Elenco 4 Slot Giocatori */}
-            <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Array.from({ length: 4 }, (_, idx) => {
-                const player = snapshot.players[idx];
-                if (!player) {
-                  return (
-                    <div
-                      key={`empty-${idx}`}
-                      className="rounded-2xl border-2 border-dashed border-brown/15 bg-cream/40 p-5 flex flex-col items-center justify-center text-center min-h-[190px]"
-                    >
-                      <p className="font-display text-base font-bold text-brown-soft">
-                        Posto Cuoco #{idx + 1}
-                      </p>
-                      <p className="mt-1 text-xs text-brown-soft">
-                        Invita un amico col codice <strong>{snapshot.code}</strong>
-                      </p>
-                    </div>
-                  );
-                }
-
-                const isMe = player.id === session?.playerId;
-                const roleInfo = getBrigadeRole(player.avatar?.role);
-                return (
-                  <div
-                    key={player.id}
-                    className={`rounded-2xl border p-4 flex flex-col items-center text-center min-h-[190px] justify-between ${
-                      isMe
-                        ? 'border-terracotta bg-white shadow-sm'
-                        : 'border-brown/15 bg-cream-soft'
-                    }`}
-                  >
-                    <div className="flex w-full items-center justify-between text-xs font-bold">
-                      <span
-                        className={`rounded-sm px-2 py-0.5 ${
-                          player.isHost
-                            ? 'bg-terracotta text-white'
-                            : 'bg-brown/10 text-brown'
-                        }`}
-                      >
-                        {player.isHost ? 'Capo Brigata' : `Cuoco #${idx + 1}`}
-                      </span>
-                      <span
-                        className={`inline-flex items-center gap-1 ${
-                          player.isOnline ? 'text-green-deep' : 'text-brown-soft'
-                        }`}
-                      >
-                        <span
-                          className={`h-2 w-2 rounded-full ${
-                            player.isOnline ? 'bg-green' : 'bg-rating'
-                          }`}
-                        />
-                        {player.isOnline ? 'Online' : 'Riconnessione'}
-                      </span>
-                    </div>
-
-                    <div className="my-2 flex flex-col items-center">
-                      <ChefAvatarSvg avatar={player.avatar} size={68} showRoleBadge />
-                      <p className="mt-3 font-display text-lg font-bold text-brown">
-                        {player.nickname} {isMe ? '(Tu)' : ''}
-                      </p>
-                      <p className="text-[11px] font-semibold text-brown-soft">
-                        {roleInfo.label}
-                      </p>
-                    </div>
-
-                    <span
-                      className={`w-full rounded-xl py-1.5 text-xs font-bold ${
-                        player.isReady
-                          ? 'bg-green/15 text-green-deep border border-green/30'
-                          : 'bg-rating/20 text-brown border border-rating/40'
-                      }`}
-                    >
-                      {player.isReady ? 'Pronto ai fornelli' : 'In preparazione…'}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Azioni Lobby */}
-            <div className="mt-6 pt-5 border-t border-brown/12 flex flex-wrap items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={handleLeaveLobby}
-                className="btn btn-danger-outline"
-              >
-                Esci dalla lobby
-              </button>
-
-              <div className="flex flex-wrap items-center gap-3">
+              {/* Barra CTA della Lobby */}
+              <div className="pt-4 border-t border-brown/12 flex flex-wrap items-center justify-between gap-3">
                 <button
                   type="button"
-                  onClick={handleToggleReady}
-                  className="btn btn-secondary"
+                  onClick={handleLeaveLobby}
+                  className="btn btn-danger-outline"
                 >
-                  {mePlayer?.isReady ? 'Segna: Non pronto' : 'Segna: Pronto!'}
+                  Esci dalla lobby
                 </button>
 
-                {isHost ? (
+                <div className="flex flex-wrap items-center gap-3">
                   <button
                     type="button"
-                    disabled={netState === 'loading'}
-                    onClick={handleStartMatch}
-                    className="btn btn-primary"
-                    data-testid="start-match-btn"
+                    onClick={handleToggleReady}
+                    className="btn btn-secondary"
                   >
-                    <GameUiIcon name="flame" size={18} />
-                    <span>
-                      {snapshot.players.length === 1
-                        ? 'Avvia turno (1 giocatore)'
-                        : `Avvia turno co-op (${snapshot.players.length} giocatori)`}
-                    </span>
+                    {mePlayer?.isReady ? 'Segna: Non pronto' : 'Segna: Pronto!'}
                   </button>
-                ) : (
-                  <p className="text-sm font-semibold text-brown-soft px-2">
-                    In attesa che il Capo Brigata avvii il servizio…
-                  </p>
-                )}
+
+                  {isHost ? (
+                    <button
+                      type="button"
+                      disabled={netState === 'loading'}
+                      onClick={handleStartMatch}
+                      className="btn btn-primary text-base font-extrabold shadow-md"
+                      data-testid="start-match-btn"
+                    >
+                      <GameUiIcon name="flame" size={18} />
+                      <span>
+                        {snapshot.players.length === 1
+                          ? 'Alza la saracinesca (1 giocatore)'
+                          : `Alza la saracinesca (${snapshot.players.length} cuochi)`}
+                      </span>
+                    </button>
+                  ) : (
+                    <p className="text-sm font-semibold text-brown-soft px-2">
+                      In attesa che il Capo Brigata alzi la saracinesca…
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </section>
         )}
 
         {/* ===================================================================
-            VISTA 3: PARTITA IN CORSO — INTERFACCIA RISTORANTE RIPROGETTATA
+            VISTA 3: PARTITA IN CORSO — SCENA UNICA 2.5D PANINOTECA NAPOLETANA
            =================================================================== */}
         {view === 'playing' && snapshot?.game && (
-          <div className="space-y-3.5">
+          <div className="overflow-hidden rounded-3xl border-2 border-[#6E4023] bg-[#26160E] shadow-xl">
             {/* ---------------------------------------------------------------
-                ZONA 0: BARRA SUPERIORE TURNO, PUNTEGGIO & BRIGATA LIVE
+                1. HUD SUPERIORE COMPATTO (Architrave in legno scuro & ottone)
                --------------------------------------------------------------- */}
             <section
-              aria-label="Stato del turno, punteggio e brigata"
-              className="surface p-3 sm:p-3.5 space-y-2.5"
+              aria-label="HUD turno, punteggio e brigata"
+              className="border-b-2 border-[#5C341D] bg-gradient-to-b from-[#331E14] to-[#26160E] px-3 py-2.5 sm:px-4 text-cream"
             >
-              <div className="flex flex-wrap items-center justify-between gap-2.5">
-                <div className="flex items-center gap-2.5 sm:gap-3.5 flex-wrap">
-                  {/* Timer Turno */}
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                {/* Timer + Punteggio + Statistiche sintetiche */}
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                   <div
-                    className={`flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-cream-soft ${
-                      remainingRoundMs <= 25_000 ? 'bg-danger' : 'bg-brown'
+                    className={`flex items-center gap-2 rounded-xl px-3 py-1 border ${
+                      remainingRoundMs <= 25_000
+                        ? 'bg-danger border-white/40 text-white'
+                        : 'bg-[#1A0E09] border-[#8C583A] text-cream'
                     }`}
                   >
-                    <GameUiIcon name="clock" size={18} />
+                    <GameUiIcon name="clock" size={17} />
                     <div>
-                      <p className="text-[10px] uppercase tracking-wider opacity-85 leading-none">
+                      <p className="text-[9px] font-bold uppercase tracking-wider text-[#E6C9A8] leading-none">
                         {currentPhase.label}
                       </p>
                       <p
@@ -1320,56 +1406,59 @@ export default function GamePage() {
                     </div>
                   </div>
 
-                  {/* Punteggio Squadra */}
-                  <div className="rounded-xl border border-brown/15 bg-cream px-3.5 py-1.5">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-brown-soft leading-none">
-                      Punteggio Squadra
+                  <div className="rounded-xl border border-[#8C583A] bg-[#1A0E09] px-3 py-1">
+                    <p className="text-[9px] font-bold uppercase tracking-wider text-[#E6C9A8] leading-none">
+                      Punteggio Brigata
                     </p>
                     <p
-                      className="font-display text-xl sm:text-2xl font-extrabold text-terracotta-deep tabular leading-tight"
+                      className="font-display text-lg sm:text-xl font-extrabold text-[#FFB48A] tabular leading-tight"
                       data-testid="team-score"
                     >
-                      {snapshot.game.score} <span className="text-xs font-sans font-semibold">pt</span>
+                      {snapshot.game.score} <span className="text-xs font-sans">pt</span>
                     </p>
                   </div>
 
-                  {/* Indicatori Serviti / Combo / Errori */}
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="rounded-xl border border-brown/15 bg-white px-2.5 py-1.5 text-xs font-bold">
-                      Serviti: <strong className="tabular text-green-deep">{snapshot.game.stats.ordersServed}</strong>
+                    <span className="rounded-lg border border-[#6E4023] bg-[#362015] px-2.5 py-1 text-xs font-bold text-[#F5DEC2]">
+                      Serviti:{' '}
+                      <strong className="tabular text-[#A9E37B]">
+                        {snapshot.game.stats.ordersServed}
+                      </strong>
                     </span>
                     {snapshot.game.combo >= 2 && (
-                      <span className="rounded-xl bg-rating px-2.5 py-1.5 text-xs font-extrabold text-brown shadow-xs">
+                      <span className="rounded-lg bg-rating px-2.5 py-1 text-xs font-extrabold text-brown">
                         Combo ×{snapshot.game.combo}
                       </span>
                     )}
-                    {(snapshot.game.stats.customersLost > 0 || snapshot.game.stats.burnedCount > 0) && (
-                      <span className="rounded-xl border border-danger/25 bg-danger/10 px-2.5 py-1.5 text-xs font-bold text-danger">
-                        Persi: {snapshot.game.stats.customersLost} · Bruciati: {snapshot.game.stats.burnedCount}
+                    {(snapshot.game.stats.customersLost > 0 ||
+                      snapshot.game.stats.burnedCount > 0) && (
+                      <span className="rounded-lg border border-danger/60 bg-[#4A1814] px-2 py-1 text-xs font-bold text-[#FF9E96]">
+                        Persi: {snapshot.game.stats.customersLost} · Bruciati:{' '}
+                        {snapshot.game.stats.burnedCount}
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Notifica Evento / Azione Corrente + Toggle Panorama */}
-                <div className="flex items-center gap-2 flex-1 min-w-[240px] justify-end">
+                {/* Ticker Evento Live + Toggle Vista Scena */}
+                <div className="flex items-center gap-2 flex-1 min-w-[220px] justify-end">
                   <div
                     role="status"
                     aria-live="polite"
-                    className="flex-1 rounded-xl border border-brown/12 bg-white px-3 py-1.5 text-xs font-semibold text-brown flex items-center justify-between gap-2 min-w-0"
+                    className="flex-1 max-w-md rounded-xl border border-[#6E4023] bg-[#1A0E09]/90 px-3 py-1.5 text-xs font-semibold text-[#F5DEC2] flex items-center justify-between gap-2 min-w-0"
                   >
                     <span className="truncate">
                       {actionToast ||
                         snapshot.game.scoreEvents?.[0]?.message ||
-                        'Scegli una comanda e assembla il panino!'}
+                        'Tocca un cliente o gli ingredienti per preparare il panino!'}
                     </span>
                     {snapshot.game.scoreEvents?.[0]?.delta !== 0 &&
                       snapshot.game.scoreEvents?.[0]?.delta !== undefined && (
                         <span
                           className={`shrink-0 rounded-sm px-1.5 py-0.5 text-[11px] font-extrabold tabular ${
                             snapshot.game.scoreEvents[0].delta > 0
-                              ? 'bg-green/15 text-green-deep'
-                              : 'bg-danger/15 text-danger'
+                              ? 'bg-[#2A4723] text-[#A9E37B]'
+                              : 'bg-[#4A1814] text-[#FF9E96]'
                           }`}
                         >
                           {snapshot.game.scoreEvents[0].delta > 0
@@ -1384,18 +1473,18 @@ export default function GamePage() {
                     type="button"
                     onClick={() => setShowPanorama((v) => !v)}
                     aria-pressed={showPanorama}
-                    className="btn btn-secondary btn-sm shrink-0 text-xs"
+                    className="btn btn-sm shrink-0 text-xs border border-[#8C583A] bg-[#3E2519] text-cream hover:bg-[#523222] min-h-[38px] px-2.5"
                   >
-                    {showPanorama ? 'Nascondi vista sala' : 'Mostra vista sala'}
+                    {showPanorama ? 'Compatta scena' : 'Espandi scena 2.5D'}
                   </button>
                 </div>
               </div>
 
-              {/* Barra Brigata Co-Op (mostra ruolo e stato di ciascun giocatore + switch rapido ruolo) */}
-              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-brown/10">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-brown-soft">
-                    Brigata in cucina ({snapshot.players.length}/4):
+              {/* Barra Compatta dei 4 Cuochi in Cucina + Switch Ruolo */}
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-[#4D2C1A]">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#E6C9A8] mr-1">
+                    Brigata ({snapshot.players.length}/4):
                   </span>
                   {snapshot.players.map((p) => {
                     const isMe = p.id === session?.playerId;
@@ -1403,37 +1492,35 @@ export default function GamePage() {
                     return (
                       <div
                         key={p.id}
-                        className={`inline-flex items-center gap-2 rounded-xl border px-2.5 py-1 text-xs ${
+                        className={`inline-flex items-center gap-1.5 rounded-xl border px-2 py-0.5 text-xs ${
                           isMe
-                            ? 'border-terracotta bg-white font-bold shadow-2xs'
-                            : 'border-brown/12 bg-cream/60 font-semibold'
+                            ? 'border-terracotta bg-[#3D2317] text-cream font-bold'
+                            : 'border-[#5C341D] bg-[#23140D] text-[#E8D5B7] font-semibold'
                         }`}
                       >
                         <span
                           className={`h-2 w-2 rounded-full ${
-                            p.isOnline ? 'bg-green' : 'bg-rating'
+                            p.isOnline ? 'bg-[#8AE856]' : 'bg-rating'
                           }`}
                         />
-                        <ChefAvatarSvg avatar={p.avatar} size={24} />
-                        <span className="text-brown">
+                        <ChefAvatarSvg avatar={p.avatar} size={26} />
+                        <span className="truncate max-w-[90px]">
                           {p.nickname}
                           {isMe ? ' (Tu)' : ''}
                         </span>
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${rInfo.badgeClass}`}>
+                        <span
+                          className={`rounded-full px-1.5 py-0.2 text-[10px] font-extrabold ${rInfo.badgeClass}`}
+                        >
                           {rInfo.shortLabel}
-                        </span>
-                        <span className="text-[11px] text-brown-soft tabular">
-                          🥪{p.contributions?.ordersServed || 0} 🔥{p.contributions?.ingredientsCooked || 0}
                         </span>
                       </div>
                     );
                   })}
                 </div>
 
-                {/* Cambio rapido ruolo personale senza uscire dalla cucina */}
                 <div className="flex items-center gap-1">
-                  <span className="text-[11px] font-semibold text-brown-soft mr-1 hidden sm:inline">
-                    Tuo ruolo:
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#E6C9A8] mr-1 hidden sm:inline">
+                    Ruolo:
                   </span>
                   {BRIGADE_ROLES.map((r) => {
                     const active = (mePlayer?.avatar?.role || avatar.role) === r.id;
@@ -1446,7 +1533,7 @@ export default function GamePage() {
                         className={`rounded-lg px-2 py-1 text-[11px] font-bold transition ${
                           active
                             ? `${r.badgeClass}`
-                            : 'bg-cream text-brown-soft hover:bg-brown/10'
+                            : 'bg-[#382116] text-[#E6C9A8] hover:bg-[#4D2E1F]'
                         }`}
                       >
                         {r.shortLabel}
@@ -1457,79 +1544,97 @@ export default function GamePage() {
               </div>
             </section>
 
-            {/* Panorama Animato Phaser 4 (compatto, disattivabile con 1 click su schermi piccoli) */}
+            {/* ---------------------------------------------------------------
+                2. SCENA DI GIOCO 2.5D IN PHASER 4 (Sala, Clienti, Fumetti,
+                   Piastra a 4 Fuochi, 2 Taglieri con Panino a Strati, Dispensa)
+               --------------------------------------------------------------- */}
             {showPanorama && (
-              <Suspense
-                fallback={
-                  <div className="surface flex h-36 items-center justify-center border border-brown/15 bg-cream-soft text-xs font-semibold text-brown-soft">
-                    Caricamento panorama animato della cucina…
-                  </div>
-                }
-              >
-                <KitchenPhaserCanvas
-                  snapshot={snapshot}
-                  selectedBoardIndex={selectedBoardIndex}
-                  serverTimeOffsetMs={serverTimeOffsetMs}
-                  reducedMotion={reducedMotion}
-                  disabled={netState === 'reconnecting'}
-                  onSelectBoard={(bIdx) => setSelectedBoardIndex(bIdx)}
-                  onSelectTicket={(ticketId) =>
-                    dispatchKitchenAction({
-                      type: 'SELECT_TICKET',
-                      boardIndex: selectedBoardIndex,
-                      ticketId,
-                    })
+              <div className="p-2 sm:p-3 bg-[#1E110B]">
+                <Suspense
+                  fallback={
+                    <div className="flex h-64 items-center justify-center rounded-2xl border border-[#5C341D] bg-[#2B1911] text-xs font-semibold text-[#E8D5B7]">
+                      Apertura della cucina 2.5D de Il Banco del Gambero…
+                    </div>
                   }
-                  onCollectGrill={(slotIdx) =>
-                    dispatchKitchenAction({
-                      type: 'COLLECT_GRILL',
-                      slotIndex: slotIdx,
-                      toBoardIndex: selectedBoardIndex,
-                    })
-                  }
-                  onServeOrder={(bIdx, ticketId) =>
-                    dispatchKitchenAction({
-                      type: 'SERVE_ORDER',
-                      boardIndex: bIdx,
-                      ticketId,
-                    })
-                  }
-                />
-              </Suspense>
+                >
+                  <KitchenPhaserCanvas
+                    snapshot={snapshot}
+                    selectedBoardIndex={selectedBoardIndex}
+                    serverTimeOffsetMs={serverTimeOffsetMs}
+                    reducedMotion={reducedMotion}
+                    disabled={netState === 'reconnecting'}
+                    onSelectBoard={(bIdx) => setSelectedBoardIndex(bIdx)}
+                    onSelectTicket={(ticketId) =>
+                      dispatchKitchenAction({
+                        type: 'SELECT_TICKET',
+                        boardIndex: selectedBoardIndex,
+                        ticketId,
+                      })
+                    }
+                    onStartCook={(ingredientId) =>
+                      dispatchKitchenAction({
+                        type: 'START_COOK',
+                        ingredientId,
+                      })
+                    }
+                    onCollectGrill={(slotIdx) =>
+                      dispatchKitchenAction({
+                        type: 'COLLECT_GRILL',
+                        slotIndex: slotIdx,
+                        toBoardIndex: selectedBoardIndex,
+                      })
+                    }
+                    onAddIngredient={(ingredientId) =>
+                      dispatchKitchenAction({
+                        type: 'ADD_INGREDIENT',
+                        boardIndex: selectedBoardIndex,
+                        ingredientId,
+                      })
+                    }
+                    onServeOrder={(bIdx, ticketId) =>
+                      dispatchKitchenAction({
+                        type: 'SERVE_ORDER',
+                        boardIndex: bIdx,
+                        ticketId,
+                      })
+                    }
+                  />
+                </Suspense>
+              </div>
             )}
 
             {/* ---------------------------------------------------------------
-                ZONA 1: FASCIA ORIZZONTALE CLIENTI & COMANDE ATTIVE
-                Mostra a colpo d'occhio: chi aspetta, quanto tempo resta,
-                note SENZA/EXTRA, ingredienti mancanti e bottone Consegna!
+                3. COMANDE APPESE AL PASS (Ticket da Cucina con Piatto Finito 2.5D)
                --------------------------------------------------------------- */}
             <section
               aria-labelledby="tickets-station-heading"
-              className="surface p-3.5 sm:p-4 space-y-2.5"
+              className="border-y-2 border-[#5C341D] bg-[#331E14] px-3 py-2.5 sm:px-4"
             >
-              <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-terracotta text-xs font-extrabold text-white">
-                    1
-                  </span>
-                  <h2 id="tickets-station-heading" className="font-display text-base sm:text-lg font-bold">
-                    Clienti al Bancone & Comande Attive ({activeTickets.length}/{maxTicketSlots})
+                  <h2
+                    id="tickets-station-heading"
+                    className="font-display text-sm sm:text-base font-bold text-cream"
+                  >
+                    Comande al Pass ({activeTickets.length}/{maxTicketSlots} clienti al bancone)
                   </h2>
                 </div>
-                <p className="text-xs font-semibold text-brown-soft">
-                  Tocca una comanda per prepararla sul <strong>Banco {selectedBoardIndex + 1}</strong> · Tasti [1–6]
+                <p className="text-[11px] font-semibold text-[#E6C9A8]">
+                  Tocca un ticket per assegnarlo al <strong>Banco {selectedBoardIndex + 1}</strong> ·
+                  Scorciatoia tasti [1–6]
                 </p>
               </div>
 
               {activeTickets.length === 0 ? (
-                <p className="rounded-xl border border-dashed border-brown/20 p-4 text-center text-sm text-brown-soft">
-                  Nuovo cliente in arrivo al bancone…
+                <p className="rounded-xl border border-dashed border-[#8C583A] bg-[#26160E] p-3 text-center text-xs text-[#E6C9A8]">
+                  Nuovo cliente in arrivo dal vicolo…
                 </p>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
                   {activeTickets.map((tkt, idx) => {
-                    // Verifica quale banco (Banco 1 o Banco 2) sta preparando questo ticket
-                    const assignedBoardIdx = prepBoards.findIndex((b) => b.targetTicketId === tkt.id);
+                    const assignedBoardIdx = prepBoards.findIndex(
+                      (b) => b.targetTicketId === tkt.id,
+                    );
                     const isCurrentTarget = activeTicket?.id === tkt.id;
                     const boardForThisTicket =
                       assignedBoardIdx !== -1
@@ -1557,29 +1662,30 @@ export default function GamePage() {
                       <div
                         key={tkt.id}
                         data-testid={`ticket-card-${idx}`}
-                        className={`rounded-2xl border-2 p-3 flex flex-col justify-between transition ${
+                        className={`rounded-2xl border-2 p-2.5 flex flex-col justify-between transition ${
                           isReadyToServe
-                            ? 'border-green bg-green/10 shadow-sm ring-2 ring-green/30'
+                            ? 'border-[#76B054] bg-[#EAF7E1] text-brown shadow-md ring-2 ring-[#76B054]/40'
                             : isCurrentTarget
-                              ? 'border-terracotta bg-white shadow-sm ring-2 ring-terracotta/20'
+                              ? 'border-terracotta bg-[#FFFDF9] text-brown shadow-md'
                               : ratio <= 0.28
-                                ? 'border-danger/60 bg-danger/5'
-                                : 'border-brown/15 bg-cream/60'
+                                ? 'border-danger bg-[#FDECEC] text-brown'
+                                : 'border-[#8C6D53] bg-[#F7EEE0] text-brown'
                         }`}
                       >
                         <div>
-                          {/* Testata Cliente: Avatar Umore + Nome + Archetipo + Timer Secondi */}
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-2.5 min-w-0">
+                          {/* Riga Superiore: Cliente + Piatto Finito 2.5D + Timer */}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
                               <CustomerAvatarSvg
                                 appearance={tkt.appearance}
                                 patienceRatio={ratio}
                                 isThinking={isThinking}
+                                isReady={isReadyToServe}
                                 archetypeId={tkt.archetypeId}
-                                size={48}
+                                size={46}
                               />
                               <div className="min-w-0">
-                                <div className="flex items-center gap-1.5 flex-wrap">
+                                <div className="flex items-center gap-1 flex-wrap">
                                   <span className="font-display text-sm font-bold text-brown">
                                     #{idx + 1} {tkt.customerName}
                                   </span>
@@ -1596,19 +1702,24 @@ export default function GamePage() {
                                     </span>
                                   )}
                                 </div>
-                                <p className="text-[11px] italic text-brown-soft truncate">
-                                  “{tkt.quote}”
+                                <p className="font-display text-xs font-extrabold text-brown truncate">
+                                  {isThinking
+                                    ? `Sceglie tra ${thinkingLeftSec}s…`
+                                    : `${tkt.recipeName} (+${tkt.basePoints}pt)`}
                                 </p>
                               </div>
                             </div>
 
-                            <div className="text-right shrink-0">
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {!isThinking && (
+                                <RecipePlateSvg recipeId={tkt.recipeId} size={46} />
+                              )}
                               <span
                                 className={`inline-block rounded-lg px-2 py-0.5 font-mono text-xs font-extrabold tabular ${
                                   ratio <= 0.28
                                     ? 'bg-danger text-white'
                                     : ratio <= 0.55
-                                      ? 'bg-rating/30 text-brown'
+                                      ? 'bg-rating/35 text-brown'
                                       : 'bg-green/15 text-green-deep'
                                 }`}
                               >
@@ -1619,7 +1730,7 @@ export default function GamePage() {
 
                           {/* Barra di pazienza */}
                           <div
-                            className="mt-2 h-2 w-full overflow-hidden rounded-full bg-brown/10"
+                            className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-brown/15"
                             role="progressbar"
                             aria-label={`Pazienza di ${tkt.customerName}`}
                             aria-valuenow={Math.round(ratio * 100)}
@@ -1638,81 +1749,59 @@ export default function GamePage() {
                             />
                           </div>
 
-                          {/* Corpo Comanda: Ricetta, Modificatori e Ingredienti */}
-                          <div className="mt-2.5">
-                            {isThinking ? (
-                              <div className="rounded-xl border border-dashed border-brown/25 bg-white/80 p-2.5 text-center">
-                                <p className="font-display text-xs font-bold text-brown">
-                                  💭 Cliente indeciso: sceglie tra {thinkingLeftSec}s…
-                                </p>
-                                <p className="text-[11px] text-brown-soft mt-0.5">
-                                  Tocca <strong>“Fissa comanda”</strong> qui sotto per farlo decidere subito!
-                                </p>
+                          {/* Varianti (SENZA / EXTRA / CON) + Ingredienti della comanda */}
+                          {!isThinking && (
+                            <div className="mt-2">
+                              {tkt.modifiers?.exclude && (
+                                <div className="mb-1 rounded-md bg-danger/15 border border-danger/35 px-2 py-0.5 text-[10px] font-extrabold text-danger">
+                                  ⛔ SENZA{' '}
+                                  {getIngredient(tkt.modifiers.exclude)?.shortName?.toUpperCase()}
+                                </div>
+                              )}
+                              {tkt.modifiers?.add && (
+                                <div className="mb-1 rounded-md bg-terracotta/15 border border-terracotta/35 px-2 py-0.5 text-[10px] font-extrabold text-terracotta-deep">
+                                  ➕ EXTRA{' '}
+                                  {getIngredient(tkt.modifiers.add)?.shortName?.toUpperCase()}
+                                </div>
+                              )}
+                              {tkt.modifiers?.swap && (
+                                <div className="mb-1 rounded-md bg-green/15 border border-green/35 px-2 py-0.5 text-[10px] font-extrabold text-green-deep">
+                                  🔄 CON{' '}
+                                  {getIngredient(tkt.modifiers.swap.to)?.shortName?.toUpperCase()}{' '}
+                                  (no {getIngredient(tkt.modifiers.swap.from)?.shortName})
+                                </div>
+                              )}
+
+                              <div className="flex flex-wrap gap-1">
+                                {ticketAnalysis.checklist.map((item, ingIdx) => {
+                                  const ing = getIngredient(item.ingredientId);
+                                  return (
+                                    <span
+                                      key={`${tkt.id}-${item.ingredientId}-${ingIdx}`}
+                                      className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[11px] font-bold ${
+                                        item.present
+                                          ? 'border-green bg-green text-white'
+                                          : ing?.requiresGrill
+                                            ? 'border-terracotta/45 bg-white text-brown'
+                                            : 'border-brown/15 bg-white text-brown'
+                                      }`}
+                                    >
+                                      <IngredientIconSvg
+                                        ingredientId={item.ingredientId}
+                                        size={16}
+                                      />
+                                      <span>{ing?.shortName || item.ingredientId}</span>
+                                      {item.present ? <span>✓</span> : null}
+                                    </span>
+                                  );
+                                })}
                               </div>
-                            ) : (
-                              <>
-                                <div className="flex items-center justify-between gap-2">
-                                  <p className="font-display text-sm font-bold text-brown">
-                                    {tkt.recipeName}
-                                  </p>
-                                  <span className="text-[11px] font-extrabold text-green-deep tabular">
-                                    +{tkt.basePoints} pt
-                                  </span>
-                                </div>
-
-                                {/* Banner Modificatore ad alta visibilità */}
-                                {tkt.modifiers?.exclude && (
-                                  <div className="mt-1 rounded-lg bg-danger/15 border border-danger/30 px-2 py-1 text-[11px] font-extrabold text-danger">
-                                    ⛔ SENZA {getIngredient(tkt.modifiers.exclude)?.shortName?.toUpperCase()}
-                                  </div>
-                                )}
-                                {tkt.modifiers?.add && (
-                                  <div className="mt-1 rounded-lg bg-terracotta/15 border border-terracotta/30 px-2 py-1 text-[11px] font-extrabold text-terracotta-deep">
-                                    ➕ EXTRA {getIngredient(tkt.modifiers.add)?.shortName?.toUpperCase()}
-                                  </div>
-                                )}
-                                {tkt.modifiers?.swap && (
-                                  <div className="mt-1 rounded-lg bg-green/15 border border-green/30 px-2 py-1 text-[11px] font-extrabold text-green-deep">
-                                    🔄 CON {getIngredient(tkt.modifiers.swap.to)?.shortName?.toUpperCase()} (al posto di{' '}
-                                    {getIngredient(tkt.modifiers.swap.from)?.shortName})
-                                  </div>
-                                )}
-
-                                {/* Elenco ingredienti richiesti (spuntati SOLO per il banco che prepara questo ticket) */}
-                                <div className="mt-2 flex flex-wrap gap-1">
-                                  {ticketAnalysis.checklist.map((item, ingIdx) => {
-                                    const ing = getIngredient(item.ingredientId);
-                                    return (
-                                      <span
-                                        key={`${tkt.id}-${item.ingredientId}-${ingIdx}`}
-                                        className={`inline-flex items-center gap-1 rounded-lg border px-2 py-0.5 text-[11px] font-bold ${
-                                          item.present
-                                            ? 'border-green bg-green text-white'
-                                            : ing?.requiresGrill
-                                              ? 'border-terracotta/40 bg-white text-brown'
-                                              : 'border-brown/15 bg-white text-brown'
-                                        }`}
-                                      >
-                                        <IngredientIconSvg ingredientId={item.ingredientId} size={15} />
-                                        <span>{ing?.shortName || item.ingredientId}</span>
-                                        {item.present ? (
-                                          <span>✓</span>
-                                        ) : ing?.requiresGrill ? (
-                                          <span className="text-[10px] text-terracotta-deep font-extrabold">
-                                            🔥
-                                          </span>
-                                        ) : null}
-                                      </span>
-                                    );
-                                  })}
-                                </div>
-                              </>
-                            )}
-                          </div>
+                            </div>
+                          )}
                         </div>
 
-                        {/* Pulsanti Azione Comanda */}
-                        <div className="mt-3 flex items-center gap-2 pt-2 border-t border-brown/10">
+                        {/* Azioni Comanda */}
+                        <div className="mt-2 flex items-center gap-1.5 pt-1.5 border-t border-brown/10">
                           <button
                             type="button"
                             disabled={netState === 'reconnecting'}
@@ -1723,15 +1812,15 @@ export default function GamePage() {
                                 ticketId: tkt.id,
                               })
                             }
-                            className={`btn btn-sm flex-1 text-xs ${
+                            className={`btn btn-sm flex-1 text-xs min-h-[38px] ${
                               isCurrentTarget ? 'btn-secondary' : 'btn-outline'
                             }`}
                           >
                             {isThinking
                               ? 'Fissa comanda'
                               : isCurrentTarget
-                                ? `In preparazione (Banco ${selectedBoardIndex + 1})`
-                                : `Prepara su Banco ${selectedBoardIndex + 1}`}
+                                ? `Su Banco ${selectedBoardIndex + 1}`
+                                : `Prepara (Banco ${selectedBoardIndex + 1})`}
                           </button>
 
                           <button
@@ -1750,8 +1839,8 @@ export default function GamePage() {
                               })
                             }
                             data-testid={`serve-ticket-${idx}`}
-                            className={`btn btn-sm text-xs ${
-                              isReadyToServe ? 'btn-primary ring-2 ring-green/40' : 'btn-primary'
+                            className={`btn btn-sm text-xs min-h-[38px] ${
+                              isReadyToServe ? 'btn-primary ring-2 ring-green/50' : 'btn-primary'
                             }`}
                           >
                             <GameUiIcon name="bell" size={14} />
@@ -1766,34 +1855,32 @@ export default function GamePage() {
             </section>
 
             {/* ---------------------------------------------------------------
-                ZONA 2: POSTAZIONE OPERATIVA CUCINA A 3 COLONNE CHIARE
-                - Colonna A (4 col): Piastra a 4 Fuochi + Vassoio Caldo
-                - Colonna B (4 col): Tagliere di Assemblaggio + Checklist + Consegna
-                - Colonna C (4 col): Dispensa Ingredienti Napoletani
+                4. PIANO DI LAVORO FISICO DEL BANCONE (3 Baie Integrate:
+                   Piastra in Ghisa · Banco Tagliere in Legno · Dispensa Gastronorm)
                --------------------------------------------------------------- */}
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-12 items-start">
+            <div className="grid grid-cols-1 gap-3 p-3 sm:p-4 lg:grid-cols-12 items-start bg-[#3E2417]">
               {/* =============================================================
-                  COLONNA A: PIASTRA IN GHISA (4 FUOCHI) & VASSOIO CALDO
+                  BAIA 1 (SINISTRA): PIASTRA IN GHISA A 4 FUOCHI & VASSOIO CALDO
                  ============================================================= */}
               <section
                 aria-labelledby="grill-station-heading"
-                className="surface p-4 lg:col-span-4 space-y-3.5"
+                className="rounded-2xl border-2 border-[#6E5A4F] bg-[#1F1815] p-3.5 text-[#FFF3E2] lg:col-span-4 space-y-3 shadow-md"
               >
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between border-b border-[#4A3B34] pb-2">
                   <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-terracotta text-xs font-extrabold text-white">
-                      2
-                    </span>
-                    <h2 id="grill-station-heading" className="font-display text-base sm:text-lg font-bold">
-                      Piastra Calda & Vassoio
+                    <GameUiIcon name="flame" size={18} className="text-terracotta" />
+                    <h2 id="grill-station-heading" className="font-display text-base font-bold !text-[#FFF8EC]">
+                      Piastra in Ghisa & Vassoio
                     </h2>
                   </div>
-                  <span className="text-xs font-semibold text-brown-soft">Tasti [Q W E R]</span>
+                  <span className="rounded-md bg-[#332722] px-2 py-0.5 text-[11px] font-bold text-[#E6C9A8]">
+                    Tasti [Q W E R]
+                  </span>
                 </div>
 
-                {/* Avvio Cottura Proteine (con badge "Serve ora!" quando richieste dai clienti) */}
+                {/* Vaschette Proteine Crude da mettere sulla piastra */}
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wider text-brown-soft mb-2">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[#C9B8AC] mb-1.5">
                     Metti a cuocere sulla piastra:
                   </p>
                   <div className="grid grid-cols-2 gap-2">
@@ -1811,22 +1898,26 @@ export default function GamePage() {
                             })
                           }
                           data-testid={`cook-btn-${ing.id}`}
-                          className={`press relative flex items-center gap-2.5 rounded-xl border-2 px-3 py-2.5 text-left text-xs font-bold min-h-[54px] transition ${
+                          className={`press relative flex items-center gap-2 rounded-xl border-2 px-2.5 py-2 text-left text-xs font-bold min-h-[52px] transition ${
                             neededCount > 0
-                              ? 'border-terracotta bg-white shadow-xs ring-2 ring-terracotta/20'
-                              : 'border-brown/15 bg-white hover:border-terracotta'
+                              ? 'border-terracotta bg-[#36261E] text-cream ring-2 ring-terracotta/30'
+                              : 'border-[#5A473E] bg-[#2B211D] text-cream hover:border-terracotta'
                           }`}
                         >
-                          <IngredientIconSvg ingredientId={ing.id} size={28} />
+                          <IngredientIconSvg
+                            ingredientId={ing.id}
+                            cookState={COOK_STATES.RAW}
+                            size={32}
+                          />
                           <div className="min-w-0 flex-1">
-                            <p className="text-brown truncate">{ing.shortName}</p>
-                            <p className="text-[11px] font-normal text-brown-soft">
-                              {(ing.cookTimeMs / 1000).toFixed(1)}s cottura
+                            <p className="truncate">{ing.shortName}</p>
+                            <p className="text-[10px] font-normal text-[#C9B8AC]">
+                              {(ing.cookTimeMs / 1000).toFixed(1)}s
                             </p>
                           </div>
                           {neededCount > 0 && (
-                            <span className="rounded-full bg-terracotta px-2 py-0.5 text-[10px] font-extrabold text-white">
-                              Serve ×{neededCount}
+                            <span className="rounded-full bg-terracotta px-1.5 py-0.5 text-[10px] font-extrabold text-white">
+                              ×{neededCount}
                             </span>
                           )}
                         </button>
@@ -1835,172 +1926,132 @@ export default function GamePage() {
                   </div>
                 </div>
 
-                {/* I 4 Fuochi della Piastra */}
-                <div className="space-y-2 pt-2 border-t border-brown/10">
-                  <p className="text-xs font-bold uppercase tracking-wider text-brown-soft">
-                    I 4 Fuochi della Piastra:
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {snapshot.game.grillSlots.map((slot, sIdx) => {
-                      const status = getGrillSlotStatus(slot, effectiveNowMs);
-                      const ing = slot.ingredientId ? getIngredient(slot.ingredientId) : null;
-                      const keyHint = ['Q', 'W', 'E', 'R'][sIdx];
-                      const cookByName = findPlayerName(slot.startedByPlayerId);
+                {/* I 4 Fuochi della Piastra in Ghisa */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {snapshot.game.grillSlots.map((slot, sIdx) => {
+                    const status = getGrillSlotStatus(slot, effectiveNowMs);
+                    const ing = slot.ingredientId ? getIngredient(slot.ingredientId) : null;
+                    const keyHint = ['Q', 'W', 'E', 'R'][sIdx];
+                    const cookByName = findPlayerName(slot.startedByPlayerId);
 
-                      return (
-                        <div
-                          key={slot.slotIndex}
-                          data-testid={`grill-slot-${sIdx}`}
-                          className={`rounded-xl border-2 p-3 flex flex-col justify-between gap-2 transition ${
-                            !slot.ingredientId
-                              ? 'border-dashed border-brown/20 bg-cream/40'
-                              : status.state === COOK_STATES.COOKED && status.aboutToBurn
-                                ? 'border-danger bg-danger/15 ring-2 ring-danger/30'
+                    return (
+                      <div
+                        key={slot.slotIndex}
+                        data-testid={`grill-slot-${sIdx}`}
+                        className={`rounded-xl border-2 p-2.5 flex flex-col justify-between gap-2 transition ${
+                          !slot.ingredientId
+                            ? 'border-dashed border-[#5A473E] bg-[#28201C]'
+                            : status.state === COOK_STATES.COOKED && status.aboutToBurn
+                              ? 'border-danger bg-[#4A1F1A] ring-2 ring-danger/40'
+                              : status.state === COOK_STATES.COOKED
+                                ? 'border-[#5F8F3A] bg-[#243B1F]'
+                                : status.state === COOK_STATES.BURNED
+                                  ? 'border-danger bg-[#381714]'
+                                  : 'border-rating bg-[#3D2C1E]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between text-[11px] font-bold">
+                          <span className="text-[#E6C9A8]">
+                            Fuoco {sIdx + 1} [{keyHint}]
+                          </span>
+                          <span
+                            className={
+                              status.state === COOK_STATES.COOKED && status.aboutToBurn
+                                ? 'text-[#FF9E96] font-extrabold'
                                 : status.state === COOK_STATES.COOKED
-                                  ? 'border-green bg-green/12 shadow-xs'
+                                  ? 'text-[#A9E37B] font-extrabold'
                                   : status.state === COOK_STATES.BURNED
-                                    ? 'border-danger bg-danger/10'
-                                    : 'border-rating bg-rating/12'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between text-xs font-bold">
-                            <span>
-                              Fuoco {sIdx + 1} [{keyHint}]
-                            </span>
-                            <span
-                              className={
-                                status.state === COOK_STATES.COOKED && status.aboutToBurn
-                                  ? 'text-danger font-extrabold'
+                                    ? 'text-[#FF9E96] font-extrabold'
+                                    : 'text-[#F7D08A]'
+                            }
+                          >
+                            {!slot.ingredientId
+                              ? 'Libero'
+                              : status.state === COOK_STATES.COOKING
+                                ? `${(status.remainingMs / 1000).toFixed(1)}s`
+                                : status.state === COOK_STATES.COOKED && status.aboutToBurn
+                                  ? `⚠ BRUCIA ${(status.remainingMs / 1000).toFixed(1)}s`
                                   : status.state === COOK_STATES.COOKED
-                                    ? 'text-green-deep font-extrabold'
-                                    : status.state === COOK_STATES.BURNED
-                                      ? 'text-danger font-extrabold'
-                                      : 'text-brown-soft'
-                              }
-                            >
-                              {!slot.ingredientId
-                                ? 'Libero'
-                                : status.state === COOK_STATES.COOKING
-                                  ? `Cuoce ${(status.remainingMs / 1000).toFixed(1)}s`
-                                  : status.state === COOK_STATES.COOKED && status.aboutToBurn
-                                    ? `⚠ BRUCIA TRA ${(status.remainingMs / 1000).toFixed(1)}s!`
-                                    : status.state === COOK_STATES.COOKED
-                                      ? `PRONTO (${(status.remainingMs / 1000).toFixed(0)}s)`
-                                      : 'BRUCIATO!'}
-                            </span>
-                          </div>
+                                    ? `PRONTO (${(status.remainingMs / 1000).toFixed(0)}s)`
+                                    : 'BRUCIATO!'}
+                          </span>
+                        </div>
 
-                          {ing ? (
-                            <>
-                              <div className="flex items-center gap-2.5">
-                                <GrillBurnerSvg
-                                  ingredientId={ing.id}
-                                  cookState={status.state}
-                                  aboutToBurn={status.aboutToBurn}
-                                  size={42}
-                                />
-                                <div className="min-w-0">
-                                  <p className="font-display text-sm font-bold truncate">
-                                    {ing.shortName}
+                        {ing ? (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <GrillBurnerSvg
+                                ingredientId={ing.id}
+                                cookState={status.state}
+                                aboutToBurn={status.aboutToBurn}
+                                size={46}
+                              />
+                              <div className="min-w-0">
+                                <p className="font-display text-sm font-bold text-cream truncate">
+                                  {ing.shortName}
+                                </p>
+                                {cookByName && (
+                                  <p className="text-[10px] text-[#C9B8AC] truncate">
+                                    Cuoco: {cookByName}
                                   </p>
-                                  {cookByName && (
-                                    <p className="text-[10px] font-semibold text-brown-soft truncate">
-                                      Messo da {cookByName}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-
-                              {/* Barra avanzamento cottura o tempo prima di bruciare */}
-                              <div className="h-2 w-full overflow-hidden rounded-full bg-brown/15">
-                                <div
-                                  className={`h-full transition-all ${
-                                    status.state === COOK_STATES.COOKING
-                                      ? 'bg-rating'
-                                      : status.state === COOK_STATES.COOKED && !status.aboutToBurn
-                                        ? 'bg-green'
-                                        : 'bg-danger'
-                                  }`}
-                                  style={{
-                                    width: `${Math.max(
-                                      6,
-                                      Math.round(
-                                        (status.state === COOK_STATES.COOKING
-                                          ? status.progress
-                                          : status.state === COOK_STATES.COOKED
-                                            ? 1 - status.burnProgress
-                                            : 1) * 100,
-                                      ),
-                                    )}%`,
-                                  }}
-                                />
-                              </div>
-
-                              {/* Azioni esplicite sullo slot */}
-                              <div className="flex items-center gap-1.5">
-                                {status.state === COOK_STATES.COOKING && (
-                                  <>
-                                    <button
-                                      type="button"
-                                      disabled
-                                      data-testid={`collect-grill-${sIdx}`}
-                                      className="btn btn-secondary btn-sm flex-1 text-xs"
-                                    >
-                                      Sfrigola…
-                                    </button>
-                                    <button
-                                      type="button"
-                                      disabled={netState === 'reconnecting'}
-                                      onClick={() =>
-                                        dispatchKitchenAction({
-                                          type: 'DISCARD_GRILL',
-                                          slotIndex: sIdx,
-                                        })
-                                      }
-                                      title="Togli dalla piastra"
-                                      className="btn btn-secondary btn-sm px-2.5 text-xs text-danger"
-                                    >
-                                      <GameUiIcon name="trash" size={14} />
-                                    </button>
-                                  </>
                                 )}
+                              </div>
+                            </div>
 
-                                {status.state === COOK_STATES.COOKED && (
-                                  <>
-                                    <button
-                                      type="button"
-                                      disabled={netState === 'reconnecting'}
-                                      onClick={() =>
-                                        dispatchKitchenAction({
-                                          type: 'COLLECT_GRILL',
-                                          slotIndex: sIdx,
-                                          toBoardIndex: selectedBoardIndex,
-                                        })
-                                      }
-                                      data-testid={`collect-grill-${sIdx}`}
-                                      className="btn btn-primary btn-sm flex-1 text-xs"
-                                    >
-                                      → Banco {selectedBoardIndex + 1}
-                                    </button>
-                                    <button
-                                      type="button"
-                                      disabled={netState === 'reconnecting'}
-                                      onClick={() =>
-                                        dispatchKitchenAction({
-                                          type: 'COLLECT_GRILL',
-                                          slotIndex: sIdx,
-                                          toBoardIndex: null,
-                                        })
-                                      }
-                                      title="Salva nel Vassoio Caldo (non brucia più!)"
-                                      className="btn btn-secondary btn-sm px-2.5 text-xs"
-                                    >
-                                      → Vassoio
-                                    </button>
-                                  </>
-                                )}
+                            <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/40">
+                              <div
+                                className={`h-full transition-all ${
+                                  status.state === COOK_STATES.COOKING
+                                    ? 'bg-rating'
+                                    : status.state === COOK_STATES.COOKED && !status.aboutToBurn
+                                      ? 'bg-green'
+                                      : 'bg-danger'
+                                }`}
+                                style={{
+                                  width: `${Math.max(
+                                    6,
+                                    Math.round(
+                                      (status.state === COOK_STATES.COOKING
+                                        ? status.progress
+                                        : status.state === COOK_STATES.COOKED
+                                          ? 1 - status.burnProgress
+                                          : 1) * 100,
+                                    ),
+                                  )}%`,
+                                }}
+                              />
+                            </div>
 
-                                {status.state === COOK_STATES.BURNED && (
+                            <div className="flex items-center gap-1.5">
+                              {status.state === COOK_STATES.COOKING && (
+                                <>
+                                  <button
+                                    type="button"
+                                    disabled
+                                    data-testid={`collect-grill-${sIdx}`}
+                                    className="btn btn-secondary btn-sm flex-1 text-xs min-h-[38px]"
+                                  >
+                                    Sfrigola…
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={netState === 'reconnecting'}
+                                    onClick={() =>
+                                      dispatchKitchenAction({
+                                        type: 'DISCARD_GRILL',
+                                        slotIndex: sIdx,
+                                      })
+                                    }
+                                    title="Togli dalla piastra"
+                                    className="btn btn-secondary btn-sm px-2.5 text-xs text-danger min-h-[38px]"
+                                  >
+                                    <GameUiIcon name="trash" size={14} />
+                                  </button>
+                                </>
+                              )}
+
+                              {status.state === COOK_STATES.COOKED && (
+                                <>
                                   <button
                                     type="button"
                                     disabled={netState === 'reconnecting'}
@@ -2008,40 +2059,71 @@ export default function GamePage() {
                                       dispatchKitchenAction({
                                         type: 'COLLECT_GRILL',
                                         slotIndex: sIdx,
+                                        toBoardIndex: selectedBoardIndex,
                                       })
                                     }
                                     data-testid={`collect-grill-${sIdx}`}
-                                    className="btn btn-danger btn-sm w-full text-xs"
+                                    className="btn btn-primary btn-sm flex-1 text-xs min-h-[38px]"
                                   >
-                                    Pulisci (-15 pt)
+                                    → Banco {selectedBoardIndex + 1}
                                   </button>
-                                )}
-                              </div>
-                            </>
-                          ) : (
-                            <p className="text-xs text-brown-soft py-3 text-center">
-                              Fuoco libero · Tocca una carne qui sopra
-                            </p>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                                  <button
+                                    type="button"
+                                    disabled={netState === 'reconnecting'}
+                                    onClick={() =>
+                                      dispatchKitchenAction({
+                                        type: 'COLLECT_GRILL',
+                                        slotIndex: sIdx,
+                                        toBoardIndex: null,
+                                      })
+                                    }
+                                    title="Salva nel Vassoio Caldo (non brucia più!)"
+                                    className="btn btn-secondary btn-sm px-2 text-xs min-h-[38px]"
+                                  >
+                                    → Vassoio
+                                  </button>
+                                </>
+                              )}
+
+                              {status.state === COOK_STATES.BURNED && (
+                                <button
+                                  type="button"
+                                  disabled={netState === 'reconnecting'}
+                                  onClick={() =>
+                                    dispatchKitchenAction({
+                                      type: 'COLLECT_GRILL',
+                                      slotIndex: sIdx,
+                                    })
+                                  }
+                                  data-testid={`collect-grill-${sIdx}`}
+                                  className="btn btn-danger btn-sm w-full text-xs min-h-[38px]"
+                                >
+                                  Pulisci (-15 pt)
+                                </button>
+                              )}
+                            </div>
+                          </>
+                        ) : (
+                          <p className="text-[11px] text-[#A9998E] py-3 text-center">
+                            Fuoco libero · Tocca una proteina sopra
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
-                {/* Vassoio Caldo Condiviso (dove le cotture pronte non bruciano mai) */}
-                <div className="rounded-2xl border border-brown/15 bg-cream/70 p-3">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <p className="text-xs font-bold uppercase tracking-wider text-brown">
+                {/* Vassoio Caldo in Acciaio Inox */}
+                <div className="rounded-xl border border-[#6E5A4F] bg-[#2B221E] p-2.5">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-cream">
                       Vassoio Caldo Condiviso ({snapshot.game.cookedTray.length}/6)
                     </p>
-                    <span className="text-[11px] font-semibold text-green-deep">
-                      Non brucia mai
-                    </span>
+                    <span className="text-[10px] font-bold text-[#A9E37B]">Non brucia mai</span>
                   </div>
                   {snapshot.game.cookedTray.length === 0 ? (
-                    <p className="text-xs text-brown-soft">
-                      Usa <strong>“→ Vassoio”</strong> sulla piastra per mettere da parte le cotture pronte per i compagni!
+                    <p className="text-[11px] text-[#C9B8AC]">
+                      Usa <strong>“→ Vassoio”</strong> per tenere pronte le carni per la brigata.
                     </p>
                   ) : (
                     <div className="flex flex-wrap gap-1.5">
@@ -2058,10 +2140,14 @@ export default function GamePage() {
                                 ingredientId: item.ingredientId,
                               })
                             }
-                            className="press inline-flex items-center gap-1.5 rounded-xl border border-green bg-white px-2.5 py-1.5 text-xs font-bold text-green-deep shadow-2xs min-h-[40px]"
+                            className="press inline-flex items-center gap-1.5 rounded-xl border border-[#76B054] bg-[#23381E] px-2.5 py-1 text-xs font-bold text-[#C5F2A7] min-h-[38px]"
                           >
-                            <IngredientIconSvg ingredientId={item.ingredientId} size={20} />
-                            <span>+ {ing?.shortName} (su Banco {selectedBoardIndex + 1})</span>
+                            <IngredientIconSvg
+                              ingredientId={item.ingredientId}
+                              cookState={COOK_STATES.COOKED}
+                              size={22}
+                            />
+                            <span>+ {ing?.shortName} → Banco {selectedBoardIndex + 1}</span>
                           </button>
                         );
                       })}
@@ -2071,24 +2157,19 @@ export default function GamePage() {
               </section>
 
               {/* =============================================================
-                  COLONNA B: TAGLIERE DI ASSEMBLAGGIO, CHECKLIST & CONSEGNA
+                  BAIA 2 (CENTRO): BANCO D'ASSEMBLAGGIO IN LEGNO D'ULIVO & PASS
                  ============================================================= */}
               <section
                 aria-labelledby="assembly-station-heading"
-                className="surface p-4 lg:col-span-4 space-y-3.5"
+                className="rounded-2xl border-2 border-[#8C583A] bg-[#EAD4B4] p-3.5 text-brown lg:col-span-4 space-y-3 shadow-md"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-terracotta text-xs font-extrabold text-white">
-                      3
-                    </span>
-                    <h2 id="assembly-station-heading" className="font-display text-base sm:text-lg font-bold">
-                      Tagliere & Consegna
-                    </h2>
-                  </div>
+                <div className="flex items-center justify-between gap-2 border-b border-brown/15 pb-2">
+                  <h2 id="assembly-station-heading" className="font-display text-base font-bold">
+                    Tagliere & Pass Consegna
+                  </h2>
 
                   {/* Selettore Banco 1 / Banco 2 */}
-                  <div className="inline-flex rounded-xl border border-brown/15 bg-cream p-1">
+                  <div className="inline-flex rounded-xl border border-brown/20 bg-cream p-1">
                     {[0, 1].map((bIdx) => {
                       const b = prepBoards[bIdx];
                       const bTicket = activeTickets.find((t) => t.id === b?.targetTicketId);
@@ -2098,10 +2179,10 @@ export default function GamePage() {
                           type="button"
                           onClick={() => setSelectedBoardIndex(bIdx)}
                           aria-pressed={selectedBoardIndex === bIdx}
-                          className={`rounded-lg px-2.5 py-1.5 text-xs font-bold min-h-[36px] transition ${
+                          className={`rounded-lg px-2.5 py-1 text-xs font-bold min-h-[34px] transition ${
                             selectedBoardIndex === bIdx
-                              ? 'bg-terracotta text-white shadow-xs'
-                              : 'text-brown hover:bg-white/60'
+                              ? 'bg-terracotta text-white shadow-2xs'
+                              : 'text-brown hover:bg-white/70'
                           }`}
                         >
                           Banco {bIdx + 1} ({b?.ingredients?.length || 0})
@@ -2112,22 +2193,28 @@ export default function GamePage() {
                   </div>
                 </div>
 
-                {/* Checklist Ricetta del Cliente Collegato */}
-                <div className="rounded-2xl border border-brown/15 bg-white p-3 space-y-2">
+                {/* Comanda attiva sul Tagliere + Checklist 1-tap */}
+                <div className="rounded-2xl border border-brown/15 bg-white/95 p-3 space-y-2 shadow-2xs">
                   <div className="flex items-center justify-between gap-2">
-                    <div>
-                      <p className="text-[11px] font-bold uppercase tracking-wider text-brown-soft">
-                        Comanda su Banco {selectedBoardIndex + 1}
-                        {findPlayerName(activeBoard.updatedByPlayerId)
-                          ? ` · Ultimo tocco: ${findPlayerName(activeBoard.updatedByPlayerId)}`
-                          : ''}
-                      </p>
-                      <p className="font-display text-base font-bold text-brown">
-                        {activeTicket
-                          ? `${activeTicket.recipeName} per ${activeTicket.customerName}`
-                          : 'Nessuna comanda selezionata'}
-                      </p>
+                    <div className="flex items-center gap-2 min-w-0">
+                      {activeTicket && (
+                        <RecipePlateSvg recipeId={activeTicket.recipeId} size={46} />
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-brown-soft truncate">
+                          Banco {selectedBoardIndex + 1}
+                          {findPlayerName(activeBoard.updatedByPlayerId)
+                            ? ` · Cuoco: ${findPlayerName(activeBoard.updatedByPlayerId)}`
+                            : ''}
+                        </p>
+                        <p className="font-display text-sm sm:text-base font-bold text-brown truncate">
+                          {activeTicket
+                            ? `${activeTicket.recipeName} per ${activeTicket.customerName}`
+                            : 'Nessuna comanda selezionata'}
+                        </p>
+                      </div>
                     </div>
+
                     {activeBoard.ingredients.length > 0 && (
                       <button
                         type="button"
@@ -2137,9 +2224,9 @@ export default function GamePage() {
                             boardIndex: selectedBoardIndex,
                           })
                         }
-                        className="text-xs text-danger underline font-bold"
+                        className="text-xs text-danger underline font-bold shrink-0"
                       >
-                        Svuota tagliere
+                        Svuota
                       </button>
                     )}
                   </div>
@@ -2147,7 +2234,7 @@ export default function GamePage() {
                   {activeTicket && (
                     <div className="pt-1">
                       <p className="text-[11px] font-bold text-brown-soft mb-1.5">
-                        Checklist ricetta (tocca un ingrediente mancante per aggiungerlo):
+                        Tocca gli ingredienti della ricetta per comporre il panino:
                       </p>
                       <div className="grid grid-cols-2 gap-1.5">
                         {activeBoardAnalysis.checklist.map((item, idx) => {
@@ -2159,7 +2246,6 @@ export default function GamePage() {
                               disabled={item.present || netState === 'reconnecting'}
                               onClick={() => {
                                 if (ing?.requiresGrill) {
-                                  // Se è già pronto in griglia o nel vassoio, ADD_INGREDIENT lo prende; altrimenti avvia la cottura!
                                   const hasReadyInTray = snapshot.game.cookedTray.some(
                                     (t) => t.ingredientId === ing.id,
                                   );
@@ -2189,18 +2275,18 @@ export default function GamePage() {
                                   });
                                 }
                               }}
-                              className={`flex items-center justify-between gap-1.5 rounded-xl border px-2.5 py-1.5 text-left text-xs font-bold min-h-[40px] ${
+                              className={`flex items-center justify-between gap-1.5 rounded-xl border px-2.5 py-1.5 text-left text-xs font-bold min-h-[42px] ${
                                 item.present
-                                  ? 'border-green bg-green/12 text-green-deep'
-                                  : 'border-terracotta/40 bg-cream/60 text-brown hover:bg-terracotta/10 press'
+                                  ? 'border-green bg-green/15 text-green-deep'
+                                  : 'border-terracotta/45 bg-cream/70 text-brown hover:bg-terracotta/15 press'
                               }`}
                             >
                               <span className="inline-flex items-center gap-1.5 min-w-0">
-                                <IngredientIconSvg ingredientId={item.ingredientId} size={18} />
+                                <IngredientIconSvg ingredientId={item.ingredientId} size={22} />
                                 <span className="truncate">{ing?.shortName}</span>
                               </span>
-                              <span className="shrink-0 text-[11px]">
-                                {item.present ? '✓ Messo' : ing?.requiresGrill ? '+ 🔥' : '+ Metti'}
+                              <span className="shrink-0 text-[10px] font-extrabold">
+                                {item.present ? '✓' : ing?.requiresGrill ? '+Piastra' : '+Metti'}
                               </span>
                             </button>
                           );
@@ -2210,7 +2296,7 @@ export default function GamePage() {
                   )}
                 </div>
 
-                {/* Visualizzatore Tagliere e Strati Panino (con segnalazione rossa su errori) */}
+                {/* Tagliere 2.5D con Pila Visuale del Panino */}
                 <SandwichStackSvg
                   boardIngredients={activeBoard.ingredients}
                   ticket={activeTicket}
@@ -2223,7 +2309,7 @@ export default function GamePage() {
                   }
                 />
 
-                {/* Barra Azioni Primarie: Togli ultimo + CONSEGNA PANINO */}
+                {/* Barra Pass Consegna */}
                 <div className="flex items-center gap-2">
                   <button
                     type="button"
@@ -2263,7 +2349,7 @@ export default function GamePage() {
                     data-testid="main-serve-btn"
                     className={`btn btn-sm flex-1 font-extrabold ${
                       activeBoardAnalysis.ok
-                        ? 'btn-primary ring-2 ring-green/50'
+                        ? 'btn-primary ring-2 ring-green/60 shadow-md'
                         : 'btn-primary'
                     }`}
                   >
@@ -2278,44 +2364,39 @@ export default function GamePage() {
               </section>
 
               {/* =============================================================
-                  COLONNA C: DISPENSA INGREDIENTI NAPOLETANI PER STAZIONE
+                  BAIA 3 (DESTRA): CASSETTI DISPENSA GASTRONORM NAPOLETANA
                  ============================================================= */}
               <section
                 aria-labelledby="pantry-station-heading"
-                className="surface p-4 lg:col-span-4 space-y-3"
+                className="rounded-2xl border-2 border-[#7A5438] bg-[#2E1E14] p-3.5 text-cream lg:col-span-4 space-y-3 shadow-md"
               >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-terracotta text-xs font-extrabold text-white">
-                      4
-                    </span>
-                    <h2 id="pantry-station-heading" className="font-display text-base sm:text-lg font-bold">
-                      Dispensa Ingredienti
-                    </h2>
-                  </div>
-                  <span className="text-xs font-semibold text-brown-soft">
-                    Tocca per aggiungere a Banco {selectedBoardIndex + 1}
+                <div className="flex items-center justify-between gap-2 border-b border-[#4D3322] pb-2">
+                  <h2 id="pantry-station-heading" className="font-display text-base font-bold !text-[#FFF8EC]">
+                    Vaschette Dispensa
+                  </h2>
+                  <span className="rounded-md bg-[#452C1E] px-2 py-0.5 text-[11px] font-bold text-[#F5DEC2]">
+                    → Banco {selectedBoardIndex + 1}
                   </span>
                 </div>
 
-                {/* Filtri Stazione Dispensa */}
+                {/* Cassetti Semantici della Dispensa */}
                 <div className="flex flex-wrap gap-1.5">
                   {[
                     { id: 'all', label: 'Tutti (17)' },
                     { id: STATIONS.BREAD, label: 'Pani (3)' },
-                    { id: STATIONS.COLD, label: 'Formaggi & Verdure (8)' },
+                    { id: STATIONS.COLD, label: 'Latticini & Orto (8)' },
                     { id: STATIONS.WARM, label: 'Caldi & Polpette (4)' },
-                    { id: STATIONS.SAUCE, label: 'Salse (5)' },
+                    { id: STATIONS.SAUCE, label: 'Salse & Ragù (5)' },
                   ].map((tab) => (
                     <button
                       key={tab.id}
                       type="button"
                       onClick={() => setStationTab(tab.id)}
                       aria-pressed={stationTab === tab.id}
-                      className={`rounded-lg px-2.5 py-1.5 text-xs font-bold min-h-[38px] transition ${
+                      className={`rounded-lg px-2.5 py-1 text-xs font-bold min-h-[36px] transition ${
                         stationTab === tab.id
-                          ? 'bg-brown text-cream-soft'
-                          : 'bg-cream text-brown hover:bg-brown/10'
+                          ? 'bg-terracotta text-white shadow-2xs'
+                          : 'bg-[#422A1D] text-[#E8D5B7] hover:bg-[#573827]'
                       }`}
                     >
                       {tab.label}
@@ -2323,7 +2404,7 @@ export default function GamePage() {
                   ))}
                 </div>
 
-                {/* Griglia Bottoni Ingredienti Dispensa con Sprite SVG e Badge Contestuale */}
+                {/* Griglia Vaschette Gastronorm 2.5D */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {pantryIngredients.map((ing) => {
                     const isForbidden = activeTicket?.modifiers?.exclude === ing.id;
@@ -2343,31 +2424,31 @@ export default function GamePage() {
                           })
                         }
                         data-testid={`add-ing-${ing.id}`}
-                        className={`press relative flex items-center gap-2 rounded-xl border-2 p-2.5 text-left text-xs font-bold min-h-[52px] transition ${
+                        className={`press relative flex items-center gap-2 rounded-xl border-2 p-2 text-left text-xs font-bold min-h-[54px] transition ${
                           isForbidden
-                            ? 'border-danger/40 bg-danger/5 text-brown-soft'
+                            ? 'border-danger/60 bg-[#3B1916] text-[#FF9E96]'
                             : isStillNeeded
-                              ? 'border-terracotta bg-white text-brown shadow-2xs ring-2 ring-terracotta/20'
+                              ? 'border-terracotta bg-[#FFFDF9] text-brown shadow-sm ring-2 ring-terracotta/40'
                               : isAlreadyOnBoard
-                                ? 'border-green bg-green/10 text-green-deep'
-                                : 'border-brown/15 bg-white text-brown hover:bg-cream/60'
+                                ? 'border-[#76B054] bg-[#243B1F] text-[#C5F2A7]'
+                                : 'border-[#6E503B] bg-[#F5E6D0] text-brown hover:bg-white'
                         }`}
                       >
-                        <IngredientIconSvg ingredientId={ing.id} size={28} />
+                        <IngredientIconSvg ingredientId={ing.id} size={32} />
                         <div className="min-w-0 flex-1">
                           <p className="truncate leading-tight">{ing.shortName}</p>
                           {isForbidden ? (
-                            <p className="text-[10px] font-extrabold text-danger">⛔ SENZA!</p>
+                            <p className="text-[10px] font-extrabold text-[#FF9E96]">⛔ SENZA!</p>
                           ) : isStillNeeded ? (
                             <p className="text-[10px] font-extrabold text-terracotta-deep">
                               ★ Serve ora
                             </p>
                           ) : isAlreadyOnBoard ? (
-                            <p className="text-[10px] font-extrabold text-green-deep">
+                            <p className="text-[10px] font-extrabold text-[#A9E37B]">
                               ✓ Nel panino
                             </p>
                           ) : (
-                            <p className="text-[10px] font-normal text-brown-soft">Disponibile</p>
+                            <p className="text-[10px] font-normal text-brown-soft">Pronto</p>
                           )}
                         </div>
                       </button>
@@ -2385,7 +2466,7 @@ export default function GamePage() {
         {view === 'finished' && snapshot?.game && (
           <section
             aria-labelledby="match-results-heading"
-            className="surface p-6 sm:p-8 max-w-4xl mx-auto space-y-6"
+            className="rounded-3xl border-2 border-[#7A482A] bg-cream-soft p-6 sm:p-8 max-w-4xl mx-auto space-y-6 shadow-xl"
           >
             {(() => {
               const rank = getBrigadeRankTitle(
@@ -2394,19 +2475,19 @@ export default function GamePage() {
               );
               return (
                 <div className="text-center border-b border-brown/12 pb-6">
-                  <span className="inline-flex items-center gap-1.5 rounded-sm bg-rating/25 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-brown">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-rating/25 px-3 py-1 text-xs font-extrabold uppercase tracking-wider text-brown">
                     <GameUiIcon name="sparkle" size={14} />
-                    <span>Fine turno al Banco del Gambero</span>
+                    <span>Chiusura Cassa al Banco del Gambero</span>
                   </span>
                   <h2
                     id="match-results-heading"
-                    className="mt-2 font-display text-3xl sm:text-4xl font-bold"
+                    className="mt-2 font-display text-3xl sm:text-4xl font-bold text-brown"
                   >
                     {rank.title}
                   </h2>
                   <p className="mt-1 text-base text-brown-soft">{rank.subtitle}</p>
 
-                  <div className="mt-5 inline-flex flex-col items-center rounded-2xl border-2 border-terracotta/40 bg-cream px-8 py-4">
+                  <div className="mt-5 inline-flex flex-col items-center rounded-2xl border-2 border-terracotta bg-white px-8 py-4 shadow-sm">
                     <span className="text-xs font-bold uppercase tracking-wider text-brown-soft">
                       Punteggio Finale di Squadra
                     </span>
@@ -2435,7 +2516,7 @@ export default function GamePage() {
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-brown/12 bg-cream/60 p-3.5 text-center"
+                  className="rounded-2xl border border-brown/15 bg-cream p-3.5 text-center"
                 >
                   <p className="text-xs font-semibold text-brown-soft">{stat.label}</p>
                   <p className="mt-1 font-display text-xl font-bold text-brown tabular">
@@ -2446,8 +2527,8 @@ export default function GamePage() {
             </div>
 
             <div>
-              <h3 className="font-display text-lg font-bold mb-3">
-                Contributi amichevoli della brigata
+              <h3 className="font-display text-lg font-bold mb-3 text-brown">
+                Contributi della brigata in cucina
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {snapshot.players.map((p) => (
@@ -2455,9 +2536,11 @@ export default function GamePage() {
                     key={p.id}
                     className="rounded-2xl border border-brown/15 bg-white p-4 flex items-center gap-3"
                   >
-                    <ChefAvatarSvg avatar={p.avatar} size={52} showRoleBadge />
+                    <ChefAvatarSvg avatar={p.avatar} size={60} showRoleBadge />
                     <div className="min-w-0">
-                      <p className="font-display text-base font-bold truncate">{p.nickname}</p>
+                      <p className="font-display text-base font-bold text-brown truncate">
+                        {p.nickname}
+                      </p>
                       <p className="text-xs text-brown-soft">
                         Serviti: <strong>{p.contributions?.ordersServed || 0}</strong> · Piastra:{' '}
                         <strong>{p.contributions?.ingredientsCooked || 0}</strong>
@@ -2507,26 +2590,26 @@ export default function GamePage() {
         )}
       </main>
 
-      {/* Modale Ricettario e Archetipi Clienti con Illustrazioni Ingredienti */}
+      {/* Modale Ricettario Illustrato 2.5D e Archetipi Clienti */}
       {showGuideModal && (
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby="guide-modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-brown/50 p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/65 p-4 backdrop-blur-xs"
           onClick={() => setShowGuideModal(false)}
         >
           <div
-            className="surface max-h-[85dvh] w-full max-w-3xl overflow-y-auto p-5 sm:p-7 space-y-6"
+            className="surface max-h-[85dvh] w-full max-w-4xl overflow-y-auto p-5 sm:p-7 space-y-6 text-brown"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between gap-4 border-b border-brown/12 pb-4">
               <div>
                 <h2 id="guide-modal-title" className="font-display text-2xl font-bold">
-                  Menu del Banco & Clienti di Napoli
+                  Ricettario Illustrato & Clienti del Quartiere
                 </h2>
                 <p className="text-xs text-brown-soft">
-                  Tutte le 8 ricette ufficiali con i relativi ingredienti e gli 8 archetipi comportamentali.
+                  Le 8 ricette originali de Il Banco del Gambero con piatti finiti 2.5D e ingredienti.
                 </p>
               </div>
               <button
@@ -2544,25 +2627,28 @@ export default function GamePage() {
                 {RECIPES.map((r) => (
                   <div
                     key={r.id}
-                    className="rounded-xl border border-brown/12 bg-cream/50 p-3.5 space-y-1.5"
+                    className="rounded-2xl border border-brown/15 bg-cream/60 p-3.5 flex items-start gap-3"
                   >
-                    <div className="flex items-center justify-between">
-                      <p className="font-display text-sm font-bold">{r.name}</p>
-                      <span className="text-xs font-bold text-terracotta-deep">
-                        {r.basePoints} pt {r.requiresGrill ? '· 🔥 Piastra' : '· No piastra'}
-                      </span>
-                    </div>
-                    <p className="text-xs text-brown-soft">{r.description}</p>
-                    <div className="flex flex-wrap gap-1.5 pt-1">
-                      {r.ingredients.map((ingId) => (
-                        <span
-                          key={ingId}
-                          className="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-0.5 text-[11px] font-semibold border border-brown/12"
-                        >
-                          <IngredientIconSvg ingredientId={ingId} size={15} />
-                          <span>{getIngredient(ingId)?.shortName}</span>
+                    <RecipePlateSvg recipeId={r.id} size={72} />
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-center justify-between gap-1">
+                        <p className="font-display text-sm font-bold">{r.name}</p>
+                        <span className="text-xs font-bold text-terracotta-deep shrink-0">
+                          {r.basePoints} pt {r.requiresGrill ? '· Piastra' : '· Banco'}
                         </span>
-                      ))}
+                      </div>
+                      <p className="text-xs text-brown-soft">{r.description}</p>
+                      <div className="flex flex-wrap gap-1 pt-1">
+                        {r.ingredients.map((ingId) => (
+                          <span
+                            key={ingId}
+                            className="inline-flex items-center gap-1 rounded-lg bg-white px-2 py-0.5 text-[11px] font-semibold border border-brown/12"
+                          >
+                            <IngredientIconSvg ingredientId={ingId} size={16} />
+                            <span>{getIngredient(ingId)?.shortName}</span>
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))}

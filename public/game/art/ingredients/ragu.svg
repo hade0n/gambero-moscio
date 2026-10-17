@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+        <ellipse cx="48" cy="70" rx="30" ry="8" fill="#000" fill-opacity="0.2"/>
+        <!-- Tegamino di terracotta con ragù napoletano -->
+        <path d="M18 42 H78 C78 61, 64 70, 48 70 C32 70, 18 61, 18 42 Z" fill="#9E3B24" stroke="#3A2A22" stroke-width="2.5"/>
+        <ellipse cx="48" cy="42" rx="30" ry="11" fill="#C83E2B" stroke="#3A2A22" stroke-width="2.4"/>
+        <ellipse cx="48" cy="42" rx="21" ry="7" fill="#9C2315"/>
+        <path d="M36 22 Q33 29 38 33 M50 19 Q47 27 52 31 M62 23 Q59 29 64 33" stroke="#D96B32" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+      </svg>

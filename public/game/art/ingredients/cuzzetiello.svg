@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+        <defs>
+          <linearGradient id="cuzzBody" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#D48845"/>
+            <stop offset="55%" stop-color="#9E5622"/>
+            <stop offset="100%" stop-color="#693410"/>
+          </linearGradient>
+        </defs>
+        <ellipse cx="48" cy="76" rx="30" ry="8" fill="#000" fill-opacity="0.2"/>
+        <!-- Punta conica di pane cafone -->
+        <path d="M16 38 L41 75 C45 80, 51 80, 55 75 L80 38 Z" fill="url(#cuzzBody)" stroke="#3A2A22" stroke-width="2.6"/>
+        <!-- Crosta rustica rigata -->
+        <path d="M27 50 Q48 56 69 50 M34 62 Q48 66 62 62" stroke="#592B0C" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <!-- Apertura scavata con mollica calda -->
+        <ellipse cx="48" cy="38" rx="32" ry="13" fill="#F2D7A7" stroke="#3A2A22" stroke-width="2.5"/>
+        <ellipse cx="48" cy="38" rx="22" ry="8" fill="#7D3B18" stroke="#C68446" stroke-width="1.6"/>
+      </svg>

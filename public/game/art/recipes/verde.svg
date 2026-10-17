@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 140" fill="none">
+      <!-- Ombra piatto -->
+      <ellipse cx="80" cy="116" rx="66" ry="18" fill="#000" fill-opacity="0.22"/>
+      <!-- Piatto in ceramica vietrese bianca e blu -->
+      <ellipse cx="80" cy="110" rx="64" ry="17" fill="#FFFDF9" stroke="#2D5A88" stroke-width="3.5"/>
+      <ellipse cx="80" cy="110" rx="54" ry="13" fill="#F7EFE2" stroke="#D96B32" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <!-- Carta paglia da paninoteca -->
+      <polygon points="34,108 80,94 128,107 84,121" fill="#F2D8A7" stroke="#C6985A" stroke-width="1.4"/>
+      <g transform="translate(32, 38) scale(1, 0.78)">
+        <defs>
+          <radialGradient id="casCrust" cx="45%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#E6AC6E"/>
+            <stop offset="65%" stop-color="#B87333"/>
+            <stop offset="100%" stop-color="#7D491B"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="73" rx="36" ry="9" fill="#000" fill-opacity="0.18"/>
+        <path d="M12 52 C10 26, 28 18, 48 18 C68 18, 86 26, 84 52 C83 66, 68 72, 48 72 C28 72, 13 66, 12 52 Z" fill="url(#casCrust)" stroke="#3A2A22" stroke-width="2.6"/>
+        <!-- Spolverata di farina e tagli a rosetta -->
+        <ellipse cx="48" cy="40" rx="25" ry="14" fill="#FFF8EB" fill-opacity="0.22"/>
+        <path d="M26 38 Q48 28 70 38 M30 49 Q48 39 66 49 M48 23 L48 56" stroke="#F7DFB9" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M20 57 Q48 65 76 57" stroke="#FCE7C2" stroke-width="2.4" stroke-dasharray="4 3" fill="none"/>
+      </g><g transform="translate(32, 27) scale(1, 0.78)">
+        <defs>
+          <radialGradient id="vegGrad_cooked" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#658A3B"/>
+            <stop offset="100%" stop-color="#3C5720"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="64" rx="33" ry="10" fill="#000" fill-opacity="0.2"/>
+        <rect x="15" y="34" width="66" height="28" rx="14" fill="url(#vegGrad_cooked)" stroke="#3A2A22" stroke-width="2.6"/>
+        <circle cx="32" cy="47" r="3.2" fill="#F5D387"/>
+        <circle cx="48" cy="43" r="3" fill="#FFF3E2"/>
+        <circle cx="62" cy="49" r="3.2" fill="#E89846"/>
+        <circle cx="41" cy="53" r="2.6" fill="#A3D96C"/>
+        <path d="M27 38 L34 56 M55 38 L62 56" stroke="#2A3D16" stroke-width="2.5" stroke-linecap="round"/>
+      </g><g transform="translate(32, 16) scale(1, 0.78)">
+        <defs>
+          <radialGradient id="latGrad" cx="45%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#A8DE6C"/>
+            <stop offset="70%" stop-color="#6CA243"/>
+            <stop offset="100%" stop-color="#436E24"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="66" rx="34" ry="9" fill="#000" fill-opacity="0.16"/>
+        <path d="M14 53 C10 41, 17 29, 29 30 C35 21, 51 21, 59 29 C72 26, 84 38, 79 51 C76 63, 61 67, 48 64 C33 67, 18 63, 14 53 Z" fill="url(#latGrad)" stroke="#3A2A22" stroke-width="2.5"/>
+        <path d="M25 49 Q48 41 70 46 M47 44 L38 33 M53 44 L62 34 M42 46 L34 55" stroke="#E2F7C4" stroke-width="3" stroke-linecap="round" fill="none"/>
+      </g><g transform="translate(32, 5) scale(1, 0.78)">
+        <defs>
+          <radialGradient id="tomGrad" cx="40%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#FF6B57"/>
+            <stop offset="75%" stop-color="#D13B2A"/>
+            <stop offset="100%" stop-color="#8F2015"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="66" rx="31" ry="9" fill="#000" fill-opacity="0.18"/>
+        <ellipse cx="48" cy="48" rx="30" ry="22" fill="url(#tomGrad)" stroke="#3A2A22" stroke-width="2.6"/>
+        <ellipse cx="48" cy="48" rx="22" ry="15" fill="#F25C4A" stroke="#B0291B" stroke-width="1.5"/>
+        <line x1="48" y1="31" x2="48" y2="65" stroke="#C93829" stroke-width="3"/>
+        <line x1="24" y1="48" x2="72" y2="48" stroke="#C93829" stroke-width="3"/>
+        <g fill="#FFE699">
+          <circle cx="38" cy="41" r="2.2"/><circle cx="42" cy="38" r="1.8"/>
+          <circle cx="58" cy="41" r="2.2"/><circle cx="54" cy="38" r="1.8"/>
+          <circle cx="38" cy="55" r="2.2"/><circle cx="58" cy="55" r="2.2"/>
+        </g>
+      </g><g transform="translate(32, -6) scale(1, 0.78)">
+        <ellipse cx="48" cy="66" rx="30" ry="8" fill="#000" fill-opacity="0.16"/>
+        <g transform="translate(0,0)">
+          <circle cx="33" cy="52" r="16" fill="#6E8F32" stroke="#3A2A22" stroke-width="2.4"/>
+          <circle cx="33" cy="52" r="10" fill="#B4D46E"/>
+          <circle cx="60" cy="43" r="16" fill="#6E8F32" stroke="#3A2A22" stroke-width="2.4"/>
+          <circle cx="60" cy="43" r="10" fill="#B4D46E"/>
+          <circle cx="46" cy="35" r="14" fill="#789C38" stroke="#3A2A22" stroke-width="2.4"/>
+          <circle cx="46" cy="35" r="8.5" fill="#C2E07E"/>
+        </g>
+      </g><g transform="translate(32, -17) scale(1, 0.78)">
+        <ellipse cx="48" cy="68" rx="28" ry="8" fill="#000" fill-opacity="0.18"/>
+        <circle cx="48" cy="48" r="27" fill="#E37639" stroke="#3A2A22" stroke-width="2.6"/>
+        <path d="M34 48 C34 39, 43 34, 51 37 C60 40, 62 51, 54 57 C46 62, 36 57, 39 48" stroke="#FFF3E2" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+      </g><g transform="translate(32, -28) scale(1, 0.75)">
+        <defs>
+          <radialGradient id="casCrust" cx="45%" cy="35%" r="60%">
+            <stop offset="0%" stop-color="#E6AC6E"/>
+            <stop offset="65%" stop-color="#B87333"/>
+            <stop offset="100%" stop-color="#7D491B"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="73" rx="36" ry="9" fill="#000" fill-opacity="0.18"/>
+        <path d="M12 52 C10 26, 28 18, 48 18 C68 18, 86 26, 84 52 C83 66, 68 72, 48 72 C28 72, 13 66, 12 52 Z" fill="url(#casCrust)" stroke="#3A2A22" stroke-width="2.6"/>
+        <!-- Spolverata di farina e tagli a rosetta -->
+        <ellipse cx="48" cy="40" rx="25" ry="14" fill="#FFF8EB" fill-opacity="0.22"/>
+        <path d="M26 38 Q48 28 70 38 M30 49 Q48 39 66 49 M48 23 L48 56" stroke="#F7DFB9" stroke-width="3" stroke-linecap="round" fill="none"/>
+        <path d="M20 57 Q48 65 76 57" stroke="#FCE7C2" stroke-width="2.4" stroke-dasharray="4 3" fill="none"/>
+      </g>
+    </svg>

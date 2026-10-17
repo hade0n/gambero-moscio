@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 160" fill="none">
+      <!-- Ombra busto -->
+      <ellipse cx="70" cy="148" rx="46" ry="8" fill="#000" fill-opacity="0.2"/>
+      <!-- Busto e abito articolato -->
+      <path d="M22 148 C25 112, 42 98, 70 98 C98 98, 115 112, 118 148 Z" fill="#C88434" stroke="#3A2A22" stroke-width="3"/>
+      <!-- Maglia interna e colletto -->
+      <path d="M52 98 L70 126 L88 98 Z" fill="#FFF3E2" stroke="#3A2A22" stroke-width="2.2"/>
+      <!-- Braccia appoggiate al bancone -->
+      <path d="M22 146 C18 128, 28 112, 38 112" stroke="#3A2A22" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M118 146 C122 128, 112 112, 102 112" stroke="#3A2A22" stroke-width="2.6" stroke-linecap="round"/>
+      <ellipse cx="42" cy="144" rx="10" ry="6.5" fill="#C98E63" stroke="#3A2A22" stroke-width="2.2"/>
+      <ellipse cx="98" cy="144" rx="10" ry="6.5" fill="#C98E63" stroke="#3A2A22" stroke-width="2.2"/>
+      
+      
+      <!-- Collo e Orecchie -->
+      <rect x="60" y="82" width="20" height="20" rx="8" fill="#C98E63" stroke="#3A2A22" stroke-width="2.4"/>
+      <circle cx="41" cy="64" r="6.5" fill="#C98E63" stroke="#3A2A22" stroke-width="2.4"/>
+      <circle cx="99" cy="64" r="6.5" fill="#C98E63" stroke="#3A2A22" stroke-width="2.4"/>
+      <!-- Viso -->
+      <ellipse cx="70" cy="62" rx="28" ry="30" fill="#C98E63" stroke="#3A2A22" stroke-width="3"/>
+      <!-- Guance -->
+      <circle cx="50" cy="70" r="5.5" fill="#D96B32" fill-opacity="0.28"/>
+      <circle cx="90" cy="70" r="5.5" fill="#D96B32" fill-opacity="0.28"/>
+      <!-- Capelli -->
+      
+      <path d="M41 53 C42 32, 54 24, 70 24 C86 24, 98 32, 99 53 C90 42, 80 38, 70 38 C60 38, 50 42, 41 53 Z" fill="#261C18" stroke="#3A2A22" stroke-width="2.8"/>
+      
+    <path d="M51 56 Q57 53 63 56" stroke="#3A2A22" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M77 56 Q83 53 89 56" stroke="#3A2A22" stroke-width="2.4" stroke-linecap="round"/>
+  
+      <!-- Occhi espressivi con pupilla e punto luce -->
+      <circle cx="57" cy="64" r="4.2" fill="#3A2A22"/>
+      <circle cx="83" cy="64" r="4.2" fill="#3A2A22"/>
+      <circle cx="55.5" cy="62.5" r="1.4" fill="#FFF9F1"/>
+      <circle cx="81.5" cy="62.5" r="1.4" fill="#FFF9F1"/>
+      <!-- Naso -->
+      <path d="M70 63 L67 71 L72 72" stroke="#3A2A22" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <path d="M60 78 Q70 86 80 78" stroke="#3A2A22" stroke-width="3" stroke-linecap="round" fill="none"/>
+      
+      
+    </svg>

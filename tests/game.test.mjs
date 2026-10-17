@@ -683,3 +683,47 @@ test('9. Verifica flussi completi: ordine semplice, più ingredienti, pre-brucia
   const afterExpire = advanceSimulation(r.state, nextTkt.expiresAtMs + 100);
   assert.equal(afterExpire.stats.customersLost, 1, 'Il cliente impaziente se ne va alla scadenza');
 });
+
+test('10. Asset pack 2.5D e manifest: ogni ingrediente, ricetta, cuoco, cliente e scena ha file validi su disco', async () => {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const { GAME_ART_MANIFEST, getIngredientArtUrl, getRecipeArtUrl, getChefArtUrl, getCustomerArtUrl } = await import('../src/game/data/artManifest.js');
+  const { CHEF_PERSONAS } = await import('../src/game/data/characters.js');
+
+  const manifestPath = path.resolve(process.cwd(), 'public/game/art/manifest.json');
+  assert.ok(fs.existsSync(manifestPath), 'public/game/art/manifest.json esiste');
+  const diskManifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  assert.equal(diskManifest.version, GAME_ART_MANIFEST.version);
+
+  const checkPublicUrl = (url, label) => {
+    assert.ok(url && url.startsWith('/game/art/'), `${label} ha URL valido: ${url}`);
+    const filePath = path.resolve(process.cwd(), 'public', url.replace(/^\//, ''));
+    assert.ok(fs.existsSync(filePath), `File asset esistente per ${label}: ${filePath}`);
+    const stat = fs.statSync(filePath);
+    assert.ok(stat.size > 100, `File asset non vuoto per ${label} (${stat.size} bytes)`);
+  };
+
+  for (const [key, url] of Object.entries(GAME_ART_MANIFEST.scenes)) {
+    checkPublicUrl(url, `scene:${key}`);
+  }
+  for (const ing of INGREDIENTS) {
+    checkPublicUrl(getIngredientArtUrl(ing.id), `ingredient:${ing.id}`);
+    if (ing.requiresCooking) {
+      for (const state of ['raw', 'cooking', 'cooked', 'burned']) {
+        checkPublicUrl(getIngredientArtUrl(ing.id, state), `ingredient:${ing.id}:${state}`);
+      }
+    }
+  }
+  for (const recipe of RECIPES) {
+    checkPublicUrl(getRecipeArtUrl(recipe.id), `recipe:${recipe.id}`);
+  }
+  for (const chef of CHEF_PERSONAS) {
+    checkPublicUrl(getChefArtUrl(chef.id), `chef:${chef.id}`);
+  }
+  for (let i = 0; i < 8; i += 1) {
+    for (const mood of ['happy', 'thinking', 'impatient', 'angry', 'ready']) {
+      checkPublicUrl(getCustomerArtUrl(i, mood), `customer:${i}:${mood}`);
+    }
+  }
+});
+

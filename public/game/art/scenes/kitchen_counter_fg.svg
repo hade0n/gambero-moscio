@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 540" fill="none">
+    <defs>
+      <linearGradient id="woodTop" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#8F5633"/>
+        <stop offset="50%" stop-color="#6E3E22"/>
+        <stop offset="100%" stop-color="#4A2713"/>
+      </linearGradient>
+      <linearGradient id="steelBay" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#D8D2C9"/>
+        <stop offset="50%" stop-color="#B5ADA2"/>
+        <stop offset="100%" stop-color="#8A8279"/>
+      </linearGradient>
+      <linearGradient id="castIron" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#362B26"/>
+        <stop offset="100%" stop-color="#1E1714"/>
+      </linearGradient>
+    </defs>
+    <!-- Soglia bancone superiore (dove si affacciano i clienti) -->
+    <rect x="0" y="182" width="1280" height="22" fill="#A66A43" stroke="#3A2A22" stroke-width="2.5"/>
+    <rect x="0" y="200" width="1280" height="10" fill="#59311A"/>
+    <!-- Fregio in maiolica vietrese sotto la soglia -->
+    <rect x="0" y="210" width="1280" height="18" fill="#FFF9F1" stroke="#2D5A88" stroke-width="1.5"/>
+    <!-- Piano principale di lavoro in legno massello scuro in prospettiva 2.5D -->
+    <polygon points="0,228 1280,228 1280,540 0,540" fill="url(#woodTop)" stroke="#3A2A22" stroke-width="3"/>
+    <!-- Venature del legno -->
+    <line x1="0" y1="310" x2="1280" y2="310" stroke="#3A2A22" stroke-opacity="0.22" stroke-width="2"/>
+    <line x1="0" y1="415" x2="1280" y2="415" stroke="#3A2A22" stroke-opacity="0.22" stroke-width="2"/>
+    <!-- Alloggiamento Piastra in Ghisa a 4 Fuochi (Sinistra/Centro-Sinistra) -->
+    <rect x="28" y="244" width="490" height="274" rx="18" fill="url(#castIron)" stroke="#6E5A4F" stroke-width="4"/>
+    <!-- Alloggiamento Banchi Assemblaggio in Legno & Acciaio (Centro-Destra) -->
+    <rect x="542" y="244" width="710" height="274" rx="18" fill="#EBD8BE" stroke="#4A2713" stroke-width="3.5"/>
+  </svg>

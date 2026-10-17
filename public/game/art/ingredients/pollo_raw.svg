@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+        <defs>
+          <radialGradient id="chkGrad_raw" cx="42%" cy="35%" r="65%">
+            <stop offset="0%" stop-color="#F7C8B6"/>
+            <stop offset="100%" stop-color="#D9947E"/>
+          </radialGradient>
+        </defs>
+        <ellipse cx="48" cy="65" rx="34" ry="10" fill="#000" fill-opacity="0.2"/>
+        <path d="M14 49 C12 37, 23 29, 36 31 C45 26, 61 28, 70 34 C82 37, 84 52, 75 59 C64 67, 34 67, 21 60 C15 57, 14 53, 14 49 Z" fill="url(#chkGrad_raw)" stroke="#3A2A22" stroke-width="2.6"/>
+        <!-- Panatura croccante a fiocchi -->
+        <path d="M28 42 L35 46 M46 39 L53 43 M60 44 L66 48 M36 53 L45 51 M54 54 L61 52" stroke="#FFF3D1" stroke-width="2.8" stroke-linecap="round"/>
+      </svg>

@@ -541,3 +541,145 @@ test('8. Live Vite Server: route /game (refresh), non-regressione /api/restauran
     await srv.close();
   }
 });
+
+test('9. Verifica flussi completi: ordine semplice, più ingredienti, pre-bruciatura, DISCARD_GRILL, Vassoio Caldo co-op, cliente indeciso, errore assemblaggio e cliente impaziente', async () => {
+  const { inspectBoardAgainstTicket } = await import('../src/game/engine/gameEngine.js');
+  const t0 = 2_000_000;
+  let state = createInitialGameState({ seed: 777, playerCount: 2, nowMs: t0 });
+
+  const simpleTicket = {
+    id: 'tkt-simple',
+    customerId: 'npc-1',
+    customerName: 'Elena',
+    appearance: {},
+    archetypeId: 'di_fretta',
+    archetypeName: 'Di fretta',
+    badgeLabel: 'Di fretta',
+    recipeId: 'cuzzetiello_ragu',
+    recipeName: 'Cuzzetiello al ragù',
+    bread: 'cuzzetiello',
+    requiresGrill: false,
+    modifiers: {},
+    targetIngredients: ['cuzzetiello', 'polpette', 'ragu'],
+    basePoints: 100,
+    bonusPoints: 35,
+    bonusPatienceRatio: 0.45,
+    quote: 'Al volo!',
+    spawnedAtMs: t0,
+    patienceMs: 30000,
+    expiresAtMs: t0 + 30000,
+    thinkingUntilMs: null,
+  };
+
+  const indecisiveMultiTicket = {
+    id: 'tkt-multi',
+    customerId: 'npc-2',
+    customerName: 'Bruno',
+    appearance: {},
+    archetypeId: 'indeciso',
+    archetypeName: 'Indeciso',
+    badgeLabel: 'Indeciso',
+    recipeId: 'classico_gambero',
+    recipeName: 'Classico del Gambero',
+    bread: 'pane_burger',
+    requiresGrill: true,
+    modifiers: { exclude: 'pomodoro', add: 'cipolla' },
+    targetIngredients: ['pane_burger', 'burger_manzo', 'provola', 'lattuga', 'salsa_casa', 'cipolla'],
+    basePoints: 130,
+    bonusPoints: 25,
+    bonusPatienceRatio: 0.35,
+    quote: 'Aspè che scelgo…',
+    spawnedAtMs: t0,
+    patienceMs: 45000,
+    expiresAtMs: t0 + 45000,
+    thinkingUntilMs: t0 + 3200,
+  };
+
+  state = { ...state, activeTickets: [simpleTicket, indecisiveMultiTicket] };
+
+  // A) Verifica ordine semplice (Cuzzetiello al ragù) + analisi errori in tempo reale
+  let check = inspectBoardAgainstTicket(['cuzzetiello', 'ketchup'], simpleTicket);
+  assert.equal(check.status, 'has_errors', 'Rileva ketchup come ingrediente errato');
+  assert.equal(check.assembledLayers[1].isExtra, true);
+
+  let r = applyPlayerAction(state, { actionId: 's1', type: 'ADD_INGREDIENT', boardIndex: 0, ingredientId: 'cuzzetiello', playerId: 'p1' }, t0 + 100);
+  r = applyPlayerAction(r.state, { actionId: 's2', type: 'ADD_INGREDIENT', boardIndex: 0, ingredientId: 'polpette', playerId: 'p1' }, t0 + 200);
+  r = applyPlayerAction(r.state, { actionId: 's3', type: 'ADD_INGREDIENT', boardIndex: 0, ingredientId: 'ragu', playerId: 'p1' }, t0 + 300);
+
+  check = inspectBoardAgainstTicket(r.state.prepBoards[0].ingredients, simpleTicket);
+  assert.equal(check.ok, true);
+  assert.equal(check.status, 'ready_to_serve');
+
+  r = applyPlayerAction(r.state, { actionId: 's4', type: 'SERVE_ORDER', boardIndex: 0, ticketId: 'tkt-simple', playerId: 'p1' }, t0 + 400);
+  assert.equal(r.conflict, false);
+  assert.equal(r.state.stats.ordersServed, 1);
+
+  // B) Verifica blocco consegna su cliente indeciso finché thinkingUntilMs è attivo
+  r = applyPlayerAction(r.state, { actionId: 'm0', type: 'ADD_INGREDIENT', boardIndex: 1, ingredientId: 'pane_burger', playerId: 'p2' }, t0 + 500);
+  const blockedServe = applyPlayerAction(
+    r.state,
+    { actionId: 'm-block', type: 'SERVE_ORDER', boardIndex: 1, ticketId: 'tkt-multi', playerId: 'p2' },
+    t0 + 600,
+  );
+  assert.equal(blockedServe.conflict, true, 'Non si può consegnare mentre il cliente sta ancora decidendo');
+
+  // Fissa la comanda dell'indeciso con SELECT_TICKET
+  r = applyPlayerAction(r.state, { actionId: 'm-confirm', type: 'SELECT_TICKET', boardIndex: 1, ticketId: 'tkt-multi', playerId: 'p2' }, t0 + 700);
+  const confirmedTicket = r.state.activeTickets.find((t) => t.id === 'tkt-multi');
+  assert.equal(confirmedTicket.thinkingUntilMs, null, 'SELECT_TICKET fissa subito la comanda');
+
+  // C) Cottura in ritardo (aboutToBurn), DISCARD_GRILL e flusso Vassoio Caldo (cookedTray)
+  r = applyPlayerAction(r.state, { actionId: 'g1', type: 'START_COOK', ingredientId: 'burger_manzo', slotIndex: 0, playerId: 'p1' }, t0 + 1000);
+  r = applyPlayerAction(r.state, { actionId: 'g2', type: 'START_COOK', ingredientId: 'pollo', slotIndex: 1, playerId: 'p1' }, t0 + 1000);
+
+  // Scarta il pollo messo per errore con DISCARD_GRILL
+  r = applyPlayerAction(r.state, { actionId: 'g-disc', type: 'DISCARD_GRILL', slotIndex: 1, playerId: 'p1' }, t0 + 2000);
+  assert.equal(r.state.grillSlots[1].ingredientId, null, 'DISCARD_GRILL libera lo slot');
+
+  // Verifica stato aboutToBurn quando il burger è cotto da oltre il 65% della burnWindow (cook=5500, burn=7500 -> a +10600ms)
+  const lateStatus = getGrillSlotStatus(r.state.grillSlots[0], t0 + 1000 + 5500 + 5200);
+  assert.equal(lateStatus.state, COOK_STATES.COOKED);
+  assert.equal(lateStatus.aboutToBurn, true, 'Segnala aboutToBurn negli ultimi secondi prima di bruciare');
+
+  // Raccoglie nel Vassoio Caldo (toBoardIndex: null)
+  r = applyPlayerAction(
+    r.state,
+    { actionId: 'g-tray', type: 'COLLECT_GRILL', slotIndex: 0, toBoardIndex: null, playerId: 'p1' },
+    t0 + 1000 + 5500 + 5200,
+  );
+  assert.equal(r.state.cookedTray.length, 1, 'Il burger cotto entra nel Vassoio Caldo condiviso');
+
+  // Il compagno p2 preleva dal Vassoio Caldo e completa l'ordine multi-ingrediente sul Banco 1
+  const tAssemble = t0 + 12_000;
+  for (const ingId of ['burger_manzo', 'provola', 'lattuga', 'salsa_casa', 'cipolla']) {
+    r = applyPlayerAction(
+      r.state,
+      { actionId: `add-${ingId}`, type: 'ADD_INGREDIENT', boardIndex: 1, ingredientId: ingId, playerId: 'p2' },
+      tAssemble,
+    );
+  }
+  assert.equal(r.state.cookedTray.length, 0, 'Il burger è stato prelevato dal Vassoio Caldo');
+
+  r = applyPlayerAction(
+    r.state,
+    { actionId: 'serve-multi', type: 'SERVE_ORDER', boardIndex: 1, ticketId: 'tkt-multi', playerId: 'p2' },
+    tAssemble + 100,
+  );
+  assert.equal(r.conflict, false);
+  assert.equal(r.state.stats.ordersServed, 2);
+  assert.equal(r.state.combo, 2, 'Combo di squadra incrementata a x2');
+
+  // D) Verifica consegna errata (-20 pt e azzeramento combo) e scadenza cliente impaziente (-25 pt)
+  const nextTkt = r.state.activeTickets[0];
+  assert.ok(nextTkt, 'Nuovo ticket generato automaticamente');
+  r = applyPlayerAction(r.state, { actionId: 'wrong-1', type: 'ADD_INGREDIENT', boardIndex: 0, ingredientId: 'ketchup', playerId: 'p1' }, tAssemble + 200);
+  const scoreBeforeWrong = r.state.score;
+  r = applyPlayerAction(r.state, { actionId: 'wrong-serve', type: 'SERVE_ORDER', boardIndex: 0, ticketId: nextTkt.id, playerId: 'p1' }, tAssemble + 300);
+  assert.equal(r.state.stats.wrongDeliveries, 1);
+  assert.equal(r.state.combo, 0, 'La consegna errata azzera la combo');
+  assert.equal(r.state.score, scoreBeforeWrong - 20);
+
+  // Scadenza cliente impaziente
+  const afterExpire = advanceSimulation(r.state, nextTkt.expiresAtMs + 100);
+  assert.equal(afterExpire.stats.customersLost, 1, 'Il cliente impaziente se ne va alla scadenza');
+});

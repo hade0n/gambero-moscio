@@ -76,6 +76,7 @@ export function getGrillSlotStatus(slot, nowMs) {
       state: COOK_STATES.RAW,
       progress: 0,
       burnProgress: 0,
+      aboutToBurn: false,
       remainingMs: 0,
     };
   }
@@ -89,16 +90,19 @@ export function getGrillSlotStatus(slot, nowMs) {
       state: COOK_STATES.COOKING,
       progress: Math.min(1, elapsed / cookTimeMs),
       burnProgress: 0,
+      aboutToBurn: false,
       remainingMs: cookTimeMs - elapsed,
     };
   }
 
   const readyElapsed = elapsed - cookTimeMs;
   if (readyElapsed < burnWindowMs) {
+    const burnProgress = Math.min(1, readyElapsed / burnWindowMs);
     return {
       state: COOK_STATES.COOKED,
       progress: 1,
-      burnProgress: Math.min(1, readyElapsed / burnWindowMs),
+      burnProgress,
+      aboutToBurn: burnProgress >= 0.65,
       remainingMs: burnWindowMs - readyElapsed,
     };
   }
@@ -107,6 +111,7 @@ export function getGrillSlotStatus(slot, nowMs) {
     state: COOK_STATES.BURNED,
     progress: 1,
     burnProgress: 1,
+    aboutToBurn: false,
     remainingMs: 0,
   };
 }
@@ -642,6 +647,79 @@ export function validateSandwichIngredients(assembled = [], target = []) {
 }
 
 /**
+ * Analizza in dettaglio un tagliere rispetto a un ticket cliente, restituendo:
+ * - checklist ordinata degli ingredienti richiesti (presente / mancante)
+ * - elenco degli strati sul tagliere marcati come validi o in eccesso/errati (`isExtra`)
+ * - stato complessivo (`empty` | `in_progress` | `has_errors` | `ready_to_serve`)
+ */
+export function inspectBoardAgainstTicket(boardIngredients = [], ticket = null) {
+  const assembled = Array.isArray(boardIngredients) ? boardIngredients : [];
+  if (!ticket || !Array.isArray(ticket.targetIngredients)) {
+    return {
+      status: assembled.length === 0 ? 'empty' : 'in_progress',
+      ok: false,
+      checklist: [],
+      assembledLayers: assembled.map((ingredientId, index) => ({
+        index,
+        ingredientId,
+        isExtra: false,
+      })),
+      missing: [],
+      extra: [],
+    };
+  }
+
+  const target = ticket.targetIngredients;
+  const validation = validateSandwichIngredients(assembled, target);
+
+  // Conta le occorrenze disponibili sul tagliere per marcare la checklist
+  const remainingHave = {};
+  for (const id of assembled) {
+    remainingHave[id] = (remainingHave[id] || 0) + 1;
+  }
+
+  const checklist = target.map((ingredientId) => {
+    if ((remainingHave[ingredientId] || 0) > 0) {
+      remainingHave[ingredientId] -= 1;
+      return { ingredientId, present: true };
+    }
+    return { ingredientId, present: false };
+  });
+
+  // Conta le occorrenze richieste per individuare esattamente quali strati sul tagliere sono extra/errati
+  const remainingNeeded = {};
+  for (const id of target) {
+    remainingNeeded[id] = (remainingNeeded[id] || 0) + 1;
+  }
+
+  const assembledLayers = assembled.map((ingredientId, index) => {
+    if ((remainingNeeded[ingredientId] || 0) > 0) {
+      remainingNeeded[ingredientId] -= 1;
+      return { index, ingredientId, isExtra: false };
+    }
+    return { index, ingredientId, isExtra: true };
+  });
+
+  let status = 'in_progress';
+  if (assembled.length === 0) {
+    status = 'empty';
+  } else if (validation.extra.length > 0) {
+    status = 'has_errors';
+  } else if (validation.ok) {
+    status = 'ready_to_serve';
+  }
+
+  return {
+    status,
+    ok: validation.ok,
+    checklist,
+    assembledLayers,
+    missing: validation.missing,
+    extra: validation.extra,
+  };
+}
+
+/**
  * Applica un'azione di gioco in modo idempotente e autorevole.
  * Ritorna `{ state, notice, conflict, duplicate }`.
  */
@@ -981,7 +1059,7 @@ export function applyPlayerAction(rawState, action = {}, nowMs = Date.now()) {
           : state.activeTickets[0]?.id || null;
 
       const activeTickets = state.activeTickets.map((t) =>
-        t.id === targetTicketId ? { ...t, thinkingUntilMs: null, prepStarted: true } : t,
+        t.id === targetTicketId ? { ...t, prepStarted: true } : t,
       );
 
       const prepBoards = state.prepBoards.map((b, idx) =>
@@ -1100,6 +1178,14 @@ export function applyPlayerAction(rawState, action = {}, nowMs = Date.now()) {
           state: recordActionId(state),
           conflict: true,
           notice: 'Ordine già consegnato o scaduto!',
+        };
+      }
+
+      if (ticket.thinkingUntilMs && nowMs < ticket.thinkingUntilMs) {
+        return {
+          state: recordActionId(state),
+          conflict: true,
+          notice: `${ticket.customerName} sta ancora decidendo! Fissa prima la comanda.`,
         };
       }
 

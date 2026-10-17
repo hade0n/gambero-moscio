@@ -1,18 +1,26 @@
 /**
- * Scena interattiva 2D in Phaser 4 per "Il Banco del Gambero".
- * - Disegna la paninoteca napoletana (piastrelle maiolicate, bancone in legno caldo,
- *   clienti NPC con barra pazienza, piastra a 4 slot con stati crudo/cottura/pronto/bruciato,
- *   2 banchi di assemblaggio con strati del panino visibili e cuochi della squadra).
- * - Espone hit area interattive (tap/click) su clienti, slot griglia, banchi e campana di consegna.
- * - Si distrugge in modo pulito (`game.destroy(true)`) all'uscita da `/game`.
+ * Panorama interattivo 2D in Phaser 4 per "Il Banco del Gambero".
+ * Progettato come fascia panoramica compatta (`960×230`) che rappresenta in tempo reale
+ * la paninoteca napoletana senza duplicare i pannelli testuali né spingere i comandi fuori schermo:
+ * - Zona Sinistra: Bancone maiolicato con i clienti in attesa (volto con espressione reale
+ *   legata alla pazienza, fumetto ordine, badge Banco 1/2 collegato).
+ * - Zona Centrale: Piastra in ghisa a 4 fuochi (stati Libero / Sfrigola / Pronto / Sta bruciando! / Bruciato)
+ *   + contatore del Vassoio Caldo condiviso.
+ * - Zona Destra: I 2 Taglieri condivisi (Banco 1 e Banco 2) con il panino che cresce a strati,
+ *   il cuoco della brigata al lavoro e il segnale verde "PRONTO! SERVI" quando la ricetta è completa.
  */
 import { useEffect, useRef } from 'react';
 import * as Phaser from 'phaser';
 import { COOK_STATES, getIngredient } from '../data/ingredients.js';
-import { getGrillSlotStatus, getMatchPhase } from '../engine/gameEngine.js';
+import {
+  getGrillSlotStatus,
+  getMatchPhase,
+  getScalingForPlayers,
+  inspectBoardAgainstTicket,
+} from '../engine/gameEngine.js';
 
 const CANVAS_W = 960;
-const CANVAS_H = 430;
+const CANVAS_H = 228;
 
 function hexToNum(hex, fallback = 0xd96b32) {
   if (typeof hex !== 'string') return fallback;
@@ -31,7 +39,6 @@ export default function KitchenPhaserCanvas({
   onSelectTicket,
   onCollectGrill,
   onServeOrder,
-  onRemoveLastIngredient,
 }) {
   const containerRef = useRef(null);
   const gameRef = useRef(null);
@@ -47,7 +54,6 @@ export default function KitchenPhaserCanvas({
     onSelectTicket,
     onCollectGrill,
     onServeOrder,
-    onRemoveLastIngredient,
   });
 
   useEffect(() => {
@@ -66,9 +72,8 @@ export default function KitchenPhaserCanvas({
       onSelectTicket,
       onCollectGrill,
       onServeOrder,
-      onRemoveLastIngredient,
     };
-  }, [onSelectBoard, onSelectTicket, onCollectGrill, onServeOrder, onRemoveLastIngredient]);
+  }, [onSelectBoard, onSelectTicket, onCollectGrill, onServeOrder]);
 
   useEffect(() => {
     const parentEl = containerRef.current;
@@ -95,7 +100,7 @@ export default function KitchenPhaserCanvas({
         let txt = this.textPool[this.textCursor];
         const mergedStyle = {
           fontFamily: 'Karla, sans-serif',
-          fontSize: '13px',
+          fontSize: '12px',
           color: '#3A2A22',
           fontStyle: 'bold',
           ...style,
@@ -118,66 +123,55 @@ export default function KitchenPhaserCanvas({
         const g = this.bgGraphics;
         g.clear();
 
-        // Parete crema calda
+        // Parete maiolicata calda
         g.fillStyle(0xfff3e2, 1);
         g.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-        // Fascia piastrelle maiolicate napoletane (Vietri / Centro Storico)
-        const tileSize = 32;
+        const tileSize = 28;
         for (let x = 0; x < CANVAS_W; x += tileSize) {
-          for (let y = 0; y < 185; y += tileSize) {
+          for (let y = 0; y < 84; y += tileSize) {
             const isAlt = ((x / tileSize) + (y / tileSize)) % 2 === 0;
-            g.fillStyle(isAlt ? 0xfff9f1 : 0xf7e6ce, 1);
+            g.fillStyle(isAlt ? 0xfff9f1 : 0xf6e4cb, 1);
             g.fillRect(x, y, tileSize, tileSize);
-            g.lineStyle(1, 0x3a2a22, 0.06);
+            g.lineStyle(1, 0x3a2a22, 0.05);
             g.strokeRect(x, y, tileSize, tileSize);
-
-            // Rombo decorativo discreto
-            if ((x / tileSize) % 3 === 0 && (y / tileSize) % 2 === 0) {
-              g.fillStyle(0xd96b32, 0.14);
-              g.fillCircle(x + tileSize / 2, y + tileSize / 2, 4);
-              g.fillStyle(0x5f8f3a, 0.14);
-              g.fillCircle(x + tileSize / 2, y + tileSize / 2, 2);
-            }
           }
         }
 
-        // Insegna lavagna in alto al centro
-        g.fillStyle(0x3a2a22, 1);
-        g.fillRoundedRect(290, 8, 380, 34, 10);
-        g.lineStyle(2, 0xd96b32, 0.85);
-        g.strokeRoundedRect(290, 8, 380, 34, 10);
-
-        // Bancone in legno vissuto (divisione tra sala clienti e cucina)
+        // Bancone in legno massello che attraversa la paninoteca
         g.fillStyle(0x8c5332, 1);
-        g.fillRect(0, 176, CANVAS_W, 18);
+        g.fillRect(0, 80, CANVAS_W, 10);
         g.fillStyle(0x6b3d22, 1);
-        g.fillRect(0, 190, CANVAS_W, 6);
+        g.fillRect(0, 88, CANVAS_W, 4);
 
-        // Pavimento cucina inferiore
-        g.fillStyle(0xf5e5d0, 1);
-        g.fillRect(0, 196, CANVAS_W, CANVAS_H - 196);
+        // Area 1: Sala & Bancone Clienti (Sinistra: x 10..426)
+        g.fillStyle(0xfdf5e8, 1);
+        g.fillRoundedRect(10, 10, 418, 208, 12);
+        g.lineStyle(1.5, 0x3a2a22, 0.16);
+        g.strokeRoundedRect(10, 10, 418, 208, 12);
 
-        // Area Piastra in ghisa (sinistra, 4 slot)
-        g.fillStyle(0x2c221e, 1);
-        g.fillRoundedRect(16, 206, 430, 210, 14);
-        g.lineStyle(2, 0x6b564b, 0.6);
-        g.strokeRoundedRect(16, 206, 430, 210, 14);
+        // Area 2: Piastra in Ghisa a 4 Fuochi (Centro: x 438..688)
+        g.fillStyle(0x281f1b, 1);
+        g.fillRoundedRect(438, 10, 250, 208, 12);
+        g.lineStyle(2, 0x5a473e, 0.8);
+        g.strokeRoundedRect(438, 10, 250, 208, 12);
 
-        // Area Banchi di Assemblaggio (destra, 2 banchi condivisi)
-        g.fillStyle(0xead4b8, 1);
-        g.fillRoundedRect(462, 206, 482, 210, 14);
-        g.lineStyle(2, 0x3a2a22, 0.18);
-        g.strokeRoundedRect(462, 206, 482, 210, 14);
+        // Area 3: Banchi Tagliere & Pass Consegna (Destra: x 700..950)
+        g.fillStyle(0xecd8be, 1);
+        g.fillRoundedRect(700, 10, 250, 208, 12);
+        g.lineStyle(1.5, 0x3a2a22, 0.2);
+        g.strokeRoundedRect(700, 10, 250, 208, 12);
       }
 
       createInteractiveZones() {
-        // 1. Zone per fino a 6 clienti al bancone (in alto)
+        // 1. Zone interattive per fino a 6 clienti (griglia 3x2 a sinistra)
         for (let i = 0; i < 6; i += 1) {
-          const x = 18 + i * 155;
-          const y = 48;
+          const col = i % 3;
+          const row = Math.floor(i / 3);
+          const cx = 18 + col * 134;
+          const cy = 36 + row * 88;
           const zone = this.add
-            .zone(x + 72, y + 62, 146, 124)
+            .zone(cx + 64, cy + 40, 128, 80)
             .setInteractive({ useHandCursor: true });
           zone.on('pointerdown', () => {
             const st = stateRef.current;
@@ -185,19 +179,25 @@ export default function KitchenPhaserCanvas({
             const tickets = st.snapshot?.game?.activeTickets || [];
             const ticket = tickets[i];
             if (!ticket) return;
-            callbacksRef.current.onSelectTicket?.(ticket.id);
+            const board = st.snapshot?.game?.prepBoards?.[st.selectedBoardIndex];
+            const check = inspectBoardAgainstTicket(board?.ingredients || [], ticket);
+            if (check.ok && !(ticket.thinkingUntilMs && Date.now() + st.serverTimeOffsetMs < ticket.thinkingUntilMs)) {
+              callbacksRef.current.onServeOrder?.(st.selectedBoardIndex, ticket.id);
+            } else {
+              callbacksRef.current.onSelectTicket?.(ticket.id);
+            }
           });
           this.hitZones.push(zone);
         }
 
-        // 2. Zone per i 4 slot della piastra (in basso a sinistra)
+        // 2. Zone interattive per i 4 fuochi della piastra (centro)
         for (let idx = 0; idx < 4; idx += 1) {
           const col = idx % 2;
           const row = Math.floor(idx / 2);
-          const sx = 30 + col * 204;
-          const sy = 240 + row * 84;
+          const sx = 448 + col * 118;
+          const sy = 38 + row * 74;
           const zone = this.add
-            .zone(sx + 94, sy + 36, 190, 74)
+            .zone(sx + 56, sy + 33, 112, 66)
             .setInteractive({ useHandCursor: true });
           zone.on('pointerdown', () => {
             const st = stateRef.current;
@@ -207,117 +207,77 @@ export default function KitchenPhaserCanvas({
           this.hitZones.push(zone);
         }
 
-        // 3. Zone per i 2 Banchi di Assemblaggio + pulsanti rapidi "Togli" e "Consegna"
+        // 3. Zone interattive per i 2 Taglieri Condivisi (destra)
         for (let bIdx = 0; bIdx < 2; bIdx += 1) {
-          const bx = 476 + bIdx * 232;
-          const by = 236;
-
-          // Selezione banco
-          const selectZone = this.add
-            .zone(bx + 108, by + 62, 218, 124)
+          const bx = 710 + bIdx * 118;
+          const by = 38;
+          const zone = this.add
+            .zone(bx + 56, by + 84, 112, 168)
             .setInteractive({ useHandCursor: true });
-          selectZone.on('pointerdown', () => {
+          zone.on('pointerdown', () => {
             const st = stateRef.current;
             if (st.disabled) return;
             callbacksRef.current.onSelectBoard?.(bIdx);
+            const board = st.snapshot?.game?.prepBoards?.[bIdx];
+            const tickets = st.snapshot?.game?.activeTickets || [];
+            const linked = tickets.find((t) => t.id === board?.targetTicketId) || tickets[0];
+            if (linked && inspectBoardAgainstTicket(board?.ingredients || [], linked).ok) {
+              callbacksRef.current.onServeOrder?.(bIdx, linked.id);
+            }
           });
-          this.hitZones.push(selectZone);
-
-          // Bottone "Togli ultimo" sul canvas
-          const undoZone = this.add
-            .zone(bx + 48, by + 152, 92, 34)
-            .setInteractive({ useHandCursor: true });
-          undoZone.on('pointerdown', () => {
-            const st = stateRef.current;
-            if (st.disabled) return;
-            callbacksRef.current.onSelectBoard?.(bIdx);
-            callbacksRef.current.onRemoveLastIngredient?.(bIdx);
-          });
-          this.hitZones.push(undoZone);
-
-          // Bottone "Consegna" sul canvas
-          const serveZone = this.add
-            .zone(bx + 158, by + 152, 114, 34)
-            .setInteractive({ useHandCursor: true });
-          serveZone.on('pointerdown', () => {
-            const st = stateRef.current;
-            if (st.disabled) return;
-            callbacksRef.current.onSelectBoard?.(bIdx);
-            callbacksRef.current.onServeOrder?.(bIdx);
-          });
-          this.hitZones.push(serveZone);
+          this.hitZones.push(zone);
         }
       }
 
       update(time) {
+        for (let i = 0; i < this.textPool.length; i += 1) {
+          this.textPool[i].setVisible(false);
+        }
         this.textCursor = 0;
         const g = this.dynamicGraphics;
         g.clear();
 
         const {
           snapshot: snap,
-          selectedBoardIndex: activeBoard,
+          selectedBoardIndex: activeBoardIdx,
           serverTimeOffsetMs: offsetMs,
           reducedMotion: noMotion,
         } = stateRef.current;
 
         const game = snap?.game;
+        const players = snap?.players || [];
         const nowMs = Date.now() + (offsetMs || 0);
         const elapsedMs = game?.startedAtMs ? Math.max(0, nowMs - game.startedAtMs) : 0;
         const phase = getMatchPhase(elapsedMs);
+        const maxSlots = getScalingForPlayers(game?.playerCount || players.length || 1).maxActiveTickets;
 
-        // Header Insegna
-        this.getDynamicText(480, 25, `BANCO DEL GAMBERO · ${phase.label.toUpperCase()}`, {
-          fontFamily: 'Fraunces, Georgia, serif',
-          fontSize: '14px',
-          color: '#FFF3E2',
-          originX: 0.5,
-          originY: 0.5,
-        });
+        // --- INTESTAZIONE COLONNA 1: SALA & CLIENTI ---
+        this.getDynamicText(
+          20,
+          16,
+          `SALA & COMANDE (${(game?.activeTickets || []).length}/${maxSlots}) · ${phase.label}`,
+          { fontSize: '11px', color: '#6B564B' },
+        );
 
-        // Badge Combo squadra se attivo
-        if ((game?.combo || 0) >= 2) {
-          g.fillStyle(0xe39a2d, 1);
-          g.fillRoundedRect(700, 10, 128, 30, 8);
-          this.getDynamicText(764, 25, `COMBO SQUADRA ×${game.combo}`, {
-            fontSize: '12px',
-            color: '#3A2A22',
-            originX: 0.5,
-            originY: 0.5,
-          });
-        }
-
-        // Indicatori cuochi attivi in alto a sinistra
-        const players = snap?.players || [];
-        players.slice(0, 4).forEach((p, idx) => {
-          const px = 28 + idx * 64;
-          const py = 24;
-          g.fillStyle(p.isOnline ? 0x5f8f3a : 0x6b564b, 1);
-          g.fillCircle(px, py, 12);
-          g.lineStyle(2, 0xfff9f1, 1);
-          g.strokeCircle(px, py, 12);
-          this.getDynamicText(px, py, (p.nickname || 'C').slice(0, 2).toUpperCase(), {
-            fontSize: '11px',
-            color: '#FFF9F1',
-            originX: 0.5,
-            originY: 0.5,
-          });
-        });
-
-        // --- 1. DISEGNO CLIENTI AL BANCONE ---
         const tickets = game?.activeTickets || [];
-        const boardTargetId = game?.prepBoards?.[activeBoard]?.targetTicketId;
+        const boards = game?.prepBoards || [];
 
         for (let i = 0; i < 6; i += 1) {
+          const col = i % 3;
+          const row = Math.floor(i / 3);
+          const cx = 18 + col * 134;
+          const cy = 36 + row * 88;
           const tkt = tickets[i];
-          const x = 18 + i * 155;
-          const y = 48;
+
+          if (i >= maxSlots) {
+            continue;
+          }
 
           if (!tkt) {
-            g.lineStyle(1, 0x3a2a22, 0.1);
-            g.strokeRoundedRect(x, y, 146, 122, 12);
-            this.getDynamicText(x + 73, y + 61, 'Posto libero', {
-              fontSize: '12px',
+            g.lineStyle(1, 0x3a2a22, 0.12);
+            g.strokeRoundedRect(cx, cy, 128, 80, 10);
+            this.getDynamicText(cx + 64, cy + 40, `Posto #${i + 1} libero`, {
+              fontSize: '11px',
               color: '#8C7A70',
               originX: 0.5,
               originY: 0.5,
@@ -325,81 +285,110 @@ export default function KitchenPhaserCanvas({
             continue;
           }
 
-          const isSelected = tkt.id === boardTargetId;
+          const linkedBoardIdx = boards.findIndex((b) => b.targetTicketId === tkt.id);
+          const boardForCheck =
+            linkedBoardIdx !== -1 ? boards[linkedBoardIdx] : boards[activeBoardIdx];
+          const check = inspectBoardAgainstTicket(boardForCheck?.ingredients || [], tkt);
+          const isReadyToServe = check.ok;
+          const isSelected = linkedBoardIdx === activeBoardIdx || (linkedBoardIdx === -1 && i === 0);
+
           const remMs = Math.max(0, tkt.expiresAtMs - nowMs);
           const ratio = tkt.patienceMs > 0 ? Math.min(1, remMs / tkt.patienceMs) : 0;
+          const isThinking = Boolean(tkt.thinkingUntilMs && nowMs < tkt.thinkingUntilMs);
           const barColor =
-            ratio > 0.5 ? 0x5f8f3a : ratio > 0.25 ? 0xe39a2d : 0xb23b2e;
+            ratio > 0.55 ? 0x5f8f3a : ratio > 0.28 ? 0xe39a2d : 0xb23b2e;
 
-          const bobY = noMotion ? 0 : Math.sin(time / 280 + i) * 2;
+          const bobY = noMotion ? 0 : Math.sin(time / 260 + i) * 1.5;
 
-          // Card cliente sul bancone
-          g.fillStyle(isSelected ? 0xfff9f1 : 0xfdf5e8, 1);
-          g.fillRoundedRect(x, y, 146, 122, 12);
-          g.lineStyle(isSelected ? 3 : 1.5, isSelected ? 0xd96b32 : 0x3a2a22, isSelected ? 1 : 0.22);
-          g.strokeRoundedRect(x, y, 146, 122, 12);
+          // Sfondo card cliente
+          g.fillStyle(isReadyToServe ? 0xe9f5e1 : isSelected ? 0xfff9f1 : 0xf7ebd9, 1);
+          g.fillRoundedRect(cx, cy, 128, 80, 10);
+          g.lineStyle(
+            isReadyToServe || isSelected ? 2.5 : 1.2,
+            isReadyToServe ? 0x5f8f3a : isSelected ? 0xd96b32 : 0x3a2a22,
+            isReadyToServe || isSelected ? 1 : 0.22,
+          );
+          g.strokeRoundedRect(cx, cy, 128, 80, 10);
 
-          // Avatar busto NPC
+          // Avatar Cliente con volto ed espressione reale (sorriso / neutro / arrabbiato)
           const app = tkt.appearance || {};
+          const headX = cx + 22;
+          const headY = cy + 24 + bobY;
           g.fillStyle(hexToNum(app.jacketHex, 0x4a6b82), 1);
-          g.fillRoundedRect(x + 12, y + 36 + bobY, 34, 24, 6);
+          g.fillRoundedRect(cx + 8, cy + 32 + bobY, 28, 16, 5);
           g.fillStyle(hexToNum(app.skinHex, 0xe3b18a), 1);
-          g.fillCircle(x + 29, y + 25 + bobY, 12);
+          g.fillCircle(headX, headY, 10);
+          g.lineStyle(1.4, 0x3a2a22, 0.85);
+          g.strokeCircle(headX, headY, 10);
+          // Capelli
           g.fillStyle(hexToNum(app.hairHex, 0x3a2a22), 1);
-          g.fillRect(x + 18, y + 13 + bobY, 22, 6);
+          g.fillRoundedRect(headX - 10, headY - 11, 20, 6, 3);
+          // Occhi
+          g.fillStyle(0x3a2a22, 1);
+          g.fillCircle(headX - 3.5, headY - 1, 1.3);
+          g.fillCircle(headX + 3.5, headY - 1, 1.3);
+          // Bocca (felice / seria / arrabbiata)
+          g.lineStyle(1.5, ratio <= 0.28 ? 0xb23b2e : 0x3a2a22, 1);
+          if (ratio > 0.55) {
+            g.beginPath();
+            g.arc(headX, headY + 2, 3.5, 0.2, Math.PI - 0.2, false);
+            g.strokePath();
+          } else if (ratio > 0.28) {
+            g.lineBetween(headX - 3, headY + 4, headX + 3, headY + 4);
+          } else {
+            g.beginPath();
+            g.arc(headX, headY + 6, 3.5, Math.PI + 0.2, -0.2, false);
+            g.strokePath();
+          }
 
-          // Nome + Archetipo
-          this.getDynamicText(x + 52, y + 12, tkt.customerName, {
-            fontSize: '13px',
+          // Nome, Timer e Badge Banco
+          this.getDynamicText(cx + 40, cy + 7, `#${i + 1} ${tkt.customerName}`, {
+            fontSize: '11px',
             color: '#3A2A22',
           });
-          this.getDynamicText(x + 52, y + 28, tkt.badgeLabel, {
+          this.getDynamicText(cx + 122, cy + 7, `${Math.ceil(remMs / 1000)}s`, {
             fontSize: '11px',
-            color: '#BB5A20',
+            color: ratio <= 0.28 ? '#B23B2E' : '#3A2A22',
+            originX: 1,
           });
 
-          // Nome ricetta richiesta
-          const isThinking = Boolean(tkt.thinkingUntilMs && nowMs < tkt.thinkingUntilMs);
-          this.getDynamicText(
-            x + 10,
-            y + 64,
-            isThinking ? 'Sta scegliendo…' : tkt.recipeName,
-            {
-              fontSize: '12px',
-              color: isThinking ? '#6B564B' : '#3A2A22',
-              wordWrap: { width: 128 },
-            },
-          );
-
-          // Nota modificatore visibile
-          let modNote = '';
-          if (tkt.modifiers?.exclude) {
-            const exIng = getIngredient(tkt.modifiers.exclude);
-            modNote = `SENZA ${exIng?.shortName || tkt.modifiers.exclude}`;
-          } else if (tkt.modifiers?.add) {
-            const addIng = getIngredient(tkt.modifiers.add);
-            modNote = `EXTRA ${addIng?.shortName || tkt.modifiers.add}`;
-          } else if (tkt.modifiers?.swap) {
-            const toIng = getIngredient(tkt.modifiers.swap.to);
-            modNote = `CON ${toIng?.shortName || tkt.modifiers.swap.to}`;
-          }
-          if (modNote) {
-            this.getDynamicText(x + 10, y + 83, modNote, {
+          if (linkedBoardIdx !== -1) {
+            g.fillStyle(linkedBoardIdx === 0 ? 0xd96b32 : 0x385c32, 1);
+            g.fillRoundedRect(cx + 40, cy + 22, 42, 14, 4);
+            this.getDynamicText(cx + 61, cy + 29, `BANCO ${linkedBoardIdx + 1}`, {
+              fontSize: '9px',
+              color: '#FFF9F1',
+              originX: 0.5,
+              originY: 0.5,
+            });
+          } else {
+            this.getDynamicText(cx + 40, cy + 22, tkt.badgeLabel, {
               fontSize: '10px',
-              color: '#B23B2E',
+              color: '#BB5A20',
             });
           }
 
+          // Ricetta o invito alla consegna immediata
+          const orderLabel = isReadyToServe
+            ? '✓ PRONTO! Tocca e servi'
+            : isThinking
+              ? '💭 Sta scegliendo…'
+              : tkt.recipeName;
+          this.getDynamicText(cx + 8, cy + 49, orderLabel, {
+            fontSize: '11px',
+            color: isReadyToServe ? '#2F6B22' : isThinking ? '#6B564B' : '#3A2A22',
+          });
+
           // Barra pazienza
           g.fillStyle(0xe5d6c3, 1);
-          g.fillRoundedRect(x + 10, y + 102, 126, 10, 5);
+          g.fillRoundedRect(cx + 8, cy + 66, 112, 7, 3.5);
           g.fillStyle(barColor, 1);
-          g.fillRoundedRect(x + 10, y + 102, Math.max(8, Math.round(126 * ratio)), 10, 5);
+          g.fillRoundedRect(cx + 8, cy + 66, Math.max(6, Math.round(112 * ratio)), 7, 3.5);
         }
 
-        // --- 2. DISEGNO PIASTRA A 4 SLOT ---
-        this.getDynamicText(30, 214, 'PIASTRA ROVENTE (4 SLOT) · Tocca quando è PRONTO', {
-          fontSize: '12px',
+        // --- INTESTAZIONE COLONNA 2: PIASTRA ROVENTE (4 FUOCHI) + VASSOIO CALDO ---
+        this.getDynamicText(448, 16, 'PIASTRA IN GHISA (4 FUOCHI)', {
+          fontSize: '11px',
           color: '#FFF3E2',
         });
 
@@ -408,32 +397,36 @@ export default function KitchenPhaserCanvas({
           const slot = grillSlots[idx] || { slotIndex: idx, ingredientId: null };
           const col = idx % 2;
           const row = Math.floor(idx / 2);
-          const sx = 30 + col * 204;
-          const sy = 240 + row * 84;
+          const sx = 448 + col * 118;
+          const sy = 38 + row * 72;
 
           const status = getGrillSlotStatus(slot, nowMs);
-          let borderCol = 0x6b564b;
-          let bgCol = 0x3b2f2a;
+          let borderCol = 0x5a473e;
+          let bgCol = 0x362b26;
           if (status.state === COOK_STATES.COOKING) {
             borderCol = 0xe39a2d;
             bgCol = 0x4a3528;
+          } else if (status.state === COOK_STATES.COOKED && status.aboutToBurn) {
+            borderCol = 0xff6b4a;
+            bgCol = 0x54281f;
           } else if (status.state === COOK_STATES.COOKED) {
             borderCol = 0x5f8f3a;
-            bgCol = 0x2f4728;
+            bgCol = 0x294224;
           } else if (status.state === COOK_STATES.BURNED) {
             borderCol = 0xb23b2e;
             bgCol = 0x421d1a;
           }
 
           g.fillStyle(bgCol, 1);
-          g.fillRoundedRect(sx, sy, 190, 74, 10);
+          g.fillRoundedRect(sx, sy, 112, 66, 9);
           g.lineStyle(2, borderCol, 1);
-          g.strokeRoundedRect(sx, sy, 190, 74, 10);
+          g.strokeRoundedRect(sx, sy, 112, 66, 9);
 
+          const keyHint = ['Q', 'W', 'E', 'R'][idx];
           if (!slot.ingredientId) {
-            this.getDynamicText(sx + 95, sy + 37, `Slot ${idx + 1} · Libero`, {
-              fontSize: '12px',
-              color: '#B8A69B',
+            this.getDynamicText(sx + 56, sy + 33, `Fuoco ${idx + 1} [${keyHint}]`, {
+              fontSize: '11px',
+              color: '#A9998E',
               originX: 0.5,
               originY: 0.5,
             });
@@ -441,124 +434,148 @@ export default function KitchenPhaserCanvas({
             const ing = getIngredient(slot.ingredientId);
             const pattyCol =
               status.state === COOK_STATES.BURNED
-                ? 0x1f1715
+                ? 0x1a1311
                 : hexToNum(ing?.color, 0x8a4233);
-
             g.fillStyle(pattyCol, 1);
-            g.fillCircle(sx + 32, sy + 36, 18);
-            g.lineStyle(2, 0xfff3e2, 0.5);
-            g.strokeCircle(sx + 32, sy + 36, 18);
+            g.fillCircle(sx + 20, sy + 24, 11);
+            g.lineStyle(1.5, 0xfff3e2, 0.65);
+            g.strokeCircle(sx + 20, sy + 24, 11);
 
-            this.getDynamicText(sx + 58, sy + 14, ing?.shortName || slot.ingredientId, {
-              fontSize: '13px',
+            this.getDynamicText(sx + 36, sy + 9, ing?.shortName || slot.ingredientId, {
+              fontSize: '11px',
               color: '#FFF9F1',
             });
 
-            const stateLabel =
+            const stateText =
               status.state === COOK_STATES.COOKING
-                ? `In cottura (${(status.remainingMs / 1000).toFixed(1)}s)`
-                : status.state === COOK_STATES.COOKED
-                  ? 'PRONTO! Tocca per usare'
-                  : 'BRUCIATO! Tocca (-15)';
+                ? `${(status.remainingMs / 1000).toFixed(1)}s`
+                : status.state === COOK_STATES.COOKED && status.aboutToBurn
+                  ? 'ATTENTO!'
+                  : status.state === COOK_STATES.COOKED
+                    ? 'PRONTO!'
+                    : 'BRUCIATO';
 
-            this.getDynamicText(sx + 58, sy + 33, stateLabel, {
-              fontSize: '11px',
+            this.getDynamicText(sx + 36, sy + 24, stateText, {
+              fontSize: '10px',
               color:
-                status.state === COOK_STATES.COOKED
+                status.state === COOK_STATES.COOKED && !status.aboutToBurn
                   ? '#A9E37B'
-                  : status.state === COOK_STATES.BURNED
-                    ? '#FF9488'
-                    : '#F7D08A',
+                  : status.state === COOK_STATES.COOKING
+                    ? '#F7D08A'
+                    : '#FF9488',
             });
 
-            // Barra progresso cottura / bruciatura
             const prog =
               status.state === COOK_STATES.COOKING
                 ? status.progress
                 : status.state === COOK_STATES.COOKED
                   ? 1 - status.burnProgress
                   : 1;
-            g.fillStyle(0x1f1715, 1);
-            g.fillRoundedRect(sx + 58, sy + 53, 118, 8, 4);
+            g.fillStyle(0x1a1311, 1);
+            g.fillRoundedRect(sx + 10, sy + 49, 92, 7, 3.5);
             g.fillStyle(borderCol, 1);
-            g.fillRoundedRect(sx + 58, sy + 53, Math.max(6, Math.round(118 * prog)), 8, 4);
+            g.fillRoundedRect(sx + 10, sy + 49, Math.max(5, Math.round(92 * prog)), 7, 3.5);
           }
         }
 
-        // --- 3. DISEGNO DEI 2 BANCHI DI ASSEMBLAGGIO CONDIVISI ---
-        this.getDynamicText(476, 214, 'BANCHI DI ASSEMBLAGGIO CONDIVISI', {
-          fontSize: '12px',
+        // Striscia Vassoio Caldo sotto i 4 fuochi
+        const trayItems = game?.cookedTray || [];
+        g.fillStyle(0x3a2d27, 1);
+        g.fillRoundedRect(448, 184, 230, 26, 7);
+        this.getDynamicText(
+          458,
+          197,
+          `Vassoio Caldo: ${trayItems.length}/6 pronti`,
+          {
+            fontSize: '11px',
+            color: trayItems.length > 0 ? '#A9E37B' : '#C9B8AC',
+            originY: 0.5,
+          },
+        );
+
+        // --- INTESTAZIONE COLONNA 3: I 2 TAGLIERI CONDIVISI ---
+        this.getDynamicText(710, 16, 'TAGLIERI DI ASSEMBLAGGIO', {
+          fontSize: '11px',
           color: '#3A2A22',
         });
 
-        const boards = game?.prepBoards || [];
         for (let bIdx = 0; bIdx < 2; bIdx += 1) {
           const board = boards[bIdx] || { boardIndex: bIdx, ingredients: [], targetTicketId: null };
-          const bx = 476 + bIdx * 232;
-          const by = 236;
-          const isCurrent = bIdx === activeBoard;
+          const bx = 710 + bIdx * 118;
+          const by = 38;
+          const isCurrent = bIdx === activeBoardIdx;
+          const linkedTicket = tickets.find((t) => t.id === board.targetTicketId) || null;
+          const analysis = inspectBoardAgainstTicket(board.ingredients || [], linkedTicket);
+          const chef = players.find((p) => p.id === board.updatedByPlayerId);
 
-          g.fillStyle(isCurrent ? 0xfff9f1 : 0xf5e8d6, 1);
-          g.fillRoundedRect(bx, by, 218, 128, 12);
-          g.lineStyle(isCurrent ? 3 : 1.5, isCurrent ? 0xd96b32 : 0x3a2a22, isCurrent ? 1 : 0.25);
-          g.strokeRoundedRect(bx, by, 218, 128, 12);
+          g.fillStyle(
+            analysis.ok ? 0xe9f5e1 : isCurrent ? 0xfff9f1 : 0xf6ead8,
+            1,
+          );
+          g.fillRoundedRect(bx, by, 112, 172, 10);
+          g.lineStyle(
+            analysis.ok || isCurrent ? 2.5 : 1.4,
+            analysis.ok ? 0x5f8f3a : isCurrent ? 0xd96b32 : 0x3a2a22,
+            analysis.ok || isCurrent ? 1 : 0.25,
+          );
+          g.strokeRoundedRect(bx, by, 112, 172, 10);
 
-          const linkedTicket = tickets.find((t) => t.id === board.targetTicketId);
+          this.getDynamicText(bx + 10, by + 8, `BANCO ${bIdx + 1}`, {
+            fontSize: '11px',
+            color: isCurrent ? '#BB5A20' : '#3A2A22',
+          });
+
           this.getDynamicText(
-            bx + 12,
-            by + 10,
-            `BANCO ${bIdx + 1} ${linkedTicket ? `→ ${linkedTicket.customerName}` : ''}`,
+            bx + 10,
+            by + 23,
+            linkedTicket ? `Per ${linkedTicket.customerName}` : 'Nessun cliente',
             {
-              fontSize: '12px',
-              color: isCurrent ? '#BB5A20' : '#3A2A22',
+              fontSize: '10px',
+              color: '#6B564B',
             },
           );
 
-          // Piatto / Tagliere centrale con gli strati del panino
-          g.fillStyle(0xe2c49f, 1);
-          g.fillEllipse(bx + 109, by + 95, 130, 26);
+          // Tagliere in legno + pila panino
+          g.fillStyle(0xd8b48a, 1);
+          g.fillEllipse(bx + 56, by + 118, 88, 18);
 
           const ings = board.ingredients || [];
           if (ings.length === 0) {
-            this.getDynamicText(bx + 109, by + 68, 'Vuoto · Aggiungi pane e farcitura', {
-              fontSize: '11px',
+            this.getDynamicText(bx + 56, by + 82, 'Tagliere vuoto', {
+              fontSize: '10px',
               color: '#8C7A70',
               originX: 0.5,
               originY: 0.5,
             });
           } else {
-            ings.forEach((ingId, layerIdx) => {
+            ings.slice(0, 7).forEach((ingId, layerIdx) => {
               const ing = getIngredient(ingId);
-              const ly = by + 88 - layerIdx * 9;
-              g.fillStyle(hexToNum(ing?.color, 0xd96b32), 1);
-              g.fillRoundedRect(bx + 54, ly, 110, 10, 5);
-              g.lineStyle(1, 0x3a2a22, 0.45);
-              g.strokeRoundedRect(bx + 54, ly, 110, 10, 5);
-            });
-            this.getDynamicText(bx + 12, by + 106, `${ings.length} ingr. sul tagliere`, {
-              fontSize: '11px',
-              color: '#3A2A22',
+              const isExtra = analysis.assembledLayers[layerIdx]?.isExtra;
+              const ly = by + 110 - layerIdx * 9;
+              g.fillStyle(isExtra ? 0xb23b2e : hexToNum(ing?.color, 0xd96b32), 1);
+              g.fillRoundedRect(bx + 20, ly, 72, 9, 4);
+              g.lineStyle(1, 0x3a2a22, 0.5);
+              g.strokeRoundedRect(bx + 20, ly, 72, 9, 4);
             });
           }
 
-          // Pulsante Togli ultimo
-          g.fillStyle(0xfff3e2, 1);
-          g.fillRoundedRect(bx + 2, by + 135, 92, 34, 8);
-          g.lineStyle(1.5, 0x3a2a22, 0.25);
-          g.strokeRoundedRect(bx + 2, by + 135, 92, 34, 8);
-          this.getDynamicText(bx + 48, by + 152, 'Togli ultimo', {
-            fontSize: '11px',
-            color: '#3A2A22',
-            originX: 0.5,
-            originY: 0.5,
-          });
+          // Stato sintetico del tagliere in basso
+          const statusLabel = analysis.ok
+            ? '✓ SERVI ORA!'
+            : analysis.status === 'has_errors'
+              ? '⚠ Errore ingr.'
+              : chef
+                ? `Cuoco: ${chef.nickname.slice(0, 8)}`
+                : `${ings.length} strati`;
 
-          // Pulsante Consegna
-          g.fillStyle(0xbb5a20, 1);
-          g.fillRoundedRect(bx + 101, by + 135, 114, 34, 8);
-          this.getDynamicText(bx + 158, by + 152, 'Consegna panino', {
-            fontSize: '11px',
-            color: '#FFF9F1',
+          g.fillStyle(
+            analysis.ok ? 0x5f8f3a : analysis.status === 'has_errors' ? 0xb23b2e : 0xead8c0,
+            1,
+          );
+          g.fillRoundedRect(bx + 8, by + 138, 96, 24, 6);
+          this.getDynamicText(bx + 56, by + 150, statusLabel, {
+            fontSize: '10px',
+            color: analysis.ok || analysis.status === 'has_errors' ? '#FFF9F1' : '#3A2A22',
             originX: 0.5,
             originY: 0.5,
           });
@@ -598,8 +615,8 @@ export default function KitchenPhaserCanvas({
 
   return (
     <div
-      className="surface overflow-hidden border border-brown/15 bg-cream-soft p-2 shadow-sm"
-      aria-label="Vista interattiva della cucina Il Banco del Gambero"
+      className="surface overflow-hidden border border-brown/15 bg-cream-soft p-1.5 shadow-xs"
+      aria-label="Panorama animato del bancone Il Banco del Gambero"
     >
       <div
         ref={containerRef}

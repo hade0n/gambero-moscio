@@ -3,6 +3,37 @@
  * per l'aspetto dei clienti NPC. Separati dagli account recensioni del sito.
  */
 
+export const BRIGADE_ROLES = [
+  {
+    id: 'piastra',
+    label: 'Addetto Piastra',
+    shortLabel: 'Piastra',
+    description: 'Cuoce manzo, pollo, salsiccia e burger veg e rifornisce il Vassoio Caldo.',
+    badgeClass: 'bg-terracotta text-white',
+  },
+  {
+    id: 'banco1',
+    label: 'Mastro Banco 1',
+    shortLabel: 'Banco 1',
+    description: 'Assembla pani, farciture e salse sul Tagliere 1 e consegna ai clienti.',
+    badgeClass: 'bg-green text-white',
+  },
+  {
+    id: 'banco2',
+    label: 'Mastro Banco 2',
+    shortLabel: 'Banco 2',
+    description: 'Gestisce il Tagliere 2 per gli ordini doppi e l’ora di punta.',
+    badgeClass: 'bg-brown text-cream-soft',
+  },
+  {
+    id: 'jolly',
+    label: 'Tuttofare di Brigata',
+    shortLabel: 'Jolly',
+    description: 'Passa tra piastra, dispensa e consegne dove c’è più urgenza.',
+    badgeClass: 'bg-rating text-brown',
+  },
+];
+
 export const CHEF_PERSONAS = [
   {
     id: 'chef_gennaro',
@@ -14,6 +45,7 @@ export const CHEF_PERSONAS = [
       hairColor: 'castano',
       apronColor: 'terracotta',
       accessory: 'cappello_chef',
+      role: 'piastra',
     },
   },
   {
@@ -26,6 +58,7 @@ export const CHEF_PERSONAS = [
       hairColor: 'nero',
       apronColor: 'verde_ulivo',
       accessory: 'rametto_basilico',
+      role: 'banco1',
     },
   },
   {
@@ -38,6 +71,7 @@ export const CHEF_PERSONAS = [
       hairColor: 'nero',
       apronColor: 'ocra',
       accessory: 'occhiali',
+      role: 'banco2',
     },
   },
   {
@@ -50,6 +84,7 @@ export const CHEF_PERSONAS = [
       hairColor: 'biondo_ramato',
       apronColor: 'blu_golfo',
       accessory: 'foulard',
+      role: 'jolly',
     },
   },
 ];
@@ -122,6 +157,10 @@ const NPC_JACKET_COLORS = [
   '#A6523B',
 ];
 
+export function getBrigadeRole(roleId) {
+  return BRIGADE_ROLES.find((r) => r.id === roleId) || BRIGADE_ROLES[3];
+}
+
 /**
  * Normalizza e valida un oggetto avatar giocatore.
  */
@@ -136,6 +175,7 @@ export function normalizePlayerAvatar(raw = {}) {
     hairColor: pick(HAIR_COLORS, raw.hairColor, persona.defaultAvatar.hairColor),
     apronColor: pick(APRON_COLORS, raw.apronColor, persona.defaultAvatar.apronColor),
     accessory: pick(ACCESSORIES, raw.accessory, persona.defaultAvatar.accessory),
+    role: pick(BRIGADE_ROLES, raw.role, persona.defaultAvatar.role || 'jolly'),
   };
 }
 

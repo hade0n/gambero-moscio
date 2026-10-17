@@ -16,11 +16,13 @@
     "enrich:gambero": "node scripts/enrich-gambero-db.mjs",
     "photos:gambero": "node scripts/fetch-photos-commons.mjs && node scripts/fetch-photos-sites.mjs",
     "export:blob": "node scripts/export-blob.mjs",
-    "import:supabase": "node scripts/import-to-supabase.mjs"
+    "import:supabase": "node scripts/import-to-supabase.mjs",
+    "test": "node --test tests/game.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.4",
     "framer-motion": "^11.18.2",
+    "phaser": "4.2.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2"
